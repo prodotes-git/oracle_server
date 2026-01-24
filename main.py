@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+import httpx
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 import os
 import redis
@@ -15,6 +16,11 @@ r = redis.from_url(REDIS_URL, decode_responses=True)
 # 서버 시작 시간 기록 (Uptime 계산용)
 boot_time = time.time()
 
+# 데이터 캐싱을 위한 설정
+DATA_URL = "https://raw.githubusercontent.com/if1live/shiroko-kfcc/interest-rate/summary/report_mat.json"
+CACHE_KEY = "kfcc_data_cache"
+CACHE_EXPIRE = 3600  # 1시간 동안 캐시 유지
+
 def get_uptime():
     uptime_seconds = int(time.time() - boot_time)
     days, rem = divmod(uptime_seconds, 86400)
@@ -24,6 +30,32 @@ def get_uptime():
         return f"{days}d {hours}h"
     return f"{hours}h {minutes}m"
 
+@app.get("/api/kfcc")
+async def get_kfcc_data():
+    """
+    내 서버에서 독립적으로 데이터를 제공하는 API입니다.
+    Redis를 사용하여 데이터를 캐싱하므로 원본 사이트보다 훨씬 빠릅니다.
+    """
+    try:
+        # 1. 먼저 캐시에 데이터가 있는지 확인
+        cached_data = r.get(CACHE_KEY)
+        if cached_data:
+            import json
+            return json.loads(cached_data)
+
+        # 2. 캐시에 없으면 원본에서 가져와서 캐싱
+        async with httpx.AsyncClient() as client:
+            response = await client.get(DATA_URL)
+            if response.status_code != 200:
+                raise HTTPException(status_code=500, detail="데이터 원본을 가져올 수 없습니다.")
+            
+            data = response.json()
+            # Redis에 저장 (1시간 유효)
+            r.setex(CACHE_KEY, CACHE_EXPIRE, response.text)
+            return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/", response_class=HTMLResponse)
 def read_root():
     try:
@@ -31,7 +63,6 @@ def read_root():
     except Exception:
         visits = "---"
     
-    # 시스템 정보 가져오기
     cpu_usage = psutil.cpu_percent(interval=None)
     memory = psutil.virtual_memory()
     memory_usage = memory.percent
@@ -58,12 +89,7 @@ def read_root():
                 --blue-color: #0071e3;
             }}
             
-            * {{
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-                -webkit-font-smoothing: antialiased;
-            }}
+            * {{ margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }}
             
             body {{
                 background-color: var(--bg-color);
@@ -78,11 +104,7 @@ def read_root():
                 padding: 2rem;
             }}
 
-            .container {{
-                width: 100%;
-                max-width: 600px;
-                animation: fadeIn 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-            }}
+            .container {{ width: 100%; max-width: 600px; animation: fadeIn 1.2s cubic-bezier(0.2, 0.8, 0.2, 1); }}
 
             @keyframes fadeIn {{
                 from {{ opacity: 0; transform: translateY(15px); }}
@@ -110,12 +132,7 @@ def read_root():
                 color: var(--accent-color);
             }}
 
-            .grid-stats {{
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 1.2rem;
-                margin-top: 1rem;
-            }}
+            .grid-stats {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-top: 1rem; }}
 
             .stat-box {{
                 background: rgba(0, 0, 0, 0.02);
@@ -140,19 +157,9 @@ def read_root():
                 font-weight: 600;
             }}
 
-            .stat-value {{
-                font-family: 'Outfit', sans-serif;
-                font-size: 1.6rem;
-                font-weight: 600;
-                color: var(--accent-color);
-            }}
+            .stat-value {{ font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 600; color: var(--accent-color); }}
 
-            /* New Menu Style */
-            .menu-section {{
-                margin-top: 3rem;
-                display: grid;
-                gap: 1rem;
-            }}
+            .menu-section {{ margin-top: 3rem; display: grid; gap: 1rem; }}
 
             .menu-button {{
                 display: flex;
@@ -168,80 +175,29 @@ def read_root():
                 box-shadow: 0 4px 12px rgba(0,0,0,0.02);
             }}
 
-            .menu-button:hover {{
-                transform: scale(1.02);
-                box-shadow: 0 12px 24px rgba(0,0,0,0.06);
-            }}
+            .menu-button:hover {{ transform: scale(1.02); box-shadow: 0 12px 24px rgba(0,0,0,0.06); }}
 
             .menu-button .icon {{
-                width: 44px;
-                height: 44px;
-                background: var(--blue-color);
-                color: white;
-                border-radius: 12px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.2rem;
+                width: 44px; height: 44px; background: var(--blue-color); color: white; border-radius: 12px;
+                display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
             }}
 
-            .menu-button .text {{
-                flex: 1;
-                margin-left: 1.2rem;
-                text-align: left;
-            }}
+            .menu-button .text {{ flex: 1; margin-left: 1.2rem; text-align: left; }}
+            .menu-button .title {{ font-weight: 600; font-size: 1.1rem; }}
+            .menu-button .subtitle {{ font-size: 0.8rem; color: var(--text-secondary); }}
 
-            .menu-button .title {{
-                font-weight: 600;
-                font-size: 1.1rem;
-            }}
-
-            .menu-button .subtitle {{
-                font-size: 0.8rem;
-                color: var(--text-secondary);
-            }}
-
-            .visits-section {{
-                margin-top: 3.5rem;
-                border-top: 1px solid rgba(0, 0, 0, 0.05);
-                padding-top: 2.5rem;
-            }}
-
-            .visits-label {{
-                font-size: 0.9rem;
-                color: var(--text-secondary);
-                margin-bottom: 0.8rem;
-                font-weight: 400;
-                letter-spacing: 0.02em;
-            }}
-
-            .visits-count {{
-                font-family: 'Outfit', sans-serif;
-                font-size: 4rem;
-                font-weight: 600;
-                color: var(--accent-color);
-                letter-spacing: -0.02em;
-            }}
+            .visits-section {{ margin-top: 3.5rem; border-top: 1px solid rgba(0, 0, 0, 0.05); padding-top: 2.5rem; }}
+            .visits-label {{ font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.8rem; font-weight: 400; }}
+            .visits-count {{ font-family: 'Outfit', sans-serif; font-size: 4rem; font-weight: 600; color: var(--accent-color); }}
 
             .status-indicator {{
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 0.8rem;
-                color: var(--success-color);
-                margin-bottom: 1.2rem;
-                font-weight: 700;
-                letter-spacing: 0.08em;
+                display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: var(--success-color);
+                margin-bottom: 1.2rem; font-weight: 700; letter-spacing: 0.08em;
             }}
 
             .dot {{
-                width: 8px;
-                height: 8px;
-                background-color: var(--success-color);
-                border-radius: 50%;
-                margin-right: 10px;
-                box-shadow: 0 0 15px rgba(40, 205, 65, 0.3);
-                animation: pulse 2.5s infinite;
+                width: 8px; height: 8px; background-color: var(--success-color); border-radius: 50%;
+                margin-right: 10px; box-shadow: 0 0 15px rgba(40, 205, 65, 0.3); animation: pulse 2.5s infinite;
             }}
 
             @keyframes pulse {{
@@ -250,13 +206,7 @@ def read_root():
                 100% {{ opacity: 1; transform: scale(1); }}
             }}
 
-            .footer {{
-                margin-top: 2.5rem;
-                font-size: 0.75rem;
-                color: var(--text-secondary);
-                letter-spacing: 0.25em;
-                font-weight: 500;
-            }}
+            .footer {{ margin-top: 2.5rem; font-size: 0.75rem; color: var(--text-secondary); letter-spacing: 0.25em; font-weight: 500; }}
         </style>
     </head>
     <body>
@@ -287,7 +237,7 @@ def read_root():
                         <div class="icon">🏦</div>
                         <div class="text">
                             <div class="title">새마을금고 금리조회</div>
-                            <div class="subtitle">전지점 예적금 금리 실시간 비교</div>
+                            <div class="subtitle">내 서버 전용 실시간 금리 API 탑재</div>
                         </div>
                         <div class="arrow">→</div>
                     </a>
@@ -326,143 +276,44 @@ def kfcc_rates():
                 --border-color: rgba(0,0,0,0.1);
             }
             
-            body {
-                background-color: var(--bg-color);
-                color: var(--accent-color);
-                font-family: 'Inter', sans-serif;
-                padding-bottom: 50px;
-            }
+            body { background-color: var(--bg-color); color: var(--accent-color); font-family: 'Inter', sans-serif; padding-bottom: 50px; }
 
             .nav-header {
-                position: sticky;
-                top: 0;
-                background: rgba(245, 245, 247, 0.8);
-                backdrop-filter: blur(20px);
-                z-index: 100;
-                padding: 1rem;
-                border-bottom: 1px solid var(--border-color);
+                position: sticky; top: 0; background: rgba(245, 245, 247, 0.8); backdrop-filter: blur(20px);
+                z-index: 100; padding: 1rem; border-bottom: 1px solid var(--border-color);
             }
 
-            .nav-content {
-                max-width: 800px;
-                margin: 0 auto;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-            }
+            .nav-content { max-width: 800px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+            .back-btn { text-decoration: none; color: var(--blue-color); font-weight: 500; }
+            .main-content { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+            h1 { font-family: 'Outfit', sans-serif; font-size: 2rem; margin-bottom: 1.5rem; }
 
-            .back-btn {
-                text-decoration: none;
-                color: var(--blue-color);
-                font-weight: 500;
-            }
-
-            .main-content {
-                max-width: 800px;
-                margin: 2rem auto;
-                padding: 0 1rem;
-            }
-
-            h1 {
-                font-family: 'Outfit', sans-serif;
-                font-size: 2rem;
-                margin-bottom: 1.5rem;
-            }
-
-            .product-tabs {
-                display: flex;
-                background: #E8E8ED;
-                padding: 4px;
-                border-radius: 12px;
-                margin-bottom: 2rem;
-            }
-
+            .product-tabs { display: flex; background: #E8E8ED; padding: 4px; border-radius: 12px; margin-bottom: 2rem; }
             .tab-btn {
-                flex: 1;
-                border: none;
-                padding: 10px;
-                border-radius: 10px;
-                font-family: inherit;
-                font-weight: 600;
-                cursor: pointer;
-                background: none;
-                color: var(--text-secondary);
-                transition: all 0.2s;
+                flex: 1; border: none; padding: 10px; border-radius: 10px; font-family: inherit;
+                font-weight: 600; cursor: pointer; background: none; color: var(--text-secondary); transition: all 0.2s;
             }
+            .tab-btn.active { background: white; color: var(--accent-color); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 
-            .tab-btn.active {
-                background: white;
-                color: var(--accent-color);
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            }
+            .filter-section { margin-bottom: 1.5rem; display: flex; gap: 10px; }
+            .search-input { flex: 1; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-color); font-size: 1rem; outline: none; }
+            .region-select { padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); background: white; outline: none; }
 
-            .filter-section {
-                margin-bottom: 1.5rem;
-                display: flex;
-                gap: 10px;
-            }
-
-            .search-input {
-                flex: 1;
-                padding: 12px 16px;
-                border-radius: 12px;
-                border: 1px solid var(--border-color);
-                font-size: 1rem;
-                outline: none;
-            }
-
-            .region-select {
-                padding: 12px;
-                border-radius: 12px;
-                border: 1px solid var(--border-color);
-                background: white;
-                outline: none;
-            }
-
-            .top-rank-container {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 1rem;
-                margin-bottom: 2rem;
-            }
-
-            .rank-card {
-                background: linear-gradient(135deg, #0071e3 0%, #00c6fb 100%);
-                color: white;
-                padding: 1.5rem;
-                border-radius: 20px;
-                box-shadow: 0 10px 20px rgba(0,113,227,0.2);
-            }
-
+            .top-rank-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+            .rank-card { background: linear-gradient(135deg, #0071e3 0%, #00c6fb 100%); color: white; padding: 1.5rem; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,113,227,0.2); }
             .rank-title { font-size: 0.8rem; font-weight: 600; opacity: 0.8; }
             .rank-name { font-size: 1.2rem; font-weight: 700; margin: 0.5rem 0; }
             .rank-rate { font-size: 2rem; font-weight: 700; }
 
-            .rate-list {
-                display: grid;
-                gap: 12px;
-            }
-
+            .rate-list { display: grid; gap: 12px; }
             .rate-item {
-                background: white;
-                padding: 1.5rem;
-                border-radius: 20px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+                background: white; padding: 1.5rem; border-radius: 20px; display: flex; justify-content: space-between;
+                align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
             }
 
             .branch-info h3 { font-size: 1.1rem; margin-bottom: 4px; }
             .branch-info p { font-size: 0.85rem; color: var(--text-secondary); }
-
-            .rate-value {
-                font-family: 'Outfit', sans-serif;
-                font-size: 1.5rem;
-                font-weight: 700;
-                color: var(--blue-color);
-            }
-
+            .rate-value { font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--blue-color); }
             .loading { text-align: center; padding: 3rem; color: var(--text-secondary); }
         </style>
     </head>
@@ -477,17 +328,12 @@ def kfcc_rates():
 
         <div class="main-content">
             <h1>전국 금리 실시간 비교</h1>
-
             <div class="product-tabs">
                 <button class="tab-btn active" onclick="switchProduct(3)">정기예금</button>
                 <button class="tab-btn" onclick="switchProduct(4)">정기적금</button>
                 <button class="tab-btn" onclick="switchProduct(5)">자유적금</button>
             </div>
-
-            <div class="top-rank-container" id="topRank">
-                <!-- Top Rank cards will be injected here -->
-            </div>
-
+            <div class="top-rank-container" id="topRank"></div>
             <div class="filter-section">
                 <select class="region-select" id="regionFilter" onchange="filterData()">
                     <option value="">전체 지역</option>
@@ -511,7 +357,6 @@ def kfcc_rates():
                 </select>
                 <input type="text" class="search-input" id="searchInput" placeholder="금고 이름으로 검색..." onkeyup="filterData()">
             </div>
-
             <div id="rateList" class="rate-list">
                 <div class="loading">데이터를 불러오는 중입니다...</div>
             </div>
@@ -519,16 +364,17 @@ def kfcc_rates():
 
         <script>
             let allData = [];
-            let currentProductIdx = 3; // Default: 정기예금
+            let currentProductIdx = 3; 
 
             async function fetchData() {
                 try {
-                    const response = await fetch('https://raw.githubusercontent.com/if1live/shiroko-kfcc/interest-rate/summary/report_mat.json');
+                    // 외부 사이트가 아닌 내 서버의 API(/api/kfcc)에서 데이터를 가져옵니다.
+                    const response = await fetch('/api/kfcc');
                     const data = await response.json();
-                    allData = data.slice(1); // Remove header
+                    allData = data.slice(1);
                     renderData();
                 } catch (error) {
-                    document.getElementById('rateList').innerHTML = '<div class="loading">데이터를 불러오지 못했습니다.</div>';
+                    document.getElementById('rateList').innerHTML = '<div class="loading">내 서버의 API에서 데이터를 불러오지 못했습니다.</div>';
                 }
             }
 
@@ -540,9 +386,7 @@ def kfcc_rates():
                 renderData();
             }
 
-            function filterData() {
-                renderData();
-            }
+            function filterData() { renderData(); }
 
             function renderData() {
                 const region = document.getElementById('regionFilter').value;
@@ -554,12 +398,10 @@ def kfcc_rates():
                     return matchesRegion && matchesSearch && item[currentProductIdx] !== null;
                 });
 
-                // Sort by rate descending
                 filtered.sort((a, b) => b[currentProductIdx] - a[currentProductIdx]);
 
-                // Render Top 3 Rank
                 const top3 = filtered.slice(0, 3);
-                const topRankHtml = top3.map((item, i) => `
+                document.getElementById('topRank').innerHTML = top3.map((item, i) => `
                     <div class="rank-card">
                         <div class="rank-title">${i+1}위 고금리</div>
                         <div class="rank-name">${item[1]}</div>
@@ -567,9 +409,7 @@ def kfcc_rates():
                         <div style="font-size: 0.7rem; opacity: 0.7;">${item[2]}</div>
                     </div>
                 `).join('');
-                document.getElementById('topRank').innerHTML = topRankHtml;
 
-                // Render List
                 const listHtml = filtered.map(item => `
                     <div class="rate-item">
                         <div class="branch-info">
@@ -582,7 +422,6 @@ def kfcc_rates():
                 `).join('');
                 document.getElementById('rateList').innerHTML = listHtml || '<div class="loading">검색 결과가 없습니다.</div>';
             }
-
             fetchData();
         </script>
     </body>
