@@ -254,6 +254,15 @@ def read_root():
                         </div>
                         <div class="arrow">→</div>
                     </a>
+                    
+                    <a href="/card-events" class="menu-button">
+                        <div class="icon" style="background: #ff3b30;">💳</div>
+                        <div class="text">
+                            <div class="title">카드사 이벤트 검색</div>
+                            <div class="subtitle">모든 카드사 혜택을 한눈에</div>
+                        </div>
+                        <div class="arrow">→</div>
+                    </a>
                 </div>
 
                 <div class="visits-section">
@@ -436,6 +445,183 @@ def kfcc_rates():
                 document.getElementById('rateList').innerHTML = listHtml || '<div class="loading">검색 결과가 없습니다.</div>';
             }
             fetchData();
+        </script>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
+
+@app.get("/card-events", response_class=HTMLResponse)
+def card_events():
+    html_content = """
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>카드사 이벤트 | Oracle Dashboard</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;600&display=swap" rel="stylesheet">
+        <style>
+            :root {
+                --bg-color: #F5F5F7;
+                --accent-color: #1d1d1f;
+                --text-secondary: #6e6e73;
+                --blue-color: #0071e3;
+                --border-color: rgba(0,0,0,0.1);
+            }
+            
+            body { background-color: var(--bg-color); color: var(--accent-color); font-family: 'Inter', sans-serif; padding-bottom: 50px; }
+
+            .nav-header {
+                position: sticky; top: 0; background: rgba(245, 245, 247, 0.8); backdrop-filter: blur(20px);
+                z-index: 100; padding: 1rem; border-bottom: 1px solid var(--border-color);
+            }
+
+            .nav-content { max-width: 800px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+            .back-btn { text-decoration: none; color: var(--blue-color); font-weight: 500; }
+            
+            .main-content { max-width: 800px; margin: 3rem auto; padding: 0 1.5rem; text-align: center; }
+            h1 { font-family: 'Outfit', sans-serif; font-size: 2.5rem; margin-bottom: 1rem; letter-spacing: -0.02em; }
+            .subtitle { color: var(--text-secondary); margin-bottom: 3rem; font-weight: 300; }
+
+            .card-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 1.5rem;
+            }
+
+            .card-link {
+                background: white;
+                border: 1px solid var(--border-color);
+                border-radius: 24px;
+                padding: 2rem 1.5rem;
+                text-decoration: none;
+                color: inherit;
+                transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            }
+
+            .card-link:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+                border-color: var(--blue-color);
+            }
+
+            .card-logo {
+                width: 64px;
+                height: 64px;
+                border-radius: 16px;
+                margin-bottom: 1.2rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.8rem;
+                background: #f2f2f7;
+            }
+
+            .card-name { font-weight: 600; font-size: 1.1rem; margin-bottom: 0.4rem; }
+            .card-desc { font-size: 0.85rem; color: var(--text-secondary); }
+
+            .search-box {
+                background: white;
+                border-radius: 16px;
+                padding: 1rem 1.5rem;
+                margin-bottom: 3rem;
+                display: flex;
+                align-items: center;
+                border: 1px solid var(--border-color);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            }
+            
+            .search-box input {
+                border: none;
+                outline: none;
+                width: 100%;
+                font-size: 1rem;
+                font-family: inherit;
+                margin-left: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="nav-header">
+            <div class="nav-content">
+                <a href="/" class="back-btn">← 대시보드</a>
+                <div style="font-weight: 600;">카드사 이벤트 검색</div>
+                <div style="width: 60px;"></div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <h1>혜택의 시작</h1>
+            <p class="subtitle">국내 주요 카드사의 실시간 이벤트를 한눈에 확인하세요.</p>
+
+            <div class="search-box">
+                <span>🔍</span>
+                <input type="text" id="cardSearch" placeholder="카드사 이름을 검색해보세요..." onkeyup="filterCards()">
+            </div>
+
+            <div class="card-grid" id="cardGrid">
+                <a href="https://www.shinhancard.com/pconts/html/benefit/event/benefitEventList.html" target="_blank" class="card-link" data-name="신한카드">
+                    <div class="card-logo" style="background: #0046ff; color: white;">S</div>
+                    <div class="card-name">신한카드</div>
+                    <div class="card-desc">진행중인 이벤트 보기</div>
+                </a>
+                <a href="https://www.samsungcard.com/personal/event/ing/list" target="_blank" class="card-link" data-name="삼성카드">
+                    <div class="card-logo" style="background: #0056b3; color: white;">S</div>
+                    <div class="card-name">삼성카드</div>
+                    <div class="card-desc">진행중인 이벤트 보기</div>
+                </a>
+                <a href="https://m.hyundaicard.com/mp/ev/MPEV0101_01.hc" target="_blank" class="card-link" data-name="현대카드">
+                    <div class="card-logo" style="background: #000; color: white;">H</div>
+                    <div class="card-name">현대카드</div>
+                    <div class="card-desc">진행중인 이벤트 보기</div>
+                </a>
+                <a href="https://card.kbcard.com/BEN/DVIEW/HPCBENM0015" target="_blank" class="card-link" data-name="KB국민카드">
+                    <div class="card-logo" style="background: #ffbc00; color: #1d1d1f;">K</div>
+                    <div class="card-name">KB국민카드</div>
+                    <div class="card-desc">진행중인 이벤트 보기</div>
+                </a>
+                <a href="https://www.lottecard.co.kr/app/LPBNNEA_V100.lc" target="_blank" class="card-link" data-name="롯데카드">
+                    <div class="card-logo" style="background: #ed1c24; color: white;">L</div>
+                    <div class="card-name">롯데카드</div>
+                    <div class="card-desc">진행중인 이벤트 보기</div>
+                </a>
+                <a href="https://www.wooricard.com/wccd/CHC/CHCM0101_01.hc" target="_blank" class="card-link" data-name="우리카드">
+                    <div class="card-logo" style="background: #007bc3; color: white;">W</div>
+                    <div class="card-name">우리카드</div>
+                    <div class="card-desc">진행중인 이벤트 보기</div>
+                </a>
+                <a href="https://www.hanacard.co.kr/OPN00000000N.web?schID=pcd&mID=OPN00000000N" target="_blank" class="card-link" data-name="하나카드">
+                    <div class="card-logo" style="background: #008485; color: white;">H</div>
+                    <div class="card-name">하나카드</div>
+                    <div class="card-desc">진행중인 이벤트 보기</div>
+                </a>
+                <a href="https://m.bccard.com/app/mobileweb/EvntList.do" target="_blank" class="card-link" data-name="BC카드">
+                    <div class="card-logo" style="background: #ed1c24; color: white;">B</div>
+                    <div class="card-name">BC카드</div>
+                    <div class="card-desc">진행중인 이벤트 보기</div>
+                </a>
+            </div>
+        </div>
+
+        <script>
+            function filterCards() {
+                const search = document.getElementById('cardSearch').value.toLowerCase();
+                const cards = document.querySelectorAll('.card-link');
+                
+                cards.forEach(card => {
+                    const name = card.getAttribute('data-name').toLowerCase();
+                    if (name.includes(search)) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
         </script>
     </body>
     </html>
