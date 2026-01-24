@@ -107,96 +107,69 @@ async def get_shinhan_myshop():
         print(f"Shinhan MyShop API Error: {e}")
         return []
 
-@app.get("/api/shinhan-cards")
-async def get_shinhan_cards():
-    """
-    신한카드 이벤트 데이터를 가져와서 정제하여 반환합니다.
-    """
+# 신한카드 데이터 갱신 (백그라운드)
+async def crawl_shinhan_bg():
     try:
-        import json
-        # 1. 캐시 확인
-        try:
-            cached = r.get(SHINHAN_CACHE_KEY)
-            if cached:
-                data = json.loads(cached)
-                if data: return data
-        except Exception: pass
-
+        print(f"[{datetime.now()}] Starting Shinhan background crawl...")
         all_events = []
         base_url = "https://www.shinhancard.com"
         
         async with httpx.AsyncClient(timeout=15.0) as client:
             # 신한카드는 01, 02... 형식의 JSON 파일을 사용
-            for i in range(1, 5):
+            for i in range(1, 10): # 페이지 범위 확대
                 api_url = f"{base_url}/logic/json/evnPgsList0{i}.json"
                 headers = {
                     "Referer": "https://www.shinhancard.com/",
                     "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"
                 }
                 
-                response = await client.get(api_url, headers=headers)
-                if response.status_code != 200:
-                    break
-                
-                data = response.json()
-                events = data.get("root", {}).get("evnlist", [])
-                if not events:
-                    break
-                
-                for ev in events:
-                    # 기간 포맷팅 (YYYYMMDD -> YYYY.MM.DD)
-                    start = ev.get('mobWbEvtStd', '')
-                    end = ev.get('mobWbEvtEdd', '')
-                    if len(start) == 8: start = f"{start[:4]}.{start[4:6]}.{start[6:]}"
-                    if len(end) == 8: end = f"{end[:4]}.{end[4:6]}.{end[6:]}"
+                try:
+                    response = await client.get(api_url, headers=headers)
+                    if response.status_code != 200:
+                        continue
                     
-                    # 이미지 및 링크 처리
-                    img_url = ev.get('hpgEvtCtgImgUrlAr', '')
-                    if img_url and not img_url.startswith('http'):
-                        img_url = f"{base_url}{img_url}"
+                    data = response.json()
+                    events = data.get("root", {}).get("evnlist", [])
+                    if not events:
+                        continue
                     
-                    link_url = ev.get('hpgEvtDlPgeUrlAr', '')
-                    if link_url and not link_url.startswith('http'):
-                        link_url = f"{base_url}{link_url}"
+                    for ev in events:
+                        start = ev.get('mobWbEvtStd', '')
+                        end = ev.get('mobWbEvtEdd', '')
+                        if len(start) == 8: start = f"{start[:4]}.{start[4:6]}.{start[6:]}"
+                        if len(end) == 8: end = f"{end[:4]}.{end[4:6]}.{end[6:]}"
+                        
+                        img_url = ev.get('hpgEvtCtgImgUrlAr', '')
+                        if img_url and not img_url.startswith('http'):
+                            img_url = f"{base_url}{img_url}"
+                        
+                        link_url = ev.get('hpgEvtDlPgeUrlAr', '')
+                        if link_url and not link_url.startswith('http'):
+                            link_url = f"{base_url}{link_url}"
 
-                    all_events.append({
-                        "category": ev.get('hpgEvtSmrTt', '이벤트'),
-                        "eventName": f"{ev.get('evtImgSlTilNm', '')} {ev.get('mobWbEvtNm', '')}".strip(),
-                        "period": f"{start} ~ {end}" if start and end else "상시 진행",
-                        "link": link_url,
-                        "image": img_url,
-                        "bgColor": "#ffffff" # 신한카드는 주로 화이트 배경
-                    })
-        
-        # 2. 결과가 있을 때만 캐싱
+                        all_events.append({
+                            "category": ev.get('hpgEvtKindNm', '이벤트'),
+                            "eventName": ev.get('hpgEvtTitNm', ''),
+                            "period": f"{start} ~ {end}",
+                            "link": link_url,
+                            "image": img_url,
+                            "bgColor": "#ffffff"
+                        })
+                except Exception: continue
+
         if all_events:
-            try:
-                r.setex(SHINHAN_CACHE_KEY, CACHE_EXPIRE, json.dumps(all_events))
-            except Exception: pass
-                
-        return all_events
-        
+            with open("shinhan_data.json", "w", encoding="utf-8") as f:
+                json.dump(all_events, f, ensure_ascii=False)
+            r.setex(SHINHAN_CACHE_KEY, CACHE_EXPIRE, json.dumps(all_events))
+            print(f"[{datetime.now()}] Shinhan crawl finished. {len(all_events)} events.")
+            
     except Exception as e:
-        print(f"Shinhan Card API Error: {e}")
-        return []
+        print(f"[{datetime.now()}] Shinhan crawl failed: {e}")
 
-@app.get("/api/kb-cards")
-async def get_kb_cards():
-    """
-    KB국민카드 이벤트 데이터를 가져와서 정제하여 반환합니다.
-    """
+# KB카드 데이터 갱신 (백그라운드)
+async def crawl_kb_bg():
     try:
-        import json
-        # 1. 캐시 확인
-        try:
-            cached = r.get(KB_CACHE_KEY)
-            if cached:
-                data = json.loads(cached)
-                if data: # 비어있지 않은 경우만 반환
-                    return data
-        except Exception as re:
-            print(f"Redis Cache Error: {re}")
-
+        print(f"[{datetime.now()}] Starting KB background crawl...")
         all_events = []
         api_url = "https://m.kbcard.com/BON/API/MBBACXHIABNC0064"
         
@@ -213,50 +186,85 @@ async def get_kb_cards():
                     "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"
                 }
                 
-                response = await client.post(api_url, data=payload, headers=headers)
-                if response.status_code != 200:
-                    print(f"KB API HTTP Error: {response.status_code}")
-                    break
-                
-                res_json = response.json()
-                events = res_json.get("evntList", [])
-                if not events:
-                    break
-                
-                for ev in events:
-                    category_code = ev.get("evntBonContents", "")
-                    category_map = {"01": "포인트/캐시백", "02": "할인/무이자", "03": "경품", "04": "기타"}
-                    category = category_map.get(category_code, "이벤트")
+                try:
+                    response = await client.post(api_url, data=payload, headers=headers)
+                    if response.status_code != 200: break
                     
-                    # 이미지 경로 처리
-                    img_path = ev.get('evtImgPath', '')
-                    if img_path and not img_path.startswith('http'):
-                        img_path = f"https://img1.kbcard.com/ST/img/cxc{img_path}"
+                    res_json = response.json()
+                    events = res_json.get("evntList", [])
+                    if not events: break
+                    
+                    for ev in events:
+                        category_code = ev.get("evntBonContents", "")
+                        category_map = {"01": "포인트/캐시백", "02": "할인/무이자", "03": "경품", "04": "기타"}
+                        category = category_map.get(category_code, "이벤트")
+                        
+                        img_path = ev.get('evtImgPath', '')
+                        if img_path and not img_path.startswith('http'):
+                            img_path = f"https://img1.kbcard.com/ST/img/cxc{img_path}"
 
-                    all_events.append({
-                        "category": category,
-                        "eventName": f"{ev.get('evtNm', '')} {ev.get('evtSubNm', '')}".strip(),
-                        "period": ev.get("evtYMD", ""),
-                        "link": f"https://m.kbcard.com/BON/DVIEW/MBBMCXHIABNC0026?evntSerno={ev.get('evtNo')}&evntMain=Y",
-                        "image": img_path,
-                        "bgColor": ev.get('bckgColrCtt', '#f2f2f7')
-                    })
-                
-                if page >= res_json.get("totalPageCount", 0):
-                    break
+                        all_events.append({
+                            "category": category,
+                            "eventName": f"{ev.get('evtNm', '')} {ev.get('evtSubNm', '')}".strip(),
+                            "period": ev.get("evtYMD", ""),
+                            "link": f"https://m.kbcard.com/BON/DVIEW/MBBMCXHIABNC0026?evntSerno={ev.get('evtNo')}&evntMain=Y",
+                            "image": img_path,
+                            "bgColor": ev.get('bckgColrCtt', '#f2f2f7')
+                        })
+                    
+                    if page >= res_json.get("totalPageCount", 0): break
+                except Exception: break
         
-        # 2. 결과가 있을 때만 캐싱
         if all_events:
-            try:
-                r.setex(KB_CACHE_KEY, CACHE_EXPIRE, json.dumps(all_events))
-            except Exception as se:
-                print(f"Redis Save Error: {se}")
-                
-        return all_events
-        
+            with open("kb_data.json", "w", encoding="utf-8") as f:
+                json.dump(all_events, f, ensure_ascii=False)
+            r.setex(KB_CACHE_KEY, CACHE_EXPIRE, json.dumps(all_events))
+            print(f"[{datetime.now()}] KB crawl finished. {len(all_events)} events.")
+            
     except Exception as e:
-        print(f"KB Card API General Error: {e}")
+        print(f"[{datetime.now()}] KB crawl failed: {e}")
+
+@app.get("/api/shinhan-cards")
+async def get_shinhan_cards():
+    try:
+        import json
+        cached = r.get(SHINHAN_CACHE_KEY)
+        if cached: return json.loads(cached)
+
+        if os.path.exists("shinhan_data.json"):
+            with open("shinhan_data.json", "r", encoding="utf-8") as f:
+                data = json.load(f)
+                r.setex(SHINHAN_CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
+                return data
+        
         return []
+    except Exception: return []
+
+@app.get("/api/kb-cards")
+async def get_kb_cards():
+    try:
+        import json
+        cached = r.get(KB_CACHE_KEY)
+        if cached: return json.loads(cached)
+
+        if os.path.exists("kb_data.json"):
+            with open("kb_data.json", "r", encoding="utf-8") as f:
+                data = json.load(f)
+                r.setex(KB_CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
+                return data
+        
+        return []
+    except Exception: return []
+
+@app.post("/api/shinhan/update")
+async def update_shinhan(bg_tasks: BackgroundTasks):
+    bg_tasks.add_task(crawl_shinhan_bg)
+    return {"status": "started"}
+
+@app.post("/api/kb/update")
+async def update_kb(bg_tasks: BackgroundTasks):
+    bg_tasks.add_task(crawl_kb_bg)
+    return {"status": "started"}
 
 def get_uptime():
     uptime_seconds = int(time.time() - boot_time)
@@ -342,10 +350,15 @@ scheduler = AsyncIOScheduler()
 
 @app.on_event("startup")
 async def start_scheduler():
-    # 매일 새벽 4시에 크롤링 실행
+    # 매일 새벽 4시에 KFCC 크롤링 실행
     scheduler.add_job(background_crawl_kfcc, 'cron', hour=4, minute=0)
+    # 4시 5분에 신한카드
+    scheduler.add_job(crawl_shinhan_bg, 'cron', hour=4, minute=5)
+    # 4시 10분에 KB카드
+    scheduler.add_job(crawl_kb_bg, 'cron', hour=4, minute=10)
+    
     scheduler.start()
-    print("Scheduler started. KFCC crawl scheduled at 04:00 daily.")
+    print("Scheduler started. All tasks scheduled.")
 
 @app.get("/", response_class=HTMLResponse)
 def read_root():
