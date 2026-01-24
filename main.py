@@ -21,7 +21,7 @@ DATA_URL = "https://raw.githubusercontent.com/if1live/shiroko-kfcc/interest-rate
 CACHE_KEY = "kfcc_data_cache"
 KB_CACHE_KEY = "kb_card_events_cache_v3" # 이미지 정보를 포함한 v3
 SHINHAN_CACHE_KEY = "shinhan_card_events_cache_v1"
-SHINHAN_MYSHOP_CACHE_KEY = "shinhan_myshop_cache_v2" # 경로 수정 반영을 위한 v2
+SHINHAN_MYSHOP_CACHE_KEY = "shinhan_myshop_cache_v3" # 안정성 강화를 위한 v3
 CACHE_EXPIRE = 3600  # 1시간 동안 캐시 유지
 
 @app.get("/api/shinhan-myshop")
@@ -37,55 +37,72 @@ async def get_shinhan_myshop():
 
         api_url = "https://www.shinhancard.com/mob/MOBFM501N/MOBFM501R21.ajax"
         base_url = "https://www.shinhancard.com"
+        
         headers = {
             "Content-Type": "application/json",
             "X-Requested-With": "XMLHttpRequest",
-            "Referer": "https://www.shinhancard.com/mob/MOBFM501N/MOBFM501R31.shc",
+            "Referer": f"{base_url}/mob/MOBFM501N/MOBFM501R31.shc",
+            "Origin": base_url,
+            "Accept": "application/json, text/javascript, */*; q=0.01",
             "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"
         }
         payload = {"QY_CCD": "T"}
         
         all_coupons = []
-        async with httpx.AsyncClient(timeout=15.0) as client:
+        async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
+            # 1. 먼저 메인 페이지를 방문하여 기본 쿠키를 확보합니다.
+            await client.get(f"{base_url}/mob/MOBFM501N/MOBFM501R31.shc", headers={"User-Agent": headers["User-Agent"]})
+            
+            # 2. AJAX 요청을 보냅니다.
             response = await client.post(api_url, json=payload, headers=headers)
             if response.status_code == 200:
                 data = response.json()
-                # GRID1에 쿠폰 정보들이 담겨 있음
-                grid = data.get("mbw_message", {}).get("GRID1", {})
+                msg = data.get("mbw_message")
                 
-                # 병렬 리스트 형식이므로 인덱스로 순회
-                names = grid.get("SSG_NM", [])
-                benefits = grid.get("MCT_CRD_SV_RG_TT", [])
-                imgs = grid.get("MYH_CUP_IMG_URL_AR", [])
-                ends = grid.get("MCT_PLF_MO_EDD", [])
-                links = grid.get("MYH_SRM_ONL_SPP_MLL_URL_AR", [])
-                
-                for i in range(len(names)):
-                    name = names[i]
-                    benefit = benefits[i] if i < len(benefits) else ""
-                    img = imgs[i] if i < len(imgs) else ""
-                    end = ends[i] if i < len(ends) else ""
-                    link = links[i] if i < len(links) else f"{base_url}/mob/MOBFM501N/MOBFM501R31.shc"
+                # mbw_message가 딕셔너리인 경우에만 GRID1을 처리합니다.
+                if isinstance(msg, dict):
+                    grid = msg.get("GRID1", {})
+                    names = grid.get("SSG_NM", [])
+                    benefits = grid.get("MCT_CRD_SV_RG_TT", [])
+                    imgs = grid.get("MYH_CUP_IMG_URL_AR", [])
+                    ends = grid.get("MCT_PLF_MO_EDD", [])
+                    links = grid.get("MYH_SRM_ONL_SPP_MLL_URL_AR", [])
                     
-                    # 이미지 경로 처리
-                    if img and not img.startswith('http'):
-                        img = f"{base_url}{img}"
+                    for i in range(len(names)):
+                        name = names[i]
+                        benefit = benefits[i] if i < len(benefits) else ""
+                        img = imgs[i] if i < len(imgs) else ""
+                        end = ends[i] if i < len(ends) else ""
+                        link = links[i] if i < len(links) else f"{base_url}/mob/MOBFM501N/MOBFM501R31.shc"
+                        
+                        if img and not img.startswith('http'):
+                            img = f"{base_url}{img}"
+                        if link and not link.startswith('http'):
+                            link = f"{base_url}{link}"
 
-                    if len(end) == 8:
-                        end = f"~ {end[:4]}.{end[4:6]}.{end[6:]}"
+                        if len(end) == 8:
+                            end = f"~ {end[:4]}.{end[4:6]}.{end[6:]}"
 
-                    all_coupons.append({
-                        "category": "마이샵 쿠폰",
-                        "eventName": f"[{name}] {benefit}",
-                        "period": end,
-                        "link": link,
-                        "image": img,
-                        "bgColor": "#ffffff"
-                    })
+                        all_coupons.append({
+                            "category": "마이샵 쿠폰",
+                            "eventName": f"[{name}] {benefit}",
+                            "period": end,
+                            "link": link,
+                            "image": img,
+                            "bgColor": "#ffffff"
+                        })
+                else:
+                    print(f"Shinhan MyShop API returned message: {msg}")
 
         if all_coupons:
-            r.setex(SHINHAN_MYSHOP_CACHE_KEY, CACHE_EXPIRE, json.dumps(all_coupons))
+            try:
+                r.setex(SHINHAN_MYSHOP_CACHE_KEY, CACHE_EXPIRE, json.dumps(all_coupons))
+            except Exception: pass
+            
         return all_coupons
+    except Exception as e:
+        print(f"Shinhan MyShop API Error: {e}")
+        return []
     except Exception as e:
         print(f"Shinhan MyShop API Error: {e}")
         return []
@@ -1207,10 +1224,11 @@ def shinhan_card_events():
 
             function filterEvents() {
                 const search = document.getElementById('searchInput').value.toLowerCase();
-                const filtered = allEvents.filter(ev => 
-                    ev.eventName.toLowerCase().includes(search) || 
-                    ev.category.toLowerCase().includes(search)
-                );
+                const filtered = allEvents.filter(ev => {
+                    const name = (ev.eventName || "").toLowerCase();
+                    const cat = (ev.category || "").toLowerCase();
+                    return name.includes(search) || cat.includes(search);
+                });
                 renderEvents(filtered);
             }
 
