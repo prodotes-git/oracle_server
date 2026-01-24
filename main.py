@@ -328,7 +328,7 @@ async def crawl_hana_bg():
         print(f"[{datetime.now()}] Starting Hana background crawl...")
         all_events = []
         base_url = "https://m.hanacard.co.kr"
-        target_url = "https://m.hanacard.co.kr/MKEVT1000M.web"
+        api_url = "https://m.hanacard.co.kr/MKEVT1000M.ajax"
 
         # SSL Context 설정 (DH_KEY_TOO_SMALL 해결)
         import ssl
@@ -339,73 +339,85 @@ async def crawl_hana_bg():
             # OpenSSL 3.0 이상에서 DH Key 허용을 위해 보안 레벨 낮춤
             ssl_context.set_ciphers('DEFAULT@SECLEVEL=1')
         except Exception:
-            # 설정 실패 시 기본값 (verify=False로 대체될 것임)
             ssl_context = False
 
         async with httpx.AsyncClient(timeout=30.0, follow_redirects=True, verify=ssl_context) as client:
             headers = {
-                "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"
+                "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
+                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+                "X-Requested-With": "XMLHttpRequest",
+                "Origin": "https://m.hanacard.co.kr",
+                "Referer": "https://m.hanacard.co.kr/MKEVT1000M.web"
             }
-            response = await client.get(target_url, headers=headers)
             
-            if response.status_code == 200:
-                # euc-kr 디코딩 시도 (하나카드는 euc-kr 사용)
-                try:
-                    html = response.content.decode("euc-kr")
-                except UnicodeDecodeError:
-                    html = response.text
-
-                from bs4 import BeautifulSoup
-                import re
-
-                soup = BeautifulSoup(html, "lxml")
-                # 이벤트 리스트 아이템 선택
-                items = soup.select("li.usage-default-item")
+            for page in range(1, 40): # 충분한 페이지 수
+                data = {
+                    "evnCate": "00000",
+                    "page": str(page),
+                    "schTxt": "",
+                    "schVipYn": "N",
+                    "orderType": "N",
+                    "srchF": "A",
+                    "srchV": "",
+                    "ctgId": "0" 
+                }
                 
-                for item in items:
+                try:
+                    response = await client.post(api_url, data=data, headers=headers)
+                    if response.status_code != 200:
+                        break
+                    
+                    # 하나카드 API는 EUC-KR 인코딩 사용
                     try:
-                        # 링크 및 ID 추출
-                        anchor = item.select_one("a")
-                        if not anchor: continue
+                        res_text = response.content.decode("euc-kr")
+                    except UnicodeDecodeError:
+                        res_text = response.text
                         
-                        onclick = anchor.get("onclick", "")
-                        # detail('/MKEVT1010M.web','8086') 패턴 추출
-                        match = re.search(r"detail\('([^']+)',\s*'([^']+)'\)", onclick)
+                    res_json = json.loads(res_text)
+                    
+                    # 응답 구조: DATA -> eventListMap -> list
+                    data_obj = res_json.get("DATA", {})
+                    event_map = data_obj.get("eventListMap", {})
+                    event_list = event_map.get("list", [])
+                    
+                    if not event_list:
+                        break
                         
+                    for ev in event_list:
+                        # 필드 매핑
+                        title = ev.get("EVN_TIT_NM", "")
+                        category = ev.get("ITG_APP_EVN_MC_NM", "이벤트")
+                        start_date = ev.get("EVN_SDT", "")
+                        end_date = ev.get("EVN_EDT", "")
+                        seq = ev.get("EVN_SEQ", "")
+                        
+                        img_path = ev.get("APN_FILE_NM", "")
+                        if img_path and not img_path.startswith("http"):
+                            img_path = f"{base_url}{img_path}"
+                            
                         link = ""
-                        if match:
-                            path, seq = match.groups()
-                            link = f"{base_url}{path}?EVN_SEQ={seq}"
-                        else:
-                            # 다른 패턴 (goLinkWeb 등)
-                            continue
-
-                        # 이미지
-                        img_tag = item.select_one("img")
-                        img_src = img_tag.get("src", "") if img_tag else ""
-                        if img_src and not img_src.startswith("http"):
-                            img_src = f"{base_url}{img_src}"
-
-                        # 텍스트 정보
-                        brand_div = item.select_one(".usage-default-brand")
-                        category = brand_div.text.strip() if brand_div else "하나카드"
+                        if seq:
+                            link = f"{base_url}/MKEVT1010M.web?EVN_SEQ={seq}"
                         
-                        title_div = item.select_one(".usage-default-title")
-                        title = title_div.text.strip() if title_div else "이벤트"
-                        
-                        date_div = item.select_one(".usage-default-etc-item")
-                        period = date_div.text.strip() if date_div else ""
-
                         all_events.append({
                             "category": category,
                             "eventName": title,
-                            "period": period,
+                            "period": f"{start_date} ~ {end_date}",
                             "link": link,
-                            "image": img_src,
+                            "image": img_path,
                             "bgColor": "#ffffff"
                         })
-                    except Exception:
-                        continue
+
+                    # 페이지 종료 체크
+                    total_page = int(event_map.get("totalPage", 0))
+                    if page >= total_page:
+                        break
+                        
+                except Exception as e:
+                    print(f"Error parsing Hana page {page}: {e}")
+                    # API 호출 실패 시 중단하지 않고 다음 시도 (혹은 중단)
+                    # 여기서는 안전하게 중단
+                    break
 
         if all_events:
             try:
