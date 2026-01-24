@@ -303,13 +303,13 @@ async def get_kfcc_data():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"서버 내부 오류: {str(e)}")
 
-@app.post("/api/kfcc/update")
-async def update_kfcc_data(background_tasks: BackgroundTasks):
-    """
-    새마을금고 데이터 크롤링을 백그라운드에서 실행합니다.
-    """
-    background_tasks.add_task(background_crawl_kfcc)
-    return {"status": "started", "message": "KFCC data update started in background."}
+@app.get("/kfcc", response_class=HTMLResponse)
+def view_kfcc_page():
+    try:
+        with open("kfcc.html", "r", encoding="utf-8") as f:
+            return f.read()
+    except FileNotFoundError:
+        return "kfcc.html not found"
 
 async def background_crawl_kfcc():
     try:

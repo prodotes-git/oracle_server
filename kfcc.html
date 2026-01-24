@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>새마을금고 금리 조회</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #0046ff;
+            --bg-color: #F5F5F7;
+            --text-color: #1d1d1f;
+        }
+        body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-color); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        h1 { font-family: 'Outfit', sans-serif; font-size: 2rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 10px; }
+        
+        .controls { display: flex; gap: 1rem; margin-bottom: 2rem; align-items: center; background: white; padding: 1rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        select { padding: 8px 16px; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; }
+        .search-box { flex: 1; }
+        input { width: 100%; padding: 8px 16px; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; }
+        
+        .table-container { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 1rem; border-bottom: 1px solid #eee; }
+        th { background: #f9f9f9; font-weight: 600; font-size: 0.9rem; color: #666; }
+        tr:hover { background: #f5f5f7; }
+        
+        .rate-high { color: #d32f2f; font-weight: 700; }
+        .loading { padding: 2rem; text-align: center; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏦 새마을금고 금리 조회</h1>
+        
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="금고명 또는 지역 검색..." onkeyup="renderTable()">
+            </div>
+            <div>
+                <label>계약 기간: </label>
+                <select id="durationSelect" onchange="renderTable()">
+                    <option value="12개월" selected>12개월</option>
+                    <option value="6개월">6개월</option>
+                    <option value="3개월">3개월</option>
+                    <option value="1개월">1개월</option>
+                    <option value="13개월">13개월</option>
+                    <option value="36개월">36개월</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th width="20%">금고명</th>
+                        <th width="15%">위치</th>
+                        <th width="20%">정기예금 (MG더뱅킹)</th>
+                        <th width="20%">정기적금 (MG더뱅킹)</th>
+                        <th width="20%">자유적금 (MG더뱅킹)</th>
+                        <th width="5%">기준일</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="6" class="loading">데이터를 불러오는 중입니다...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let allData = [];
+
+        async function fetchData() {
+            try {
+                const res = await fetch('/api/kfcc');
+                const json = await res.json();
+                
+                // 데이터 형식이 리스트의 리스트인지(구형), 리스트의 딕셔너리인지(신형) 확인
+                if (Array.isArray(json) && Array.isArray(json[0])) {
+                    // 구형 포맷 (Header 제외하고 변환)
+                    const header = json[0];
+                    allData = json.slice(1).map(row => ({
+                        gmgoNm: row[1],
+                        location: row[2],
+                        rates: {
+                            "MG더뱅킹정기예금": {"12개월": row[3]},
+                            "MG더뱅킹정기적금": {"12개월": row[4]},
+                            "MG더뱅킹자유적금": {"12개월": row[5]}
+                        },
+                        기준일: row[6]
+                    }));
+                } else {
+                    // 신형 포맷 (List of Dicts)
+                    allData = json;
+                }
+                
+                renderTable();
+            } catch (e) {
+                document.getElementById('tableBody').innerHTML = `<tr><td colspan="6" class="loading">오류 발생: ${e.message}</td></tr>`;
+            }
+        }
+
+        function renderTable() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const duration = document.getElementById('durationSelect').value;
+            const tbody = document.getElementById('tableBody');
+            
+            // 필터링
+            const filtered = allData.filter(item => 
+                (item.gmgoNm || "").toLowerCase().includes(search) || 
+                (item.location || "").toLowerCase().includes(search)
+            );
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="loading">검색 결과가 없습니다.</td></tr>';
+                return;
+            }
+
+            // 정렬 (예금 금리 높은 순)
+            filtered.sort((a, b) => {
+                const rateA = parseFloat(a.rates?.["MG더뱅킹정기예금"]?.[duration] || 0);
+                const rateB = parseFloat(b.rates?.["MG더뱅킹정기예금"]?.[duration] || 0);
+                return rateB - rateA;
+            });
+
+            tbody.innerHTML = filtered.map(item => {
+                const getRate = (prod) => {
+                    const r = item.rates?.[prod]?.[duration];
+                    return r ? `<span class="rate-high">${r}%</span>` : '-';
+                };
+
+                return `
+                    <tr>
+                        <td>${item.gmgoNm}</td>
+                        <td style="color: #666; font-size: 0.9em;">${item.location}</td>
+                        <td>${getRate("MG더뱅킹정기예금")}</td>
+                        <td>${getRate("MG더뱅킹정기적금")}</td>
+                        <td>${getRate("MG더뱅킹자유적금")}</td>
+                        <td style="color: #999; font-size: 0.8em;">${item["기준일"] || '-'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        fetchData();
+    </script>
+</body>
+</html>

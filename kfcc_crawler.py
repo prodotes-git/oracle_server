@@ -29,7 +29,10 @@ HEADERS = {
     "Content-Type": "application/x-www-form-urlencoded"
 }
 
-# 12개월 금리 파싱
+# 수집할 금리 기간 (월 단위)
+TARGET_DURATIONS = ["1개월", "3개월", "6개월", "12개월", "13개월", "36개월"]
+
+# 12개월 금리 파싱 -> 숫자값만 추출
 def parse_rate(val):
     try:
         if not val or "연" not in val: return None
@@ -46,7 +49,9 @@ def parse_html(html, target_products=["MG더뱅킹정기예금", "MG더뱅킹정
     date_match = re.search(r"\d{4}/\d{2}/\d{2}", base_date_txt)
     base_date_v = date_match.group(0) if date_match else None
 
-    result = {}
+    # 상품명 -> 기간 -> 금리
+    # 예: {"MG더뱅킹정기예금": {"12개월": "4.0", "6개월": "3.0"}}
+    result = {prod: {} for prod in target_products}
     
     tables = soup.select(".tblWrap")
     for tbl in tables:
@@ -55,7 +60,6 @@ def parse_html(html, target_products=["MG더뱅킹정기예금", "MG더뱅킹정
         title = title_elem.text.strip()
         
         if title in target_products:
-            # 12개월 금리 찾기
             rows = tbl.select("#divTmp1 tbody tr")
             for row in rows:
                 cols = row.select("td")
@@ -63,9 +67,16 @@ def parse_html(html, target_products=["MG더뱅킹정기예금", "MG더뱅킹정
                     key = cols[-2].text.strip() # 기간 (12개월 이상)
                     val = cols[-1].text.strip() # 금리 (연X.XX%)
                     
-                    if "12" in key and "월" in key:
-                        result[title] = parse_rate(val)
-                        break
+                    # 수집 대상 기간인지 확인
+                    for duration in TARGET_DURATIONS:
+                        if duration in key:
+                            # "12개월" (숫자만) vs "12개월 이상" (텍스트 포함)
+                            # 키를 단순화해서 저장: "12개월"
+                            simple_key = duration
+                            rate = parse_rate(val)
+                            if rate:
+                                result[title][simple_key] = rate
+                            break
     
     return base_date_v, result
 
@@ -80,11 +91,8 @@ async def fetch_region_banks(client, r1, r2):
         rows = soup.select("tr")
         banks = []
         for row in rows:
-            # id가 없거나 onclick이 없는 row는 건너뜀
             if not row.has_attr("onclick"): continue
             
-            # 파싱 로직: onclick="parent.mapGo('0101', '3333', '...')"
-            # 또는 td span title="새마을금고코드"
             td = row.select_one("td")
             if not td: continue
             
@@ -98,7 +106,7 @@ async def fetch_region_banks(client, r1, r2):
                 banks.append({
                     "gmgoCd": data["새마을금고코드"],
                     "gmgoNm": data.get("새마을금고명", ""),
-                    "divCd": data.get("지점구분코드", ""), # 001:본점
+                    "divCd": data.get("지점구분코드", ""), 
                     "r1": r1,
                     "r2": r2,
                     "location": f"{r1} {r2}"
@@ -110,41 +118,36 @@ async def fetch_region_banks(client, r1, r2):
 
 async def fetch_bank_rates(client, bank):
     gmgoCd = bank["gmgoCd"]
+    
+    # 기본 정보
     res_data = {
         "gmgoCd": gmgoCd,
         "gmgoNm": bank["gmgoNm"],
         "location": bank["location"],
-        "MG더뱅킹정기예금": None,
-        "MG더뱅킹정기적금": None,
-        "MG더뱅킹자유적금": None,
+        "rates": {}, # 상품별/기간별 금리 저장
         "기준일": None
     }
     
-    # 13: 예탁금, 14: 적금
-    # 3번 재시도 로직은 생략하고 1번 시도
     try:
-        # 예탁금
+        # 예탁금 (13)
         url_dep = f"https://www.kfcc.co.kr/map/goods_19.do?OPEN_TRMID={gmgoCd}&gubuncode=13"
         resp_dep = await client.get(url_dep, headers=HEADERS)
-        date, rates = parse_html(resp_dep.text)
+        date, rates_dep = parse_html(resp_dep.text)
         if date: res_data["기준일"] = date
-        if "MG더뱅킹정기예금" in rates: res_data["MG더뱅킹정기예금"] = rates["MG더뱅킹정기예금"]
+        res_data["rates"].update(rates_dep)
 
-        # 적금
+        # 적금 (14)
         url_sav = f"https://www.kfcc.co.kr/map/goods_19.do?OPEN_TRMID={gmgoCd}&gubuncode=14"
         resp_sav = await client.get(url_sav, headers=HEADERS)
         _, rates_sav = parse_html(resp_sav.text)
-        if "MG더뱅킹정기적금" in rates_sav: res_data["MG더뱅킹정기적금"] = rates_sav["MG더뱅킹정기적금"]
-        if "MG더뱅킹자유적금" in rates_sav: res_data["MG더뱅킹자유적금"] = rates_sav["MG더뱅킹자유적금"]
+        res_data["rates"].update(rates_sav)
         
         return res_data
     except Exception as e:
-        # print(f"Error fetching rates for {bank['gmgoNm']}: {e}")
         return res_data
 
 async def run_crawler():
     async with httpx.AsyncClient(timeout=10.0) as client:
-        # 1. 모든 지역의 금고 목록 수집
         print("Fetching bank lists...")
         bank_tasks = []
         for region in ALL_REGIONS:
@@ -153,30 +156,22 @@ async def run_crawler():
             for r2 in sub_regions:
                 bank_tasks.append(fetch_region_banks(client, r1, r2))
         
-        # 동시성 제한을 두어 요청
-        # (너무 빠르면 차단될 수 있으므로 청크 단위로 진행하거나 세마포어 사용)
-        semaphore = asyncio.Semaphore(10) # 10개씩 동시 요청
-        
+        semaphore = asyncio.Semaphore(10)
         async def fetch_with_sem(coro):
             async with semaphore:
                 return await coro
 
         all_banks_nested = await asyncio.gather(*(fetch_with_sem(t) for t in bank_tasks))
         all_banks = [b for sublist in all_banks_nested for b in sublist]
-        
-        # 중복 제거 (본점/지점 등이 겹칠 수 있음)
         unique_banks = {b['gmgoCd']: b for b in all_banks}.values()
         print(f"Total unique banks found: {len(unique_banks)}")
 
-        # 2. 각 금고의 금리 수집
         print("Fetching interest rates...")
         rate_tasks = [fetch_bank_rates(client, bank) for bank in unique_banks]
         
-        # 금리 조회도 세마포어 적용 (더 보수적으로)
         rate_sem = asyncio.Semaphore(20)
         async def fetch_rate_with_sem(coro):
             async with rate_sem:
-                 # 약간의 딜레이 추가
                 await asyncio.sleep(0.05)
                 return await coro
                 
@@ -188,24 +183,8 @@ async def run_crawler():
             if i % 100 == 0:
                 print(f"Progress: {i}/{total}")
 
-        # 3. 데이터 포맷팅 (report_mat.json 형식)
-        # [header, [row1], [row2]...]
-        header = ["gmgoCd", "gmgoNm", "location", "MG더뱅킹정기예금", "MG더뱅킹정기적금", "MG더뱅킹자유적금", "기준일"]
-        final_data = [header]
-        
-        for r in results:
-            row = [
-                r["gmgoCd"],
-                r["gmgoNm"],
-                r["location"],
-                r["MG더뱅킹정기예금"],
-                r["MG더뱅킹정기적금"],
-                r["MG더뱅킹자유적금"],
-                r["기준일"]
-            ]
-            final_data.append(row)
-            
-        return final_data
+        # JSON(List of Dicts) 형태로 반환
+        return results
 
 if __name__ == "__main__":
     data = asyncio.run(run_crawler())
