@@ -87,193 +87,260 @@ def read_root():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Oracle Dashboard | Premium</title>
+        <title>Dashboard</title>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;600&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
         <style>
             :root {{
-                --bg-color: #F5F5F7;
-                --card-bg: rgba(255, 255, 255, 0.7);
-                --accent-color: #1d1d1f;
-                --text-secondary: #6e6e73;
-                --glass-border: rgba(255, 255, 255, 0.5);
-                --success-color: #28cd41;
-                --blue-color: #0071e3;
+                --bg: #f5f5f7;
+                --card-bg: rgba(255, 255, 255, 0.82);
+                --text: #1d1d1f;
+                --text-secondary: #86868b;
+                --accent: #0071e3;
+                --success: #28cd41;
+                --glass-border: rgba(255, 255, 255, 0.4);
             }}
             
             * {{ margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }}
             
             body {{
-                background-color: var(--bg-color);
-                color: var(--accent-color);
-                font-family: 'Inter', sans-serif;
+                background-color: var(--bg);
+                color: var(--text);
+                font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
                 min-height: 100vh;
+                padding: 4vw;
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                background: linear-gradient(180deg, #FFFFFF 0%, #F5F5F7 100%);
-                padding: 2rem;
+                background: radial-gradient(at 0% 0%, rgba(0, 113, 227, 0.05) 0px, transparent 50%),
+                            radial-gradient(at 100% 100%, rgba(40, 205, 65, 0.05) 0px, transparent 50%);
             }}
 
-            .container {{ width: 100%; max-width: 600px; animation: fadeIn 1.2s cubic-bezier(0.2, 0.8, 0.2, 1); }}
-
-            @keyframes fadeIn {{
-                from {{ opacity: 0; transform: translateY(15px); }}
-                to {{ opacity: 1; transform: translateY(0); }}
+            header {{
+                margin-bottom: 3rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-end;
             }}
 
-            .main-card {{
+            .greeting {{
+                font-family: 'Outfit', sans-serif;
+                font-size: clamp(2rem, 5vw, 3.5rem);
+                font-weight: 700;
+                letter-spacing: -0.04em;
+                line-height: 1.1;
+            }}
+
+            .date {{
+                color: var(--text-secondary);
+                font-size: 1.1rem;
+                font-weight: 500;
+                margin-top: 0.5rem;
+            }}
+
+            .dashboard-grid {{
+                display: grid;
+                grid-template-columns: repeat(12, 1fr);
+                grid-auto-rows: minmax(160px, auto);
+                gap: 1.5rem;
+                width: 100%;
+                max-width: 1600px;
+                margin: 0 auto;
+            }}
+
+            .bento-card {{
                 background: var(--card-bg);
                 backdrop-filter: blur(20px);
                 -webkit-backdrop-filter: blur(20px);
                 border: 1px solid var(--glass-border);
-                border-radius: 40px;
-                padding: 3.5rem 3rem;
-                text-align: center;
-                margin-bottom: 1.5rem;
-                box-shadow: 0 30px 60px rgba(0,0,0,0.06);
+                border-radius: 32px;
+                padding: 2rem;
+                transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.04);
+                cursor: pointer;
+                text-decoration: none;
+                color: inherit;
             }}
 
-            h1 {{
-                font-family: 'Outfit', sans-serif;
-                font-size: 3rem;
-                font-weight: 600;
-                letter-spacing: -0.04em;
-                margin-bottom: 2.5rem;
-                color: var(--accent-color);
-            }}
-
-            .grid-stats {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-top: 1rem; }}
-
-            .stat-box {{
-                background: rgba(0, 0, 0, 0.02);
-                border: 1px solid rgba(0, 0, 0, 0.05);
-                border-radius: 24px;
-                padding: 1.8rem 1rem;
-                transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-            }}
-
-            .stat-box:hover {{
+            .bento-card:hover {{
                 transform: scale(1.02);
-                background: rgba(255, 255, 255, 0.9);
-                box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+                box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+                background: rgba(255, 255, 255, 0.95);
             }}
 
-            .stat-label {{
-                font-size: 0.75rem;
+            /* Bento Sizes */
+            .col-6 {{ grid-column: span 6; }}
+            .col-4 {{ grid-column: span 4; }}
+            .col-3 {{ grid-column: span 3; }}
+            .row-2 {{ grid-row: span 2; }}
+
+            @media (max-width: 1024px) {{
+                .col-3 {{ grid-column: span 6; }}
+                .col-4 {{ grid-column: span 6; }}
+            }}
+            @media (max-width: 768px) {{
+                .col-6, .col-4, .col-3 {{ grid-column: span 12; }}
+                body {{ padding: 6vw; }}
+            }}
+
+            .card-label {{
+                font-size: 0.85rem;
+                font-weight: 600;
                 color: var(--text-secondary);
                 text-transform: uppercase;
-                letter-spacing: 0.12em;
-                margin-bottom: 0.8rem;
-                font-weight: 600;
-            }}
-
-            .stat-value {{ font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 600; color: var(--accent-color); }}
-
-            .menu-section {{ margin-top: 3rem; display: grid; gap: 1rem; }}
-
-            .menu-button {{
+                letter-spacing: 0.05em;
                 display: flex;
                 align-items: center;
-                justify-content: space-between;
-                background: white;
-                border: 1px solid rgba(0,0,0,0.05);
-                padding: 1.5rem 2rem;
-                border-radius: 24px;
-                text-decoration: none;
-                color: var(--accent-color);
-                transition: all 0.3s ease;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+                gap: 8px;
             }}
 
-            .menu-button:hover {{ transform: scale(1.02); box-shadow: 0 12px 24px rgba(0,0,0,0.06); }}
-
-            .menu-button .icon {{
-                width: 44px; height: 44px; background: var(--blue-color); color: white; border-radius: 12px;
-                display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+            .card-value {{
+                font-family: 'Outfit', sans-serif;
+                font-size: 2.8rem;
+                font-weight: 700;
+                margin: 1rem 0;
+                letter-spacing: -0.02em;
             }}
 
-            .menu-button .text {{ flex: 1; margin-left: 1.2rem; text-align: left; }}
-            .menu-button .title {{ font-weight: 600; font-size: 1.1rem; }}
-            .menu-button .subtitle {{ font-size: 0.8rem; color: var(--text-secondary); }}
-
-            .visits-section {{ margin-top: 3.5rem; border-top: 1px solid rgba(0, 0, 0, 0.05); padding-top: 2.5rem; }}
-            .visits-label {{ font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.8rem; font-weight: 400; }}
-            .visits-count {{ font-family: 'Outfit', sans-serif; font-size: 4rem; font-weight: 600; color: var(--accent-color); }}
-
-            .status-indicator {{
-                display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: var(--success-color);
-                margin-bottom: 1.2rem; font-weight: 700; letter-spacing: 0.08em;
+            .card-increment {{
+                font-size: 0.95rem;
+                font-weight: 600;
+                color: var(--success);
             }}
 
-            .dot {{
-                width: 8px; height: 8px; background-color: var(--success-color); border-radius: 50%;
-                margin-right: 10px; box-shadow: 0 0 15px rgba(40, 205, 65, 0.3); animation: pulse 2.5s infinite;
+            .icon-wrapper {{
+                width: 56px;
+                height: 56px;
+                border-radius: 18px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+            }}
+
+            .btn-title {{ font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; }}
+            .btn-desc {{ color: var(--text-secondary); font-size: 1rem; line-height: 1.4; }}
+
+            .status-dot {{
+                width: 8px;
+                height: 8px;
+                background: var(--success);
+                border-radius: 50%;
+                display: inline-block;
+                box-shadow: 0 0 12px var(--success);
+                animation: pulse 2s infinite;
             }}
 
             @keyframes pulse {{
-                0% {{ opacity: 1; transform: scale(1); }}
-                50% {{ opacity: 0.6; transform: scale(0.9); }}
-                100% {{ opacity: 1; transform: scale(1); }}
+                0% {{ opacity: 1; }}
+                50% {{ opacity: 0.5; }}
+                100% {{ opacity: 1; }}
             }}
 
-            .footer {{ margin-top: 2.5rem; font-size: 0.75rem; color: var(--text-secondary); letter-spacing: 0.25em; font-weight: 500; }}
+            .progress-bar {{
+                width: 100%;
+                height: 8px;
+                background: rgba(0,0,0,0.05);
+                border-radius: 4px;
+                overflow: hidden;
+                margin-top: 1rem;
+            }}
+            .progress-fill {{
+                height: 100%;
+                background: var(--accent);
+                transition: width 1s ease-out;
+            }}
         </style>
     </head>
     <body>
-        <div class="container">
-            <div class="main-card">
-                <div class="status-indicator">
-                    <span class="dot"></span> SYSTEM OPERATIONAL
-                </div>
-                <h1>Oracle One</h1>
-                
-                <div class="grid-stats">
-                    <div class="stat-box">
-                        <div class="stat-label">CPU</div>
-                        <div class="stat-value">{cpu_usage}%</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Memory</div>
-                        <div class="stat-value">{memory_usage}%</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Uptime</div>
-                        <div class="stat-value">{uptime}</div>
-                    </div>
-                </div>
+        <header>
+            <div>
+                <h2 class="date" id="currentDate"></h2>
+                <h1 class="greeting">System Overview</h1>
+            </div>
+            <div class="card-label">
+                <span class="status-dot"></span> LIVE STATUS
+            </div>
+        </header>
 
-                <div class="menu-section">
-                    <a href="/kfcc" class="menu-button">
-                        <div class="icon">🏦</div>
-                        <div class="text">
-                            <div class="title">새마을금고 금리조회</div>
-                            <div class="subtitle">내 서버 전용 실시간 금리 API 탑재</div>
-                        </div>
-                        <div class="arrow">→</div>
-                    </a>
-                    
-                    <a href="/card-events" class="menu-button">
-                        <div class="icon" style="background: #ff3b30;">💳</div>
-                        <div class="text">
-                            <div class="title">카드사 이벤트 검색</div>
-                            <div class="subtitle">모든 카드사 혜택을 한눈에</div>
-                        </div>
-                        <div class="arrow">→</div>
-                    </a>
+        <div class="dashboard-grid">
+            <!-- Analytics Large Card -->
+            <div class="bento-card col-6 row-2">
+                <div class="card-label">Total Engagement</div>
+                <div>
+                   <div class="card-value" style="font-size: 5rem;">{visits}</div>
+                   <div class="card-increment">↑ Increased interactions today</div>
                 </div>
+                <div class="btn-desc">Real-time visitor tracking powered by internal cache system.</div>
+            </div>
 
-                <div class="visits-section">
-                    <div class="visits-label">TOTAL INTERACTIONS</div>
-                    <div class="visits-count">{visits}</div>
+            <!-- CPU Card -->
+            <div class="bento-card col-3">
+                <div class="card-label">CPU Usage</div>
+                <div>
+                    <div class="card-value">{cpu_usage}%</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width: {cpu_usage}%"></div></div>
                 </div>
             </div>
-            <div style="text-align: center;">
-                <div class="footer">POWERED BY ORACLE CLOUD & FASTAPI</div>
+
+            <!-- RAM Card -->
+            <div class="bento-card col-3">
+                <div class="card-label">Memory</div>
+                <div>
+                    <div class="card-value">{memory_usage}%</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width: {memory_usage}%"></div></div>
+                </div>
+            </div>
+
+            <!-- Uptime Card -->
+            <div class="bento-card col-3">
+                <div class="card-label">Up Time</div>
+                <div class="card-value" style="font-size: 2.2rem;">{uptime}</div>
+            </div>
+
+            <!-- Placeholder for future tool -->
+            <div class="bento-card col-3" style="background: var(--accent); color: white; border: none;">
+                <div class="card-label" style="color: rgba(255,255,255,0.7);">Efficiency</div>
+                <div class="card-value" style="font-size: 2.2rem;">Optimal</div>
+            </div>
+
+            <!-- Menu: KFCC -->
+            <a href="/kfcc" class="bento-card col-4 row-2">
+                <div>
+                    <div class="icon-wrapper" style="background: #eef6ff; color: #0071e3;">🏦</div>
+                    <div class="btn-title">Financial<br>Inquiry</div>
+                </div>
+                <div class="btn-desc">Explore live interest rates from Geumgo branches nationwide.</div>
+            </a>
+
+            <!-- Menu: Cards -->
+            <a href="/card-events" class="bento-card col-4 row-2">
+                <div>
+                    <div class="icon-wrapper" style="background: #fff1f0; color: #ff3b30;">💳</div>
+                    <div class="btn-title">Promo<br>Explorer</div>
+                </div>
+                <div class="btn-desc">Stay updated with the latest credit card events and benefits.</div>
+            </a>
+
+            <!-- Placeholder Card -->
+            <div class="bento-card col-4 row-2">
+                <div>
+                    <div class="icon-wrapper" style="background: #f2f2f7; color: #1d1d1f;">🚀</div>
+                    <div class="btn-title">Future<br>Expansion</div>
+                </div>
+                <div class="btn-desc">New modules and AI-powered tools arriving soon.</div>
             </div>
         </div>
+
+        <script>
+            const d = new Date();
+            const options = {{ weekday: 'long', month: 'long', day: 'numeric' }};
+            document.getElementById('currentDate').innerText = d.toLocaleDateString('en-US', options).toUpperCase();
+        </script>
     </body>
     </html>
     """
