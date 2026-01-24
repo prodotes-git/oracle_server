@@ -309,7 +309,7 @@ def view_kfcc_page():
 
 async def background_crawl_kfcc():
     try:
-        print("Starting KFCC background crawl...")
+        print(f"[{datetime.now()}] Starting KFCC background crawl...")
         from kfcc_crawler import run_crawler
         import json
         
@@ -321,9 +321,22 @@ async def background_crawl_kfcc():
             
         # 캐시 갱신
         r.setex(CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
-        print(f"KFCC background crawl finished. {len(data)-1} records updated.")
+        print(f"[{datetime.now()}] KFCC background crawl finished. {len(data)-1} records updated.")
     except Exception as e:
-        print(f"KFCC background crawl failed: {e}")
+        print(f"[{datetime.now()}] KFCC background crawl failed: {e}")
+
+# 스케줄러 설정
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from contextlib import asynccontextmanager
+
+scheduler = AsyncIOScheduler()
+
+@app.on_event("startup")
+async def start_scheduler():
+    # 매일 새벽 4시에 크롤링 실행
+    scheduler.add_job(background_crawl_kfcc, 'cron', hour=4, minute=0)
+    scheduler.start()
+    print("Scheduler started. KFCC crawl scheduled at 04:00 daily.")
 
 @app.get("/", response_class=HTMLResponse)
 def read_root():
