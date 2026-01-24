@@ -289,16 +289,12 @@ async def get_kfcc_data():
                 r.setex(CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
                 return data
 
-        # 데이터가 없으면 크롤링 시도 (오래 걸림)
-        from kfcc_crawler import run_crawler
-        data = await run_crawler()
+        # 3. 로컬 파일도 없으면 빈 값 반환 (실시간 크롤링 방지)
+        # 사용자가 /api/kfcc/update를 호출해야만 데이터가 생성됨
+        if not os.path.exists(local_path):
+             return {"message": "데이터가 없습니다. /api/kfcc/update 로 데이터를 생성해주세요.", "data": []}
         
-        # 저장
-        with open(local_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False)
-        r.setex(CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
-        
-        return data
+        return []
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"서버 내부 오류: {str(e)}")
