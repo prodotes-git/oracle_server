@@ -418,8 +418,9 @@ async def crawl_hana_bg():
 async def get_hana_cards():
     try:
         import json
-        cached = r.get(HANA_CACHE_KEY)
-        if cached: return json.loads(cached)
+        if r:
+            cached = r.get(HANA_CACHE_KEY)
+            if cached: return json.loads(cached)
 
         local_path = "hana_data.json"
         if os.path.exists(local_path):
@@ -430,7 +431,10 @@ async def get_hana_cards():
             last_updated = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
             
             response = {"last_updated": last_updated, "data": data}
-            r.setex(HANA_CACHE_KEY, CACHE_EXPIRE, json.dumps(response))
+            if r:
+                try:
+                    r.setex(HANA_CACHE_KEY, CACHE_EXPIRE, json.dumps(response))
+                except Exception: pass
             return response
         
         return {"last_updated": None, "data": []}
