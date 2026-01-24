@@ -1649,8 +1649,11 @@ def shinhan_card_events():
                         fetch('/api/shinhan-myshop')
                     ]);
                     
-                    const events = await eventsRes.json();
-                    const myshop = await myshopRes.json();
+                    const eventsData = await eventsRes.json();
+                    const myshopData = await myshopRes.json();
+                    
+                    const events = Array.isArray(eventsData) ? eventsData : (eventsData.data || []);
+                    const myshop = Array.isArray(myshopData) ? myshopData : (myshopData.data || []);
                     
                     allEvents = [...events, ...myshop];
                     renderEvents(allEvents);
