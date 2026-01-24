@@ -19,7 +19,7 @@ boot_time = time.time()
 # 데이터 캐싱을 위한 설정
 DATA_URL = "https://raw.githubusercontent.com/if1live/shiroko-kfcc/interest-rate/summary/report_mat.json"
 CACHE_KEY = "kfcc_data_cache"
-KB_CACHE_KEY = "kb_card_events_cache"
+KB_CACHE_KEY = "kb_card_events_cache_v2" # 키 변경으로 캐시 강제 갱신
 CACHE_EXPIRE = 3600  # 1시간 동안 캐시 유지
 
 @app.get("/api/kb-cards")
@@ -28,46 +28,45 @@ async def get_kb_cards():
     KB국민카드 이벤트 데이터를 가져와서 정제하여 반환합니다.
     """
     try:
-        # 캐시 확인
         import json
-        cached = r.get(KB_CACHE_KEY)
-        if cached:
-            return json.loads(cached)
+        # 1. 캐시 확인
+        try:
+            cached = r.get(KB_CACHE_KEY)
+            if cached:
+                data = json.loads(cached)
+                if data: # 비어있지 않은 경우만 반환
+                    return data
+        except Exception as re:
+            print(f"Redis Cache Error: {re}")
 
         all_events = []
         api_url = "https://m.kbcard.com/BON/API/MBBACXHIABNC0064"
         
-        async with httpx.AsyncClient() as client:
-            # 여러 페이지를 가져옵니다 (최대 15페이지로 넉넉하게 설정)
+        async with httpx.AsyncClient(timeout=15.0) as client:
             for page in range(1, 15):
                 payload = {
-                    "evntStatus": "",
-                    "evntBonTag": "",
-                    "evntScp": "",
-                    "evntAi": "",
-                    "evntVip": "",
-                    "pageCount": page,
-                    "evtName": ""
+                    "evntStatus": "", "evntBonTag": "", "evntScp": "", 
+                    "evntAi": "", "evntVip": "", "pageCount": page, "evtName": ""
                 }
                 headers = {
                     "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
                     "X-Requested-With": "XMLHttpRequest",
+                    "Referer": "https://m.kbcard.com/BON/DVIEW/MBBMCXHIABNC0022",
                     "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"
                 }
                 
                 response = await client.post(api_url, data=payload, headers=headers)
                 if response.status_code != 200:
+                    print(f"KB API HTTP Error: {response.status_code}")
                     break
                 
-                data = response.json()
-                events = data.get("evntList", [])
+                res_json = response.json()
+                events = res_json.get("evntList", [])
                 if not events:
                     break
                 
                 for ev in events:
-                    # 유저 요청 형식에 맞춰 데이터 정제
                     category_code = ev.get("evntBonContents", "")
-                    # 간단한 카테고리 매핑 (필요 시 확장)
                     category_map = {"01": "포인트/캐시백", "02": "할인/무이자", "03": "경품", "04": "기타"}
                     category = category_map.get(category_code, "이벤트")
                     
@@ -78,17 +77,20 @@ async def get_kb_cards():
                         "link": f"https://m.kbcard.com/BON/DVIEW/MBBMCXHIABNC0026?evntSerno={ev.get('evtNo')}&evntMain=Y"
                     })
                 
-                # 마지막 페이지인지 확인
-                if page >= data.get("totalPageCount", 0):
+                if page >= res_json.get("totalPageCount", 0):
                     break
         
-        # Redis에 캐싱
-        r.setex(KB_CACHE_KEY, CACHE_EXPIRE, json.dumps(all_events))
+        # 2. 결과가 있을 때만 캐싱
+        if all_events:
+            try:
+                r.setex(KB_CACHE_KEY, CACHE_EXPIRE, json.dumps(all_events))
+            except Exception as se:
+                print(f"Redis Save Error: {se}")
+                
         return all_events
         
     except Exception as e:
-        print(f"KB Card API Error: {e}")
-        # 오류 시 빈 리스트 반환 (프론트엔드 오류 방지)
+        print(f"KB Card API General Error: {e}")
         return []
 
 def get_uptime():
@@ -863,7 +865,7 @@ def kb_card_events():
 
             function filterEvents() {
                 const search = document.getElementById('searchInput').value.toLowerCase();
-                const filtered = allEvents.filter(ev =\\> 
+                const filtered = allEvents.filter(ev => 
                     ev.eventName.toLowerCase().includes(search) || 
                     ev.category.toLowerCase().includes(search)
                 );
@@ -881,7 +883,7 @@ def kb_card_events():
                     return;
                 }
 
-                list.innerHTML = events.map(ev =\\> `
+                list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
                         <div class="card-upper">
                             <span class="category-tag">${ev.category}</span>
