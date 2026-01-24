@@ -1,0 +1,5350 @@
+
+
+
+	
+	
+	
+		
+	
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <title>혜택>이벤트>진행중인 이벤트>리스트</title>
+    <meta charset="euc-kr" /> 
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="하나카드 공식 홈페이지. 간편한 카드 신청과 맞춤형 생활금융 혜택을 만나보세요" />
+    
+    <meta property="og:type"           content="article"/>
+	<meta property="og:article:author" content="하나카드"/>
+	<meta property="og:title"          content="하나카드"/>
+	
+	<meta property="og:image"     content="https://qpay.hanacard.co.kr/ATTACH/MKA/images/icon/share_default.png"/>
+	<meta property="og:description"    content="하나카드 공식 홈페이지.간편한 카드 신청과 맞춤형 생활금융 혜택을 만나보세요"/> 
+	
+	<meta property="twitter:card"        content="summary_large_image" />
+	<meta property="twitter:site"        content="하나카드" />
+	<meta property="twitter:creator"     content="하나카드" />
+	<meta property="twitter:title"       content="하나카드"/>
+	<meta property="twitter:image"   content="https://qpay.hanacard.co.kr/ATTACH/MKA/images/icon/share_default.png"/>
+	<meta property="twitter:description" content="하나카드"/>
+	
+    <!-- favicon --> 
+    <link rel="icon" href="/images/common/favicon.ico" type="image/x-icon" />
+	<link rel="apple-touch-icon" sizes="57x57" href="/images/common/appicon-57.png" />
+	<link rel="apple-touch-icon" sizes="60x60" href="/images/common/appicon-60.png" />
+	<link rel="apple-touch-icon" sizes="72x72" href="/images/common/appicon-72.png" />
+	<link rel="apple-touch-icon" sizes="76x76" href="/images/common/appicon-76.png" />
+	<link rel="apple-touch-icon" sizes="114x114" href="/images/common/appicon-114.png" />
+	<link rel="apple-touch-icon" sizes="120x120" href="/images/common/appicon-120.png" />
+	<link rel="apple-touch-icon" sizes="144x144" href="/images/common/appicon-144.png" />
+	<link rel="apple-touch-icon" sizes="152x152" href="/images/common/appicon-152.png" />
+	<link rel="apple-touch-icon" sizes="180x180" href="/images/common/appicon-180.png" />
+	<link rel="apple-touch-icon" sizes="512x512" href="/images/common/appicon-512.png" />
+    <!-- //favicon -->
+    
+	
+
+	<!-- style -->  
+	<link type="text/css" rel="stylesheet" href="/css/swiper.min.css" />
+	<link type="text/css" rel="stylesheet" href="/css/common.css?20260124233" />
+
+	<link type="text/css" rel="stylesheet" href="/css/ui-style.css?20260124233" />
+	<link type="text/css" rel="stylesheet" href="/css/page-style.css?20260124233" />
+	<link type="text/css" rel="stylesheet" href="/css/wcms-data.css?20260124233" /> 	
+	<link type="text/css" rel="stylesheet" href="/css/contents_00.css?20260124233" /> 
+
+	<!-- //style -->
+
+	<script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>	
+	<script type="text/javascript">
+	var _reqDevice           ="ETC";
+	var _reqChannel          ="WEB";
+	var _isWebChannelRequest = true;
+	var _isAppChannelRequest = false;
+	var _isAosDeviceRequest  = false;
+	var _isIosDeviceRequest  = false;
+	var _backUrl             = "/MKMAIN2010M.web";
+	var _isMainTab           = false;
+	var _mainUrl             = "/MKMAIN1010M.web";
+	var _mainUrlStr          = "/MKMAIN3000M.web/MKMAIN5010M.web/MKMAIN6000M.web/MKMAIN1010M.web/MKMAIN1040M.web/MKMAIN5100N.web/MKMAIN2010M.web/MKMAIN5000M.web/MKMAIN1011M.web/MKMAIN2040M.web/MKMAIN2030M.web/MKMAIN2020M.web";
+	var _serverDomain        = "https://m.hanacard.co.kr";
+	var _isRealMode			 = true;
+	var _frame               = "";
+	
+	$(window).bind("pageshow", function(e){		
+		//alert(window.performance.navigation.type)
+		if( (e.persisted || ( window.performance && window.performance.navigation.type==2 )) /*chrome*/
+			|| ( e.originalEvent && e.originalEvent.persisted ) /*sapari*/)
+		{
+			//alert("history back");
+			location.reload();
+		}
+	});
+	
+	/**
+	 * 카드이미지 로드 에러
+	 * ty : 개인/법인 구분
+	 *      - P : 개인 (DEFAULT)
+	 *      - C : 법인
+	 */
+	function cardImageError(obj, ty) {
+		var errImgSrc = "/images/common/card-default.svg";
+		if("C" == ty){
+			errImgSrc = "/images/common/card-default.svg";
+		}
+		obj.onerror = null;
+		obj.src = errImgSrc;
+	}
+	</script>
+	
+	
+	
+	<script type="text/javascript">
+		var pageviewObj = new Object();
+		{
+			pageviewObj.dimension4  = "N";
+					pageviewObj.dimension14  = "MO_WEB";
+					pageviewObj.dimension15  = "하나카드";
+					pageviewObj.dimension20  = "혜택";
+					pageviewObj.dimension21  = "혜택>이벤트";
+					pageviewObj.dimension22  = "혜택>이벤트>진행중인 이벤트";
+					pageviewObj.dimension23  = "혜택>이벤트>진행중인 이벤트>리스트";
+					pageviewObj.dimension24  = "혜택>이벤트>진행중인 이벤트>리스트";
+					pageviewObj.dimension25  = "혜택>이벤트>진행중인 이벤트>리스트";
+					pageviewObj.dimension61  = "912202030227887";
+					
+		}
+		dataLayer = [pageviewObj];
+		
+		//GA전송 전 타이틀 변경 (onload시에 변경되기때문에 GA에 전달이 안되는 문제 해결용)
+		$(document).attr("title", "리스트<진행중인 이벤트<이벤트<혜택<하나카드");
+		
+		
+			(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+			new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+			j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+			'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+			})(window,document,'script','dataLayer','GTM-WS65FKF');
+		
+	</script>
+
+		
+		
+			<script src="https://www.googleoptimize.com/optimize.js?id=OPT-KTQN9HR"></script>
+		
+
+
+<!-- GA 공통함수  -->
+<script type="text/javascript">
+	function GA_Event(category, action, label){
+		if( "object"==typeof(dataLayer) ){
+			try{
+				dataLayer.push({
+					 "event"    : "ga_event" //이벤트명
+					,"category" : category   //카테고리
+					,"action"   : action     //액션
+					,"label"    : label      //라벨
+				});
+			} catch(e){
+				console.log(e.message);
+			} finally{
+				return true;
+			}
+		}else{
+			return true;
+		}
+	}
+
+	function GA_Virtual(title, location){
+		if( "object"==typeof(dataLayer) ){
+			try{
+				dataLayer.push({
+					 "event"           : "ga_virtual" //이벤트명
+					,"virtualtitle"    : title        //페이지명
+					,"virtuallocation" : location     //페이지URL
+				});
+			} catch(e){
+				console.log(e.message);
+			} finally{
+				return true;
+			}
+		}else{
+			return true;
+		}
+	}
+
+	function GA_CommonFn(dataMap){
+		if( "object"==typeof(dataLayer) ){
+			try{
+				dataLayer.push(dataMap);
+			} catch(e){
+				console.log(e.message);
+			} finally{
+				return true;
+			}
+		}else{
+			return true;
+		}
+	}
+	
+	function GA_Event_Fn(category, action, label, etcObj, fn){
+		if( "object"==typeof(dataLayer) ){
+			try{
+				dataLayer.push(etcObj);
+				GA_Event(category, action, label);
+			} catch(e){
+				console.log(e.message);
+			}
+		}
+		
+		if( "function"==typeof(fn) ){
+			fn;
+		}
+				
+		return true;
+	}
+</script>
+
+	
+		
+	
+	
+	
+	<script type="text/javascript" src="/js/netfunnel/netfunnel.js" ></script>
+	<script type="text/javascript" src="/js/netfunnel/netfunnel_design.js?20260124233"> </script>
+	<script type="text/javascript">
+	
+	
+	
+		
+		$(document).ready(function() {
+			NetFunnel_Complete();
+		});
+	
+	
+		
+	</script>
+	
+    <script>
+    $(document).ready(function() {
+    	$(".ui-checkbox-block").on("change", function() {
+    		var a = $(this).find("span.card-name").text().trim();
+    		var b = $(this).find("span.ui-label-text").text().trim();
+    		var c = $(this).parent().parent().siblings().find("span.card-name").text().trim();
+    		var d = $(this).parent().parent().parent().siblings().find("span.ui-label-text").text().trim();
+    		if(a.length > 0) {
+				if($(this).find("input[type=radio]").is(":checked")) {
+    				$(this).find("input[type=radio]").attr("title", a+", 선택됨");
+    				$(this).parent().siblings().find("span.card-name").each(function(i, el) {
+    					var b = $(el).text().trim();
+    					if(b.length > 0) {
+    						$(el).parent().parent().parent().siblings().attr("title", b);
+    					}
+    				});
+    			} else if($(this).find("input[type=checkbox]").is(":checked") == true) {
+    				$(this).find("input[type=checkbox]").attr("title", a+", 선택됨");
+    				if(d.length > 0 && $(this).parent().parent().parent().siblings().find("input[type=checkbox]").is(":checked")) {
+    					$(this).parent().parent().parent().siblings().find("input[type=checkbox]").attr("title", d+", 선택됨");
+    				}
+    			} else if($(this).find("input[type=checkbox]").is(":checked") == false) {
+    				$(this).find("input[type=checkbox]").attr("title", a);
+    				if(d.length > 0) {
+    					$(this).parent().parent().parent().siblings().find("input[type=checkbox]").attr("title", d);
+    				}
+    			}
+    		} else if(b.length > 0) {
+    			if($(this).parents(".ui-select-terms.wcms-section").length > 0) {
+    				if($(this).find("input[type=checkbox]").is(":checked")) {
+        				$(this).find("input[type=checkbox]").attr("title", b+", 선택됨");
+        			} else {
+        				$(this).find("input[type=checkbox]").attr("title", b);
+        			}
+    			} else if($(this).find("input[id^=allChkCards]").length > 0) {
+    				if($(this).find("input[type=checkbox]").is(":checked")) {
+        				$(this).find("input[type=checkbox]").attr("title", b+", 선택됨");
+        				if(c.length > 0) {
+        					$(this).parent().parent().siblings().find("span.card-name").each(function(i, el) {
+        						var b = $(el).text().trim();
+            					if(b.length > 0) {
+            						$(el).parent().parent().parent().parent().find("input[type=checkbox]").attr("title", b+", 선택됨");
+            					}
+        					});
+        				}
+        			} else {
+        				$(this).find("input[type=checkbox]").attr("title", b);
+        				if(c.length > 0) {
+        					$(this).parent().parent().siblings().find("span.card-name").each(function(i, el) {
+        						var b = $(el).text().trim();
+            					if(b.length > 0) {
+            						$(el).parent().parent().parent().parent().find("input[type=checkbox]").attr("title", b);
+            					}
+        					});
+        				}
+        			}
+    			} else {
+    				if($(this).find("input[type=checkbox]").is(":checked")) {
+        				$(this).find("input[type=checkbox]").attr("title", b+", 선택됨");
+        			} else {
+        				$(this).find("input[type=checkbox]").attr("title", b);
+        			}
+    			}
+    		}
+    	});
+    	$(".ui-radio-block").on("change", function() {
+    		var a = $(this).find("span.ui-label-text").text().trim();
+			if(a.length > 0) {
+				if($(this).find("input[type=radio]").is(":checked")) {
+    				$(this).find("input[type=radio]").attr("title", a+", 선택됨");
+    				if($(this).parents(".ui-select-item").length > 0) {
+    					$(this).parent().siblings().find("span.ui-label-text").each(function(i, el) {
+        					var b = $(el).text().trim();
+        					if(b.length > 0) {
+        						$(el).parent().siblings().attr("title", b);
+        					}
+        				});
+    				} else {
+    					$(this).siblings().find("span.ui-label-text").each(function(i, el) {
+        					var b = $(el).text().trim();
+        					if(b.length > 0) {
+        						$(el).parent().siblings().attr("title", b);
+        					}
+        				});
+    				}
+    			}
+    		}
+    	});
+    	
+    	$(".ui-checkbox-block, .ui-toggle-block").each(function(i, el) {
+    		var a = $(el).find("span.ui-label-text").text().trim();
+    		var b = $(el).find("input[type=checkbox]").attr("title");
+    		var c = $(el).find("span.auth-select-title").text().trim();
+    		var d = $(el).find("span.card-name").text().trim();
+    		var e = $(el).find("input[type=radio]").is(":checked");
+    		var f = $(el).find("span.detail-history-name").text().trim();
+    		var g = $(el).find("input[type=checkbox]").is(":checked");
+    		if(a.length > 0 || c.length > 0 || f.length > 0) {
+    			$(el).find("input[type=checkbox]").attr("title", (a.length > 0 ? a : (c.length > 0 ? c : f)));
+    			$(el).find("label").attr("aria-hidden", "true");
+    		} else if(d.length > 0) {
+    			$(el).find("input[type=radio]").attr("title", (e == true ? d+", 선택됨" : d));
+    			$(el).find("input[type=checkbox]").attr("title", (g == true ? d+", 선택됨" : d));
+    			$(el).find("label").attr("aria-hidden", "true");
+    		} else if(b != undefined && b.trim().length > 0) {
+    			$(el).find("label").attr("aria-hidden", "true");
+    		}
+    	});
+    	$(".ui-radio-block, .auth-select-block").each(function(i, el) {
+    		var a = $(el).find("span.ui-label-text").text().trim();
+    		var b = $(el).find("input[type=radio]").attr("title");
+    		var c = $(el).find("span.auth-select-title").text().trim();
+    		var d = $(el).find("input[type=radio]").is(":checked");
+    		if(a.length > 0 || c.length > 0) {
+    			$(el).find("input[type=radio]").attr("title", (a.length > 0 ? (d == true ? a+", 선택됨" : a) : c));
+    			if(a == "이달의 혜택" || a == "카드별 혜택") {
+    				$(el).find("label").attr("aria-hidden", "false");
+    			} else {
+    				$(el).find("label").attr("aria-hidden", "true");
+    			}
+    		} else if(b != undefined && b.trim().length > 0) {
+    			$(el).find("label").attr("aria-hidden", "true");
+    		}
+    	});
+    	$(".ui-file-block").each(function(i, el) {
+    		var a = $(el).find("span.ui-label-text").text().trim();
+    		var b = $(el).find("input[type=file]").attr("title");
+    		var c = $(el).find("span.auth-select-title").text().trim();
+    		if(a.length > 0 || c.length > 0) {
+    			$(el).find("input[type=file]").attr("title", (a.length > 0 ? a : c));
+    			$(el).find("label").attr("aria-hidden", "true");
+    		} else if(b != undefined && b.trim().length > 0) {
+    			$(el).find("label").attr("aria-hidden", "true");
+    		}
+    	});
+    });
+    </script>
+  </head>
+  <body>
+	
+		<!-- GTM -->
+		<noscript>
+			<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WS65FKF" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+		</noscript>
+	
+    <div id="wrap">
+      <div class="layout-wrap" id="first_layout_wrap">
+			
+
+
+ 
+        <!-- fix top area -->
+        
+        
+        	
+        	
+		        <div class="fix-top-wrap">
+		          <header class="header">
+		            <div class="header-left">
+			            
+			            	<button type="button" class="header-button type-back" onclick='goBackWeb();' ><span class="for-a11y">이전</span></button>
+				            <h1 class="header-title">진행중인 이벤트</h1>
+				        
+		            </div>
+		            <div class="header-right">
+		            	<button type="button" class="header-button" id="COMM_HEADER_MANAGE_button" style="display:none;"><span class="for-a11y">관리</span></button>
+		            	<a class="header-button type-home" role="button" onclick="GA_Event_Fn('통합앱_공통','GNB영역','홈','', goMain());"><span class="for-a11y">홈</span></a>
+		            	
+		            		<button type="button" class="header-button type-menu" data-layer-open="layer-gnb" onclick="GA_Event('통합앱_공통','GNB영역','메뉴');"><span class="for-a11y">메뉴</span></button>
+		            	
+		            </div>
+		          </header>
+		        </div>        	
+        	
+        
+        
+
+        <!-- //fix top area -->
+        
+	
+				<!-- layer: GNB -->
+				<div class="layer-wrap layer-gnb page-contents type-menu renewal_2024 " data-layer="layer-gnb">
+					<div class="layer-container">
+						<div class="gnb">
+							<div class="gnb-head">
+								<h1 class="for-a11y">글로벌 내비게이션</h1>
+								<div class="header">
+									<div class="header-right">
+										<a class="header-button type-setting" role="button" onclick="GA_Event_Fn('통합앱_공통','GNB영역','설정', '',goBannerLink('00', '/MKSET1000M.web', '50050'));"><span class="for-a11y">설정</span></a>
+										<button type="button" class="header-button type-close" data-role="layerClose"><span class="for-a11y">닫기</span></button>
+									</div>
+								</div>
+								
+
+
+<script type="text/javascript">
+
+
+
+function appLogOut(){
+	//
+	var url = "oneqpay://webLogout";
+	
+	location.href = "oneqpay://webLogout";//appSchemeCall(schemeUrl);
+	
+	setTimeout(function() { //특정메뉴 시작스크립트와 겹쳐 정상수행이 안되는경우가 있어 2.5초 딜레이 추가
+		goLinkWebView('/MKLGN3000M.web');	
+     }, 500);
+	
+}
+</script>
+
+
+
+							
+								<div class="gnb-name-card js-fix-top-element">
+									<div class="gnb-name-card-left">
+										<div class="gnb-name-card-user">
+										
+											<a role="button" onclick="goLinkWeb('/MKMREG2000M.web');" class="font-weight-medium">회원가입</a>
+										
+										</div>
+										
+										<!-- 우수회원 뱃지 추가 2023.09.25 -->
+										
+										
+									</div>
+									<div class="gnb-name-card-right">
+										
+											<a class="gnb-name-card-link" role="button" onclick="goLinkWebView('/MKLGN2000M.web');">로그인</a>
+										
+										
+									</div>
+								</div>
+							
+						<div class="menu-nav">
+							<div class="menu-nav-bar js-fix-top-element">
+								<div class="menu-nav-bar-scroller">
+									<ul class="menu-nav-bar-list">
+										<li class="menu-nav-bar-item">
+											<a href="#gnbMenu_All" class="menu-nav-bar-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','전체'); ">전체</a>
+										</li>
+										
+											<li class="menu-nav-bar-item">
+												<a href="#gnbMenu_912411210510483" class="menu-nav-bar-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','새로 나왔어요!'); ">새로 나왔어요!</a>
+											</li>
+										
+											<li class="menu-nav-bar-item">
+												<a href="#gnbMenu_912111251039325" class="menu-nav-bar-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','이용내역'); ">이용내역</a>
+											</li>
+										
+											<li class="menu-nav-bar-item">
+												<a href="#gnbMenu_912111251040010" class="menu-nav-bar-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','이용금액결제'); ">이용금액결제</a>
+											</li>
+										
+											<li class="menu-nav-bar-item">
+												<a href="#gnbMenu_912111251040646" class="menu-nav-bar-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','내카드'); ">내카드</a>
+											</li>
+										
+											<li class="menu-nav-bar-item">
+												<a href="#gnbMenu_912111251041716" class="menu-nav-bar-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','카드신청'); ">카드신청</a>
+											</li>
+										
+											<li class="menu-nav-bar-item">
+												<a href="#gnbMenu_912111251044929" class="menu-nav-bar-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','금융'); ">금융</a>
+											</li>
+										
+											<li class="menu-nav-bar-item">
+												<a href="#gnbMenu_912202170133297" class="menu-nav-bar-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','해외하면 하나카드'); ">해외하면 하나카드</a>
+											</li>
+										
+											<li class="menu-nav-bar-item">
+												<a href="#gnbMenu_912111251044244" class="menu-nav-bar-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','혜택'); ">혜택</a>
+											</li>
+										
+											<li class="menu-nav-bar-item">
+												<a href="#gnbMenu_912210211005874" class="menu-nav-bar-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','증명/납부'); ">증명/납부</a>
+											</li>
+										
+											<li class="menu-nav-bar-item">
+												<a href="#gnbMenu_912111251044027" class="menu-nav-bar-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','내 자산'); ">내 자산</a>
+											</li>
+										
+											<li class="menu-nav-bar-item">
+												<a href="#gnbMenu_912202030233805" class="menu-nav-bar-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','내 계좌'); ">내 계좌</a>
+											</li>
+										
+											<li class="menu-nav-bar-item">
+												<a href="#gnbMenu_912111251045719" class="menu-nav-bar-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','라이프 UP'); ">라이프 UP</a>
+											</li>
+										
+											<li class="menu-nav-bar-item">
+												<a href="#gnbMenu_912111251046809" class="menu-nav-bar-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','고객지원'); ">고객지원</a>
+											</li>
+										
+											<li class="menu-nav-bar-item">
+												<a href="#gnbMenu_912202040420658" class="menu-nav-bar-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','기업카드'); ">기업카드</a>
+											</li>
+										
+											<li class="menu-nav-bar-item">
+												<a href="#gnbMenu_912111251046982" class="menu-nav-bar-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','가맹점'); ">가맹점</a>
+											</li>
+										
+											<li class="menu-nav-bar-item">
+												<a href="#gnbMenu_912601130131235" class="menu-nav-bar-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','나라사랑카드'); ">나라사랑카드</a>
+											</li>
+										
+										<li class="menu-nav-bar-item">
+											<a href="#gnbMenu_hana" class="menu-nav-bar-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','하나서비스'); ">하나서비스</a>
+										</li>
+									</ul>
+								</div>
+								<button type="button" class="ui-button menu-nav-bar-opener">
+									<span class="for-a11y">
+										상단 메뉴
+										<span class="open-text">펼치기</span>
+										<span class="close-text">접기</span>
+									</span>
+								</button>
+							</div>
+
+							<div class="menu-nav-layer-wrap">
+								<div class="menu-nav-layer">
+									<div class="menu-nav-layer-doc">
+										<ul class="menu-nav-layer-list">
+											<li class="menu-nav-layer-item">
+												<a href="#gnbMenu_All" class="menu-nav-layer-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','검색'); ">전체</a>
+											</li>
+										
+											<li class="menu-nav-layer-item">
+												<a href="#gnbMenu_912411210510483" class="menu-nav-layer-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','새로 나왔어요!'); ">새로 나왔어요!</a>
+											</li>
+										
+											<li class="menu-nav-layer-item">
+												<a href="#gnbMenu_912111251039325" class="menu-nav-layer-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','이용내역'); ">이용내역</a>
+											</li>
+										
+											<li class="menu-nav-layer-item">
+												<a href="#gnbMenu_912111251040010" class="menu-nav-layer-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','이용금액결제'); ">이용금액결제</a>
+											</li>
+										
+											<li class="menu-nav-layer-item">
+												<a href="#gnbMenu_912111251040646" class="menu-nav-layer-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','내카드'); ">내카드</a>
+											</li>
+										
+											<li class="menu-nav-layer-item">
+												<a href="#gnbMenu_912111251041716" class="menu-nav-layer-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','카드신청'); ">카드신청</a>
+											</li>
+										
+											<li class="menu-nav-layer-item">
+												<a href="#gnbMenu_912111251044929" class="menu-nav-layer-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','금융'); ">금융</a>
+											</li>
+										
+											<li class="menu-nav-layer-item">
+												<a href="#gnbMenu_912202170133297" class="menu-nav-layer-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','해외하면 하나카드'); ">해외하면 하나카드</a>
+											</li>
+										
+											<li class="menu-nav-layer-item">
+												<a href="#gnbMenu_912111251044244" class="menu-nav-layer-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','혜택'); ">혜택</a>
+											</li>
+										
+											<li class="menu-nav-layer-item">
+												<a href="#gnbMenu_912210211005874" class="menu-nav-layer-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','증명/납부'); ">증명/납부</a>
+											</li>
+										
+											<li class="menu-nav-layer-item">
+												<a href="#gnbMenu_912111251044027" class="menu-nav-layer-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','내 자산'); ">내 자산</a>
+											</li>
+										
+											<li class="menu-nav-layer-item">
+												<a href="#gnbMenu_912202030233805" class="menu-nav-layer-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','내 계좌'); ">내 계좌</a>
+											</li>
+										
+											<li class="menu-nav-layer-item">
+												<a href="#gnbMenu_912111251045719" class="menu-nav-layer-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','라이프 UP'); ">라이프 UP</a>
+											</li>
+										
+											<li class="menu-nav-layer-item">
+												<a href="#gnbMenu_912111251046809" class="menu-nav-layer-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','고객지원'); ">고객지원</a>
+											</li>
+										
+											<li class="menu-nav-layer-item">
+												<a href="#gnbMenu_912202040420658" class="menu-nav-layer-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','기업카드'); ">기업카드</a>
+											</li>
+										
+											<li class="menu-nav-layer-item">
+												<a href="#gnbMenu_912111251046982" class="menu-nav-layer-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','가맹점'); ">가맹점</a>
+											</li>
+										
+											<li class="menu-nav-layer-item">
+												<a href="#gnbMenu_912601130131235" class="menu-nav-layer-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','나라사랑카드'); ">나라사랑카드</a>
+											</li>
+										
+											<li class="menu-nav-layer-item">
+												<a href="#gnbMenu_hana" class="menu-nav-layer-link js-hash-scroll-link" onclick="GA_Event('통합앱_공통','탭메뉴','하나서비스'); ">하나서비스</a>
+											</li>
+										</ul>
+									</div>
+								</div>
+								<div class="menu-nav-dim"></div>
+							</div>
+						</div>
+							</div>
+							<div class="gnb-body">
+								<div class="gnb-body-doc">
+									 
+
+ 
+
+
+
+									<div class="menu-top" id="gnbMenu_All">
+										<!-- 검색 영역 -->
+										<div class="menu-top-inner">
+											<div class="ui-search-form">
+												<div class="search-word-area">
+													<div class="ui-input-block type-use-delete type-search is-inputed">
+														<input type="search" class="ui-input" id="menuKeyword" title="검색어 입력" placeholder="" onkeydown="if(event.keyCode==13) {doMenuSubmit('', '직접입력검색어');}" onkeyup="quickMenuSch(this);"/>
+														<button type="button" class="ui-button ui-input-delete">
+															<span class="for-a11y">입력 내용 지우기</span>
+														</button>
+														<button type="submit" class="ui-button ui-input-search" onclick="javascript:doMenuSubmit('', '직접입력검색어');">
+															<span class="for-a11y">검색</span>
+														</button>
+													</div>
+												</div>
+												
+												<!-- 최근 검색어 목록 -->
+												
+												
+												<!-- 자동 완성 검색어 -->
+												<div id="menu_quick_search" class="ui-search-kewords-layer type-auto">
+													<div class="ui-search-kewords type-auto" id="menuQuickSch_DIV"></div>
+												</div>
+												<!-- //자동 완성 검색어 -->
+											</div>
+											
+											<!-- 배너 -->
+											
+
+<script>
+//AOS/IOS 앱 버전 체크
+var _appVersion = "0.0.0";
+
+function goHanaWts(targetUrl){
+	localStorage.setItem('hanaWtsTargetUrl',targetUrl);
+	var schemeUrl = "oneqpay://oneSignToken?returnJS=jwsCallBack";
+	
+	setTimeout(function(){
+		window.location.href = schemeUrl;
+	},100);
+	
+	return; 
+}
+function jwsCallBack(jws){
+	var targetUrl = localStorage.getItem('hanaWtsTargetUrl'); 
+	if(jws == ""){
+		
+		alert("하나카드를 이용 중인 손님만 이용 가능합니다.");
+		
+		return;
+	}
+	
+	var url = "";
+	
+		url = "https://mstock.hanaw.com/1q/login/login.cmd?relCd=HCD&targetUrl="+targetUrl+"&jws="+jws;
+	
+	var menuTitle = '하나증권';
+	setTimeout(function(){
+		if((_isAosDeviceRequest && appVerChk(_appVersion, "7.4.3", "MAX")) || (_isIosDeviceRequest && appVerChk(_appVersion, "7.2.9", "MAX"))){ //AOS 7.4.4 이상이면, IOS 7.3.0 이상이면
+			window.location.href = 'mydata://newWebView?url=' + encodeURIComponent(url) + '&callBack=webview&title_visibility=gone&isTabBar=N&menuTitle='+encodeURIComponent(menuTitle)+'&rightBtnType=home&leftBtnType=&login=N&webViewType=W_SSO&decodeTitleYn=Y';
+		}else{
+			window.location.href = 'mydata://newWebView?url=' + encodeURIComponent(url) + '&callBack=webview&title_visibility=show&menuTitle='+encodeURIComponent(menuTitle)+'&rightBtnType=home&leftBtnType=&login=N&webViewType=W_SSO&decodeTitleYn=Y';
+		}
+	},100);
+	
+	return; 
+}
+</script>
+
+
+										<div class="slide-banner">
+											<div class="slide-banner-inner">
+												<div class="slide-banner-controller"></div>
+												<ul class="slide-banner-list">
+													
+														
+														<li class="slide-banner-item ">
+															
+															
+															
+																<a class="slide-banner-link" role="button" onclick="GA_Event_Fn('통합앱_공통','배너','하나나라사랑카드 지금 바로 알아보기!','', goBannerLink('00', '/MKEVT1010M.web?EVN_SEQ=60171', ''));">
+																	<img src="/ATTACH/MKA/images/banner/banner_w13510_260115.png" alt="하나 나라사랑카드 지금 바로 알아보기!" class="slide-banner-image" />
+																</a>
+															
+															
+														</li>
+													
+														
+														<li class="slide-banner-item ">
+															
+															
+															
+																<a class="slide-banner-link" role="button" onclick="GA_Event_Fn('통합앱_공통','배너','해외여행 투게더 적립 챌린지 최대 100만원 행운!','', goBannerLink('00', '/MKEVT1010M.web?EVN_SEQ=60026', ''));">
+																	<img src="/ATTACH/MKA/images/banner/banner_w13390_251216.png" alt="해외여행 투게더 적립 챌린지 최대 100만원 행운!" class="slide-banner-image" />
+																</a>
+															
+															
+														</li>
+													
+														
+														<li class="slide-banner-item ">
+															
+															
+															
+																<a class="slide-banner-link" role="button" onclick="GA_Event_Fn('통합앱_공통','배너','신세계 트래블GO 최대 12만원 캐시백 이벤트','', goBannerLink('00', '/MKEVT1010M.web?EVN_SEQ=60158', ''));">
+																	<img src="/ATTACH/MKA/images/banner/banner_w13114_251126.png" alt="신세계 트래블GO 최대 12만원 캐시백 이벤트" class="slide-banner-image" />
+																</a>
+															
+															
+														</li>
+													
+														
+														<li class="slide-banner-item ">
+															
+															
+															
+																<a class="slide-banner-link" role="button" onclick="GA_Event_Fn('통합앱_공통','배너','트래블로그 적립 챌린지 해외여행 전세계 어디든','', goBannerLink('00', '/MKTRVB4030N.web', ''));">
+																	<img src="/ATTACH/MKA/images/banner/banner_w12400_250901.png" alt="트래블로그 적립 챌린지 해외여행 전세계 어디든" class="slide-banner-image" />
+																</a>
+															
+															
+														</li>
+													
+												</ul>
+											</div>
+										</div>
+
+											<!-- //배너 -->
+										</div>
+										<!-- //검색 영역 -->
+										
+										
+										<!-- 최근이용메뉴 및 추천메뉴 -->
+										
+										
+										
+											
+											
+												
+												
+												
+												<div class="recent_menu">
+													<div class="recent_menu-title">추천메뉴</div>
+													<div class="recent_menu-area">
+														
+														
+															<a href="javascript:void(0);" class="recent_menu-link" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','추천메뉴_혜택','', goMenuLink('912202230312098', '00', '/MKMAIN2010M.web', '', '혜택'));">혜택</a>
+														
+															<a href="javascript:void(0);" class="recent_menu-link" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','추천메뉴_전체','', goMenuLink('912111251034556', '00', '/MKMENU1000M.web', '', '전체'));">전체</a>
+														
+															<a href="javascript:void(0);" class="recent_menu-link" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','추천메뉴_이용대금명세서','', goMenuLink('912111290353830', '00', '/MKSTMT1010M.web', '', '이용대금명세서'));">이용대금명세서</a>
+														
+															<a href="javascript:void(0);" class="recent_menu-link" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','추천메뉴_해외현금인출내역','', goMenuLink('912203180922580', '00', '/MKOAPV1010M.web', '', '해외현금인출내역'));">해외현금인출내역</a>
+														
+															<a href="javascript:void(0);" class="recent_menu-link" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','추천메뉴_종합소득세 이용내역','', goMenuLink('912309180430304', '00', '/MKGITX1000M.web', '', '종합소득세 이용내역'));">종합소득세 이용내역</a>
+														
+															<a href="javascript:void(0);" class="recent_menu-link" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','추천메뉴_할부로 전환(분할결제)','', goMenuLink('912202030323764', '00', '/MKINPA1010M.web', '', '할부로 전환(분할결제)'));">할부로 전환(분할결제)</a>
+														
+													</div>
+												</div>
+												
+											
+										
+										<!-- //최근이용메뉴 -->
+									</div>
+									
+								
+									<section class="menu-group" id="gnbMenu_912411210510483">
+										<h2 class="menu-title" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','새로 나왔어요!','', goMenuLink('912411210510483', '00', '/MKFNFVR1010M.web?gubun=carInsurView', '', '새로 나왔어요!'));">새로 나왔어요!</h2>
+										<ul class="menu-list">
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','새로 나왔어요!_자동차 보험','', goMenuLink('912501210956557', '00', '/MKFNFVR1010M.web?gubun=carInsurView', '', '자동차 보험'));"  >
+													자동차 보험
+													<span class="menu-image"><img src="/ATTACH/MKA/images/icon/banner_w13675_260119.png" alt="최대 6만원 혜택" onerror="this.parentNode.className += ' is-error';" /></span>
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','새로 나왔어요!_투게더 적립 챌린지','', goMenuLink('912512160357802', '00', '/MKEVT1010M.web?EVN_SEQ=60026', '', '투게더 적립 챌린지'));"  >
+													투게더 적립 챌린지
+													<span class="menu-image"><img src="/ATTACH/MKA/images/icon/img_new_banner_w13390_251216.png" alt="최대 1백만원 하나머" onerror="this.parentNode.className += ' is-error';" /></span>
+												</a>
+												
+												
+												
+											</li>
+										
+										</ul>
+									</section>
+								
+									<section class="menu-group" id="gnbMenu_912111251039325">
+										<h2 class="menu-title" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','이용내역','', goMenuLink('912111251039325', '00', '/MKSTMT1010M.web', '', '이용내역'));">이용내역</h2>
+										<ul class="menu-list">
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','이용내역_이용대금명세서','', goMenuLink('912111290353830', '00', '/MKSTMT1010M.web', '', '이용대금명세서'));"  >
+													이용대금명세서
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','이용내역_카드이용내역','', goMenuLink('912111290354796', '00', '/MKCAPV1010M.web', '', '카드이용내역'));"  >
+													카드이용내역
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','이용내역_교통이용내역','', goMenuLink('912111290356522', '00', '/MKCAPV3010M.web', '', '교통이용내역'));"  >
+													교통이용내역
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','이용내역_해외현금인출내역','', goMenuLink('912203180922580', '00', '/MKOAPV1010M.web', '', '해외현금인출내역'));"  >
+													해외현금인출내역
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','이용내역_해외청구내역','', goMenuLink('912203180304288', '00', '/MKOAPV2010M.web', '', '해외청구내역'));"  >
+													해외청구내역
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','이용내역_연체내역','', goMenuLink('912203180924750', '00', '/MKCAPV2010M.web', '', '연체내역'));"  >
+													연체내역
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','이용내역_종합소득세 이용내역','', goMenuLink('912309180430304', '00', '/MKGITX1000M.web', '', '종합소득세 이용내역'));"  >
+													종합소득세 이용내역
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','이용내역_소득공제조회','', goMenuLink('912512150216874', '00', '/MKGITX2010M.web', '', '소득공제조회'));"  >
+													소득공제조회
+													
+												</a>
+												
+												
+												
+											</li>
+										
+										</ul>
+									</section>
+								
+									<section class="menu-group" id="gnbMenu_912111251040010">
+										<h2 class="menu-title" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','이용금액결제','', goMenuLink('912111251040010', '00', '/MKPRPA0000N.web', '', '이용금액결제'));">이용금액결제</h2>
+										<ul class="menu-list">
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','이용금액결제_즉시결제(선결제)','', goMenuLink('912202030323420', '00', '/MKPRPA0000N.web', '', '즉시결제(선결제)'));"  >
+													즉시결제(선결제)
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','이용금액결제_할부로 전환(분할결제)','', goMenuLink('912202030323764', '00', '/MKINPA1010M.web', '', '할부로 전환(분할결제)'));"  >
+													할부로 전환(분할결제)
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','이용금액결제_매주 자동선결제','', goMenuLink('912408080955533', '00', '/MKPRPA3000M.web', '', '매주 자동선결제'));"  >
+													매주 자동선결제
+													<span class="menu-image"><img src="/ATTACH/MKA/images/icon/bullet-1.png" alt="NEW" onerror="this.parentNode.className += ' is-error';" /></span>
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','이용금액결제_대출로 결제','', goMenuLink('912505220514895', '00', '/MKFIN2000M.web', '', '대출로 결제'));"  >
+													대출로 결제
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','이용금액결제_일부결제금액이월약정으로 결제','', goMenuLink('912410140257506', '00', '/MKRVOV0000M.web', '', '일부결제금액이월약정으로 결제'));"  >
+													일부결제금액이월약정으로 결제
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','이용금액결제_가상계좌 입금결제','', goMenuLink('912203110406879', '00', '/MKVTAC1000M.web', '', '가상계좌 입금결제'));"  >
+													가상계좌 입금결제
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','이용금액결제_포인트로 즉시결제','', goMenuLink('912203110406388', '00', '/MKPTPA1010M.web', '', '포인트로 즉시결제'));"  >
+													포인트로 즉시결제
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','이용금액결제_이용금액 입금내역','', goMenuLink('912203110406251', '00', '/MKPRPA1400M.web', '', '이용금액 입금내역'));"  >
+													이용금액 입금내역
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','이용금액결제_결제정보설정(결제일, 결제계좌, 명세서)','', goMenuLink('912207040311950', '00', '/MKSEST1010M.web', '', '결제정보설정(결제일, 결제계좌, 명세서)'));"  >
+													결제정보설정(결제일, 결제계좌, 명세서)
+													
+												</a>
+												
+												
+												
+											</li>
+										
+										</ul>
+									</section>
+								
+									<section class="menu-group" id="gnbMenu_912111251040646">
+										<h2 class="menu-title" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','내카드','', goMenuLink('912111251040646', '00', '/MKCDOW1000M.web', '', '내카드'));">내카드</h2>
+										<ul class="menu-list">
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','내카드_내 카드관리','', goMenuLink('912201210340511', '00', '/MKCDOW1000M.web', '', '내 카드관리'));"  >
+													내 카드관리
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','내카드_이용한도 조회·변경','', goMenuLink('912111290357949', '00', '/MKCLMT1010M.web', '', '이용한도 조회·변경'));"  >
+													이용한도 조회·변경
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','내카드_간편결제 서비스 등록','', goMenuLink('912201210341018', '00', '/MKPASV2011M.web', '', '간편결제 서비스 등록'));"  >
+													간편결제 서비스 등록
+													<span class="menu-image"><img src="/ATTACH/MKA/images/icon/logo_02.gif" alt="pay서비스 가맹점" onerror="this.parentNode.className += ' is-error';" /></span>
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','내카드_장기미이용카드 유지신청','', goMenuLink('912201210341504', '00', '/MKCDUU1010M.web', '', '장기미이용카드 유지신청'));"  >
+													장기미이용카드 유지신청
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','내카드_유효기간만료예정카드','', goMenuLink('912201210342613', '00', '/MKCDRN1010M.web', '', '유효기간만료예정카드'));"  >
+													유효기간만료예정카드
+													
+												</a>
+												
+												
+												
+											</li>
+										
+										</ul>
+									</section>
+								
+									<section class="menu-group" id="gnbMenu_912111251041716">
+										<h2 class="menu-title" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','카드신청','', goMenuLink('912111251041716', '00', '/MKCDPD6100M.web', '', '카드신청'));">카드신청</h2>
+										<ul class="menu-list">
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','카드신청_새로 나온 카드','', goMenuLink('912504230327210', '00', '/MKCDPD6100M.web', '', '새로 나온 카드'));"  >
+													새로 나온 카드
+													<span class="menu-image"><img src="/ATTACH/MKA/images/icon/badge_new.png" alt="NEW" onerror="this.parentNode.className += ' is-error';" /></span>
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','카드신청_프리미엄 카드','', goMenuLink('912504230328642', '00', '/MKCDPD2000M.web?SUB_ID=0', '', '프리미엄 카드'));"  >
+													프리미엄 카드
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','카드신청_내게 맞는 카드 찾기','', goMenuLink('912111251051414', '00', '/MKCDPD1000M.web', '', '내게 맞는 카드 찾기'));"  >
+													내게 맞는 카드 찾기
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','카드신청_트래블로그','', goMenuLink('912304141056158', '00', '/MKCDPD7000M.web', '', '트래블로그'));"  >
+													트래블로그
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','카드신청_카드발급/배송 조회','', goMenuLink('912202030211965', '00', '/MKCDIS1020M.web', '', '카드발급/배송 조회'));"  >
+													카드발급/배송 조회
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','카드신청_카드사용등록','', goMenuLink('912202030212255', '00', '/MKCDRG1010M.web', '', '카드사용등록'));"  >
+													카드사용등록
+													
+												</a>
+												
+												
+												
+											</li>
+										
+										</ul>
+									</section>
+								
+									<section class="menu-group" id="gnbMenu_912111251044929">
+										<h2 class="menu-title" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','금융','', goMenuLink('912111251044929', '00', '/MKCDLL0000M.web', '', '금융'));">금융</h2>
+										<ul class="menu-list">
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','금융_장기카드대출(카드론)','', goMenuLink('912111290410521', '00', '/MKCDLL0000M.web', '', '장기카드대출(카드론)'));"  >
+													장기카드대출(카드론)
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','금융_단기카드대출(현금서비스)','', goMenuLink('912111290409679', '00', '/MKCDLS1010M.web', '', '단기카드대출(현금서비스)'));"  >
+													단기카드대출(현금서비스)
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','금융_일부결제금액이월약정(리볼빙)','', goMenuLink('912111290410807', '00', '/MKRVOV0000M.web', '', '일부결제금액이월약정(리볼빙)'));"  >
+													일부결제금액이월약정(리볼빙)
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','금융_신용대출','', goMenuLink('912111290412861', '00', '/MKCRLO1010M.web', '', '신용대출'));"  >
+													신용대출
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','금융_대출 갈아타기','', goMenuLink('912305300605063', '00', '/MKTRLO0000M.web', '', '대출 갈아타기'));"  >
+													대출 갈아타기
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','금융_자동차금융','', goMenuLink('912111290412694', '00', '/MKAUTO0000M.web', '', '자동차금융'));"  >
+													자동차금융
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','금융_금융 한눈에 보기','', goMenuLink('912202030254031', '00', '/MKFIN0000M.web', '', '금융 한눈에 보기'));"  >
+													금융 한눈에 보기
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','금융_금리인하요구권','', goMenuLink('912204060527400', '00', '/MKCLL2000N.web', '', '금리인하요구권'));"  >
+													금리인하요구권
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','금융_제휴사대출','', goMenuLink('912204081105421', '00', '/MKFIN0000M.web?activeScrollTab=4', '', '제휴사대출'));"  >
+													제휴사대출
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','금융_대출비교 해보기','', goMenuLink('912504300118248', '00', 'https://pay.hanacard.co.kr/QW500703001DWBM.web?fromData=HANACARD00', '', '대출비교 해보기'));"  >
+													대출비교 해보기
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','금융_신용점수 올리고 대출 가능성 UP','', goMenuLink('912504300121702', '00', '/qwt/mydata.jsp?surl=/QW500601001DWBM.web', '', '신용점수 올리고 대출 가능성 UP'));"  >
+													신용점수 올리고 대출 가능성 UP
+													
+												</a>
+												
+												
+												
+											</li>
+										
+										</ul>
+									</section>
+								
+									<section class="menu-group" id="gnbMenu_912202170133297">
+										<h2 class="menu-title" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','해외하면 하나카드','', goMenuLink('912202170133297', '02', 'goTravelbucket(\&#039;/MKMAIN5000M.web\&#039;);', '', '해외하면 하나카드'));">해외하면 하나카드</h2>
+										<ul class="menu-list">
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','해외하면 하나카드_트래블버킷(항공,호텔,렌터카)','', goMenuLink('912405281118948', '02', 'goTravelbucket(\&#039;/MKMAIN5000M.web\&#039;);', '', '트래블버킷(항공,호텔,렌터카)'));"  >
+													트래블버킷(항공,호텔,렌터카)
+													<span class="menu-image"><img src="/ATTACH/MKA/images/icon/bullet-1.png" alt="NEW" onerror="this.parentNode.className += ' is-error';" /></span>
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','해외하면 하나카드_해외여행자보험','', goMenuLink('912502171036877', '00', '/MKISUR2530N.web', '', '해외여행자보험'));"  >
+													해외여행자보험
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','해외하면 하나카드_해외결제 한번에 설정하기','', goMenuLink('912312210459785', '00', '/MKDCCL2000M.web', '', '해외결제 한번에 설정하기'));"  >
+													해외결제 한번에 설정하기
+													
+												</a>
+												
+												
+												
+											</li>
+										
+										</ul>
+									</section>
+								
+									<section class="menu-group" id="gnbMenu_912111251044244">
+										<h2 class="menu-title" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','혜택','', goMenuLink('912111251044244', '00', '/MKMAIN2010M.web', '', '혜택'));">혜택</h2>
+										<ul class="menu-list">
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','혜택_모든 혜택','', goMenuLink('912202030329023', '00', '/MKMAIN2010M.web', '', '모든 혜택'));"  >
+													모든 혜택
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','혜택_받은 혜택(카드별 혜택)','', goMenuLink('912202030330978', '00', '/MKBENF2020M.web', '', '받은 혜택(카드별 혜택)'));"  >
+													받은 혜택(카드별 혜택)
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','혜택_서비스 제공 실적','', goMenuLink('912202030330626', '00', '/MKBENF2040M.web', '', '서비스 제공 실적'));"  >
+													서비스 제공 실적
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','혜택_포인트','', goMenuLink('912202030147524', '00', '/MKPONT1010M.web', '', '포인트'));"  >
+													포인트
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','혜택_이벤트','', goMenuLink('912202030227887', '00', '/MKEVT1000M.web', '', '이벤트'));"  >
+													이벤트
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','혜택_쿠폰','', goMenuLink('912202030227261', '00', '/MKCPON1010M.web', '', '쿠폰'));"  >
+													쿠폰
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','혜택_돈버는 쇼핑','', goMenuLink('912504100404517', '00', '/MKBDR1100M.web', '', '돈버는 쇼핑'));"  >
+													돈버는 쇼핑
+													<span class="menu-image"><img src="/ATTACH/MKA/images/icon/ic_category001.gif" alt="돈버는쇼핑" onerror="this.parentNode.className += ' is-error';" /></span>
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','혜택_하나Pick','', goMenuLink('912406190718851', '00', '/MKPICK1020M.web', '', '하나Pick'));"  >
+													하나Pick
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','혜택_정부지원사업','', goMenuLink('912304170328550', '00', '/MKGAAV0000M.web', '', '정부지원사업'));"  >
+													정부지원사업
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','혜택_내 주변 AI 맛집','', goMenuLink('912505230218655', '00', '/MKCONT3000M.web', '', '내 주변 AI 맛집'));"  >
+													내 주변 AI 맛집
+													<span class="menu-image"><img src="/ATTACH/MKA/images/icon/img_new_banner_250523_w10978_v3.png" alt="원더카드 맛집찾기" onerror="this.parentNode.className += ' is-error';" /></span>
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','혜택_세금 환급액 찾기','', goMenuLink('912508190942363', '00', '/MKFTR0000M.web', '', '세금 환급액 찾기'));"  >
+													세금 환급액 찾기
+													
+												</a>
+												
+												
+												
+											</li>
+										
+										</ul>
+									</section>
+								
+									<section class="menu-group" id="gnbMenu_912210211005874">
+										<h2 class="menu-title" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','증명/납부','', goMenuLink('912210211005874', '00', '/MKDOCS1000N.web', '', '증명/납부'));">증명/납부</h2>
+										<ul class="menu-list">
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','증명/납부_공공 알림','', goMenuLink('912210211008126', '02', 'goMyDocs(\&#039;/ALNINF1010M.web\&#039;);', '', '공공 알림'));"  >
+													공공 알림
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','증명/납부_증명서 발급','', goMenuLink('912301260447986', '00', '/MKEW000000MWH.web', '', '증명서 발급'));"  >
+													증명서 발급
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','증명/납부_지방세 전자고지 납부','', goMenuLink('912505071031968', '02', 'goMyData(\&#039;/GJ10000101MWH.web\&#039;);', '', '지방세 전자고지 납부'));"  >
+													지방세 전자고지 납부
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','증명/납부_서울시 수도요금 납부','', goMenuLink('912307130848938', '02', 'goMyData(\&#039;/GJ00010101MWH.web\&#039;);', '', '서울시 수도요금 납부'));"  >
+													서울시 수도요금 납부
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','증명/납부_모바일 운전면허증','', goMenuLink('912305030244293', '00', '/MKMIP1010N.web', '', '모바일 운전면허증'));"  >
+													모바일 운전면허증
+													
+												</a>
+												
+												
+												
+											</li>
+										
+										</ul>
+									</section>
+								
+									<section class="menu-group" id="gnbMenu_912111251044027">
+										<h2 class="menu-title" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','내 자산','', goMenuLink('912111251044027', '02', 'myDataFn(&#034;/QW500000001MWBM.web&#034;, &#034;20103&#034;)', '', '내 자산'));">내 자산</h2>
+										<ul class="menu-list">
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','내 자산_자산·지출','', goMenuLink('912202040422680', '02', 'myDataFn(&#034;/QW500000001MWBM.web&#034;, &#034;20103&#034;)', '', '자산·지출'));"  >
+													자산·지출
+													<span class="menu-image"><img src="/ATTACH/MKA/images/icon/bullet-2.png" alt="업데이트" onerror="this.parentNode.className += ' is-error';" /></span>
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','내 자산_가계부','', goMenuLink('912206100953174', '00', '/qwt/mydata.jsp?surl=/QW500401101DWBM.web', '', '가계부'));"  >
+													가계부
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','내 자산_소비브리핑','', goMenuLink('912502130323831', '00', '/qwt/mydata.jsp?surl=/QW500005001MWBM.web', '', '소비브리핑'));"  >
+													소비브리핑
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','내 자산_재무상태진단표','', goMenuLink('912503180232033', '00', '/qwt/mydata.jsp?surl=/QW500006001MWBM.web', '', '재무상태진단표'));"  >
+													재무상태진단표
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','내 자산_상생페이백 예상금액','', goMenuLink('912508180300885', '00', '/qwt/mydata.jsp?surl=/QW500104001MWBM.web', '', '상생페이백 예상금액'));"  >
+													상생페이백 예상금액
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','내 자산_휴면예금 / 보험금 찾기','', goMenuLink('912510160332463', '00', '/qwt/mydata.jsp?surl=/QW500513000MWBM.web', '', '휴면예금 / 보험금 찾기'));"  >
+													휴면예금 / 보험금 찾기
+													<span class="menu-image"><img src="/ATTACH/MKA/images/icon/bullet-1.png" alt="NEW" onerror="this.parentNode.className += ' is-error';" /></span>
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','내 자산_이번 달 지출분석','', goMenuLink('912407231258788', '00', '/qwt/mydata.jsp?surl=/QW500407001DWBM.web', '', '이번 달 지출분석'));"  >
+													이번 달 지출분석
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','내 자산_고정지출 관리하기','', goMenuLink('912407231259104', '00', '/qwt/mydata.jsp?surl=/QW500403002LWBM.web', '', '고정지출 관리하기'));"  >
+													고정지출 관리하기
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','내 자산_내 보험진단 해보기','', goMenuLink('912407230100620', '00', '/qwt/mydata.jsp?surl=/QW501102001DWBM.web', '', '내 보험진단 해보기'));"  >
+													내 보험진단 해보기
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','내 자산_내 연금분석','', goMenuLink('912407230101368', '00', '/qwt/mydata.jsp?surl=/QW500318901MWBM.web', '', '내 연금분석'));"  >
+													내 연금분석
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','내 자산_자산연결 관리','', goMenuLink('912202040425289', '00', '/qwt/mydata.jsp?surl=/QW500511001DWBM.web', '', '자산연결 관리'));"  >
+													자산연결 관리
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','내 자산_이용 동의 관리','', goMenuLink('912210200441153', '00', '/qwt/mydata.jsp?surl=/QW500502002DWBM.web', '', '이용 동의 관리'));"  >
+													이용 동의 관리
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','내 자산_카드추천 서비스','', goMenuLink('912406270859319', '00', '/qwt/mydata.jsp?surl=/QW500410001DWBM.web', '', '카드추천 서비스'));"  >
+													카드추천 서비스
+													
+												</a>
+												
+												
+												
+											</li>
+										
+										</ul>
+									</section>
+								
+									<section class="menu-group" id="gnbMenu_912202030233805">
+										<h2 class="menu-title" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','내 계좌','', goMenuLink('912202030233805', '00', '/MKOBQ5600M.web', '', '내 계좌'));">내 계좌</h2>
+										<ul class="menu-list">
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','내 계좌_내 계좌 한눈에','', goMenuLink('912202030428284', '00', '/MKOBQ5600M.web', '', '내 계좌 한눈에'));"  >
+													내 계좌 한눈에
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','내 계좌_내 카드 한눈에','', goMenuLink('912202030429965', '00', '/MKOBQ1600M.web', '', '내 카드 한눈에'));"  >
+													내 카드 한눈에
+													
+												</a>
+												
+												
+												
+											</li>
+										
+										</ul>
+									</section>
+								
+									<section class="menu-group" id="gnbMenu_912111251045719">
+										<h2 class="menu-title" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','라이프 UP','', goMenuLink('912111251045719', '00', '/MKLIFE1010N.web', '', '라이프 UP'));">라이프 UP</h2>
+										<ul class="menu-list">
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','라이프 UP_생활혜택','', goMenuLink('912202030300030', '00', '/MKLIFE1010N.web', '', '생활혜택'));"  >
+													생활혜택
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','라이프 UP_자동납부','', goMenuLink('912202030301209', '00', '/MKATPA1000N.web', '', '자동납부'));"  >
+													자동납부
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','라이프 UP_쇼핑혜택','', goMenuLink('912406240913854', '02', 'goMyData(\&#039;/QW500000416MWBM.web\&#039;)', '', '쇼핑혜택'));"  >
+													쇼핑혜택
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','라이프 UP_금융혜택','', goMenuLink('912406240923429', '00', '/MKFNFVR1000M.web', '', '금융혜택'));"  >
+													금융혜택
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','라이프 UP_유료상품 이용현황','', goMenuLink('912412131014461', '00', '/MKSUBSMAINM.web', '', '유료상품 이용현황'));"  >
+													유료상품 이용현황
+													
+												</a>
+												
+												
+												
+											</li>
+										
+										</ul>
+									</section>
+								
+									<section class="menu-group" id="gnbMenu_912111251046809">
+										<h2 class="menu-title" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','고객지원','', goMenuLink('912111251046809', '00', '/MKCNTR0010M.web', '', '고객지원'));">고객지원</h2>
+										<ul class="menu-list">
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','고객지원_챗봇상담/고객센터/분실·사고 신청','', goMenuLink('912111290419622', '00', '/MKCNTR0010M.web', '', '챗봇상담/고객센터/분실·사고 신청'));"  >
+													챗봇상담/고객센터/분실·사고 신청
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','고객지원_공지사항','', goMenuLink('912111290421860', '00', '/MKANNC0010M.web', '', '공지사항'));"  >
+													공지사항
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','고객지원_금융소비자보호포털','', goMenuLink('912204040313795', '00', '/MKFCPT0010M.web', '', '금융소비자보호포털'));"  >
+													금융소비자보호포털
+													
+												</a>
+												
+												
+												
+											</li>
+										
+										</ul>
+									</section>
+								
+									<section class="menu-group" id="gnbMenu_912202040420658">
+										<h2 class="menu-title" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','기업카드','', goMenuLink('912202040420658', '03', 'https://corp.hanacard.co.kr/', '', '기업카드'));">기업카드</h2>
+										<ul class="menu-list">
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','기업카드_기업카드 모바일','', goMenuLink('912202040421670', '03', 'https://corp.hanacard.co.kr/', '', '기업카드 모바일'));"  title="기본 브라우저로 화면이 전환됩니다.">
+													기업카드 모바일
+													<span class="menu-image"><img src="/ATTACH/MKA/images/icon/ic_link.png" alt="링크 연결" onerror="this.parentNode.className += ' is-error';" /></span>
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','기업카드_기업 공용카드 간편결제 등록','', goMenuLink('912505130248147', '00', '/MKCPUD1000M.web', '', '기업 공용카드 간편결제 등록'));"  >
+													기업 공용카드 간편결제 등록
+													
+												</a>
+												
+												
+												
+											</li>
+										
+										</ul>
+									</section>
+								
+									<section class="menu-group" id="gnbMenu_912111251046982">
+										<h2 class="menu-title" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','가맹점','', goMenuLink('912111251046982', '00', '/MKMCT1000M.web', '', '가맹점'));">가맹점</h2>
+										<ul class="menu-list">
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','가맹점_가맹점 모바일','', goMenuLink('912202040429823', '00', '/MKMCT1000M.web', '', '가맹점 모바일'));"  >
+													가맹점 모바일
+													<span class="menu-image"><img src="/ATTACH/MKA/images/icon/ic_link.png" alt="링크 연결" onerror="this.parentNode.className += ' is-error';" /></span>
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','가맹점_사장님 서비스','', goMenuLink('912505230221015', '00', '/qwt/mydata.jsp?surl=/QW500901012DWBM.web', '', '사장님 서비스'));"  >
+													사장님 서비스
+													<span class="menu-image"><img src="/ATTACH/MKA/images/icon/menu_badge.png" alt="하나더소호" onerror="this.parentNode.className += ' is-error';" /></span>
+												</a>
+												
+												
+												
+											</li>
+										
+										</ul>
+									</section>
+								
+									<section class="menu-group" id="gnbMenu_912601130131235">
+										<h2 class="menu-title" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','나라사랑카드','', goMenuLink('912601130131235', '00', '/MKNRL0000M.web', '', '나라사랑카드'));">나라사랑카드</h2>
+										<ul class="menu-list">
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','나라사랑카드_밀리큐브(카드)','', goMenuLink('912601130134194', '00', '/MKNRL0000M.web', '', '밀리큐브(카드)'));"  >
+													밀리큐브(카드)
+													
+												</a>
+												
+												
+												
+											</li>
+										
+											<li class="menu-item">
+												<a class="menu-button" role="button" onclick="GA_Event_Fn('통합앱_공통','탭메뉴','나라사랑카드_밀리터리라운지(은행)','', goMenuLink('912601130141088', '02', 'goNrlBankNarasarang();', '', '밀리터리라운지(은행)'));"  >
+													밀리터리라운지(은행)
+													
+												</a>
+												
+												
+												
+											</li>
+										
+										</ul>
+									</section>
+																	
+								
+								<section class="menu-group type-bg-gray" id="gnbMenu_hana">
+									<ul class="menu-list">
+	<li class="menu-item">
+		<a href="" class="menu-button">하나서비스</a>
+		<div class="service-nav">
+			<ul class="service-nav-list">
+				<li class="service-nav-item">
+					<a class="service-nav-link" role="button" onclick="GA_Event_Fn('통합앱_공통','하나서비스','하나머니','', _APP.linkExecute('MEMBERS'));" title="해당 앱으로 화면이 전환됩니다.(미설치시 설치 화면으로 이동됨)">
+						<div class="service-nav-icon type-2"></div>
+						<div class="service-nav-text">하나머니</div>
+					</a>
+				</li>
+				
+				<li class="service-nav-item">
+					<a class="service-nav-link" role="button" onclick="GA_Event_Fn('통합앱_공통','하나서비스','하나은행','', _APP.linkExecute('HANABANK'));" title="해당 앱으로 화면이 전환됩니다.(미설치시 설치 화면으로 이동됨)">
+						<div class="service-nav-icon type-3"></div>
+						<div class="service-nav-text">하나은행</div>
+					</a>
+				</li>
+				
+				<!-- [2025-05-27 KEJ] [WPM-] 추가 -->
+				<li class="service-nav-item">
+					<a class="service-nav-link" role="button" onclick="GA_Event_Fn('통합앱_공통','하나더넥스트','인스타그램','', goNewWin('https://hana1qm.com'));" title="해당 앱으로 화면이 전환됩니다.(미설치시 설치 화면으로 이동됨)">
+						<div class="service-nav-icon type-4"></div>
+						<div class="service-nav-text">하나더넥스트</div>
+					</a>
+				</li>
+				<!-- //[2025-05-27 KEJ] [WPM-] 추가 -->
+			</ul>
+		</div>
+	</li>
+	<li class="menu-item">
+		<a href="" class="menu-button">하나카드 소식(SNS)</a>
+    <!-- [2025-07-04 KJH] [WPM-11558] 접근성 title 수정 -->
+		<div class="sns-nav">
+			<ul class="sns-nav-list">
+				<li class="sns-nav-item">
+					<a class="sns-nav-link" role="button" onclick="GA_Event_Fn('통합앱_공통','SNS','인스타그램','', goNewWin('https://www.Instagram.com/hanacard.official/'));" title="새창열림">
+						<div class="sns-nav-icon type-1"></div>
+						<div class="for-a11y">인스타그램</div>
+					</a>
+				</li>
+				<li class="sns-nav-item">
+					<a class="sns-nav-link" role="button" onclick="GA_Event_Fn('통합앱_공통','SNS','카카오채널','', goNewWin('https://pf.kakao.com/_khpmxb'));" title="새창열림">
+						<div class="sns-nav-icon type-2"></div>
+						<div class="for-a11y">카카오채널</div>
+					</a>
+				</li>
+				<li class="sns-nav-item">
+					<a class="sns-nav-link" role="button" onclick="GA_Event_Fn('통합앱_공통','SNS','페이스북','', goNewWin('https://m.facebook.com/hanacard/'));" title="새창열림">
+						<div class="sns-nav-icon type-3"></div>
+						<div class="for-a11y">페이스북</div>
+					</a>
+				</li>
+				<li class="sns-nav-item">
+					<a class="sns-nav-link" role="button" onclick="GA_Event_Fn('통합앱_공통','SNS','유튜브','', goNewWin('https://m.youtube.com/channel/UCsnlgvmpylLeDhxPQvUcMCA'));" title="새창열림">
+						<div class="sns-nav-icon type-4"></div>
+						<div class="for-a11y">유튜브</div>
+					</a>
+				</li>														
+			</ul>
+		</div>
+    <!-- // [2025-07-04 KJH] [WPM-11558] 접근성 title 수정 -->
+	</li>
+	<li class="menu-item">
+		<a href="javascript:void(0);" class="menu-button" onclick="goLinkWebView('/MKATCL8000N.web');">하나카드 캐릭터</a>
+	</li>
+	<!-- 
+		20230918 MA 로고 추가 
+		- 모바일웹일때는 웹와치 로고, 앱일때는 MA로고가 보이도록 개발단에서 분기처리 필요합니다.
+		- 모바일웹 파일 위치 //cmssvp03/default/main/MKA/WORKAREA/shared/jsp/common/layout/mkaWebBottom.jsp												
+	-->
+	 
+</ul>
+								</section>
+
+
+
+
+
+
+<script type="text/javascript">
+	var recSearchItems = [
+		{
+			isRecUse : false,
+			recKeyword : "자동차 보험",
+			recSentence : "내 자동차 보험료 가입하고 3만원 받기!",
+		},
+                        {
+			isRecUse : false,
+			recKeyword : "다카마츠 항공권",
+			recSentence : "일본 항공권 왕복 9만원대~",
+		},
+		{
+			isRecUse : false,
+			recKeyword : "KTX",
+			recSentence : "KTX 20% 할인'을 검색해보세요",
+		},
+		{
+			isRecUse : false,
+			recKeyword : "니콘내콘",
+			recSentence : "모바일 쿠폰 최대 2천원 할인받기!",
+		},
+	];
+
+function goOverseaPayment() {
+	if (_isAosDeviceRequest) {
+		var schemeUrl = "jsunity://mainsubpage?id=5";
+		appSchemeCall(schemeUrl);
+		return;
+	} else {
+		appPageMove("50005");
+	}
+}
+</script>
+
+
+
+<script type="text/javascript">
+	var recommendKeyword = "";
+	
+	$(document).ready(function() {
+		setRecommendKeyword();
+	});
+	
+	function goMenuLink(menuId, urlTy, url, appMenuId, menuTitle){
+		try{setRecentMenuList(menuId);}catch(J){}
+		goBannerLink(urlTy, url, appMenuId, menuTitle);
+	}
+    
+	function setRecentMenuList(menuId){
+		var cKey     = "_MkaRecentMenuList";
+		var cValue   = $.cookie(cKey);
+		var newValue = [];
+		
+		if( undefined == cValue ){
+			cValue = [];
+		}else{
+			cValue = cValue.split("X");
+			$.each(cValue, function(idx, value) {
+				if( menuId != value ){
+					newValue.push(value);
+				}
+			});
+			
+			cValue   = newValue;
+			newValue = [];
+		}
+		
+		cValue.push(menuId);
+		
+		var valueSize = cValue.length;
+		if( valueSize > 6 ){
+			$.each(cValue, function(idx, value) {
+				if( (valueSize)- idx <=6  ){
+					newValue.push(value);
+				}
+			});
+			
+			cValue   = newValue;
+			newValue = [];
+		}
+		
+		$.cookie(cKey, cValue.join("X"), {expires:7});
+	}
+	
+	// AOS/IOS 앱 버전 체크 
+	var _appVersion = "0.0.0";
+	
+	
+	function myDataFn(url, menuId){
+		if(_isAppChannelRequest){
+			if(_isAosDeviceRequest){
+				if(appVerChk(_appVersion, "7.1.0", "MAX")){ // AOS 7.1.1 이상이면
+					appMyDataMove(menuId,'qwt/mydata.jsp?surl='+url+'?MKA_YN=Y'); // MyData Native 화면 이동
+				}else{
+					goMyData('/'+url);
+				}
+			}else if(_isIosDeviceRequest){
+				if(appVerChk(_appVersion, "7.0.7", "MAX")){ // IOS 7.0.8 이상이면
+					appMyDataMove(menuId,'qwt/mydata.jsp?surl='+url+'?MKA_YN=Y'); // MyData Native 화면 이동
+				}else{
+					goMyData('/'+url);
+				}
+			}
+		}else if(_isWebChannelRequest){
+			goMyData('/'+url);
+		}
+	}
+	
+	function myDataFn2(url, menuId){
+		if(_isAppChannelRequest){
+			if(_isAosDeviceRequest){
+				if(appVerChk(_appVersion, "7.1.0", "MAX")){ // AOS 7.1.1 이상이면
+					appMyDataMove(menuId, 'qwt/mydata.jsp?surl='+url+'?MKA_YN=Y'); // MyData Native 화면 이동
+				}else{
+					goLinkWebView('https://pay.hanacard.co.kr/'+url);
+				}
+			}else if(_isIosDeviceRequest){
+				if(appVerChk(_appVersion, "7.0.7", "MAX")){ // IOS 7.0.8 이상이면
+					appMyDataMove(menuId, 'qwt/mydata.jsp?surl='+url+'?MKA_YN=Y'); // MyData Native 화면 이동
+				}else{
+					goLinkWebView('https://pay.hanacard.co.kr/'+url);
+				}
+			}
+		}else if(_isWebChannelRequest){
+			goLinkWebView('https://pay.hanacard.co.kr/'+url);
+		}
+	}
+	
+	/*
+	* GLN ATM 앱 스킴 호출(최신버전에 따른 스킴 호출)
+	*/
+	function glnAtmFn(){
+		var isLoginCheck		= false;			// 로그인 여부 
+		
+		if(isLoginCheck){
+			if(_isAppChannelRequest){
+				if(_isAosDeviceRequest){
+					if(appVerChk(_appVersion, "7.6.1", "MAX")){ // AOS 7.6.2 이상이면
+						window.location.href = "oneqpay://GLN/glnATM";
+					}else{
+						alert("GLN 현지 ATM 출금 서비스를 이용하기 위해서는 앱 업데이트가 필요합니다.");
+						return;
+					}
+				}else if(_isIosDeviceRequest){
+					if(appVerChk(_appVersion, "7.4.1", "MAX")){ // IOS 7.4.2 이상이면
+						window.location.href = "oneqpay://GLN/glnATM";
+					}else{
+						alert("GLN 현지 ATM 출금 서비스를 이용하기 위해서는 앱 업데이트가 필요합니다.");
+						return;
+					}
+				}
+			}else if(_isWebChannelRequest){
+				alert("하나페이 앱 최신버전의 앱부터 이용가능합니다. 하나페이 앱을 통해서 이용바랍니다.");
+				return;
+			}
+		}else{
+			alert("로그인 후 이용 가능합니다.");
+			goLinkWeb("/MKLGN2000M.web");
+		}
+	}
+	
+	/*
+	* GLN QR 앱 스킴 호출(최신버전에 따른 스킴 호출)
+	*/
+	function glnMainFn(menuId){
+		var isLoginCheck = false;			// 로그인 여부 
+		
+		if(isLoginCheck){
+			if(_isAppChannelRequest){
+				if(_isAosDeviceRequest){
+					if(appVerChk(_appVersion, "7.6.4", "MAX")){ // AOS 7.6.5 이상이면
+						window.location.href = "oneqpay://GLN/glnMain";
+					}else{
+						appPageMove(menuId);
+					}
+				}else if(_isIosDeviceRequest){
+					if(appVerChk(_appVersion, "7.4.4", "MAX")){ // IOS 7.4.5 이상이면
+						window.location.href = "oneqpay://GLN/glnMain";
+					}else{
+						appPageMove(menuId);
+					}
+				}
+			}else if(_isWebChannelRequest){
+				alert("하나페이 앱 최신버전의 앱부터 이용가능합니다. 하나페이 앱을 통해서 이용바랍니다.");
+				return;
+			}
+		}else{
+			alert("로그인 후 이용 가능합니다.");
+			goLinkWeb("/MKLGN2000M.web");
+		}
+	}
+	
+	var hmCnt = 0;
+	
+	function hmApptestcall() {
+		hmCnt++;
+		
+		if(hmCnt == 5){
+			hmApptest();
+			hmCnt = 0;
+		}
+	}
+	
+	function hmApptest() {
+		var server = "R";
+		var type = "0";
+		var menuNo = "";
+		
+		if( _isRealMode ){
+			server = "R"	
+		}else{
+			server = "T"
+		}
+		var hsMinNetSchme = "HsMinNet.HS_MIN_WEB_ADD_VALUE?type=" + type + "&menu_no=" + menuNo + "&server_type=" + server + "&sso_type=HMT";
+		var scheme = "oneqpay://"+hsMinNetSchme;
+
+		if( _isAppChannelRequest ){
+			location.href = scheme;
+		}else{	
+			if(_isAosDeviceRequest){
+				scheme = scheme + "&intro=on";	
+			}
+			
+			newWinConfirm.openLayer(scheme,'HANAMONEY');
+		}
+	}
+	
+	
+	function doMenuSubmit(keyword, schTyStr){
+		
+		if ($("#menuKeyword").val() != "") {
+			keyword = $("#menuKeyword").val();
+		} else {
+			if(undefined == keyword || keyword.length == 0) {
+				keyword = recommendKeyword;
+			}
+		}
+		
+		keyword = keyword.trim();
+		
+		if(goTotalMenuSearch(keyword)){
+			setLoading(true);
+			setRecentMenuSchWord(keyword);
+			goLinkParam("/MKSRCH1000M.web", "keyword="+keyword+"&isSynDomain=true&schTyStr="+schTyStr);
+		}else{
+			return false;
+		}
+	}
+	
+	
+	function quickMenuSch( input ) {
+		$("#menu_quick_search").addClass("is-empty");
+		
+		var keyword = ($(input).val()).trim();
+		
+		if( keyword.length == 0){
+			$(input).attr("autocomplete", "on");
+		}else{
+			$(input).attr("autocomplete", "off");
+		}
+		
+		if( keyword.length >= 2 && keyword.length <= 20){
+			ajaxExceute2(
+					 "/MKSRCH1000M.web"
+					,{
+						 keyword      : keyword
+						,isSynDomain  : false     //동의어검색어부
+						,targetMethod : "quickSch"
+					 }
+					,function(dataMap){
+						if( dataMap.indexOf("ui-search-kewords-item") > -1  ){
+							$("#menuQuickSch_DIV").html(dataMap);
+							$("#menu_quick_search").removeClass("is-empty");
+						}
+					 }
+					,function(dataMap){
+						$("#menuQuickSch_DIV").html("");
+						$("#menu_quick_search").addClass("is-empty");
+					 }
+					,{
+						 dataType : "html"
+						,isLoding : false //로딩바 노출안함.
+					 }
+			);
+		}else{
+			if( keyword.length > 20 ) {
+				alert("검색어는 20자까지만 입력해 주세요.");
+				$(input).val("");
+			} else {
+				$("#menuQuickSch_DIV").html("");
+			}
+		}
+		
+	}
+	
+	
+	function goTotalMenuSearch(text){
+		var stValue = text;
+		var regExp = /^[0-9]+$/; //숫자 체크 정규식
+		var emailReg = /^((\w|[\-\.])+)@((\w|[\-\.])+)\.([A-Za-z]+)$/; //이메일 체크 정규식
+		var mobileReg = /^01([0|1|6|7|8|9]?)?([0-9]{3,4})?([0-9]{4})$/; //휴대전화번호 체크 정규식
+
+		//휴대폰번호는 "/", ")", " " 공백 제거 후 10자리 숫자 이상일 경우 체크   
+		var mobileValue = stValue.replace(/-/gi,"");
+		mobileValue = mobileValue.replace(/\)/gi,"");
+		mobileValue = mobileValue.replace(/ /gi,"");
+
+		if(stValue.indexOf("\\") > -1 || stValue.length == 0){
+			goLinkWebView("/MKSRCH1000M.web");
+			return false;
+		}else if( stValue.length > 20 ) {
+			alert("검색어는 20자까지만 입력해 주세요.");
+			return false;
+		}else if (mobileValue.length >= 13 && regExp.test(mobileValue)) {
+			alert("카드번호 및 주민번호는 검색 불가합니다.");
+			return false;
+		}else if (emailReg.test(stValue)) {
+			alert("이메일 주소는 검색 불가합니다.");
+			return false;
+		}else if (mobileValue.length >= 10 && mobileReg.test(mobileValue)) {
+			alert("휴대전화번호는 검색 불가합니다.");
+			return false;
+		}else {
+			return true;
+		}
+	}
+	
+	
+	function setRecentMenuSchWord(schWord) {
+		var isLogin		= false;
+		var cKey		= "_MkaRecentSchWord";
+		var cValue		= $.cookie(cKey);
+		var cValueSize	= 0;
+		var newValue	= [];
+		
+		if (!isLogin) return;
+		
+		if (cValue == null || typeof(cValue) == "undefined") {
+			cValue = [];
+		} else {
+			cValue = cValue.split("!^!");
+			$.each(cValue, function(idx, value) {
+				if (value != schWord) {
+					newValue.push(value);
+				}
+			})
+			
+			cValue = newValue;
+			newValue = [];
+		}
+
+		cValue.push(schWord);
+		cValueSize = cValue.length;
+		
+		if (cValueSize > 5) {
+			$.each(cValue, function(idx, value) {
+				if ((cValueSize - idx) <= 5) {
+					newValue.push(value);
+				}
+			})
+			
+			cValue = newValue;
+		}
+		
+		$.cookie(cKey, cValue.join("!^!"), {expires:7});
+	}
+	
+	
+	function setRecommendKeyword() {
+		var recommendSentence = "'카드', '메뉴', '혜택' 등을 검색해 보세요.";
+		
+		for (var i = 0; i < recSearchItems.length; i++) {
+			if (recSearchItems[i].isRecUse) {
+				recommendSentence = recSearchItems[i].recSentence;
+				recommendKeyword = recSearchItems[i].recKeyword;
+				break;
+			}
+		}
+		
+		$("#menuKeyword").attr("placeholder", recommendSentence)
+	}
+	
+	
+	function goNrlBankNarasarang(){
+		const targetUrl = "/mbp/resource/html/BCOM/BCOM04/BCOM0400001.html";
+		
+			openExtBrowser("https://mbp.hanabank.com/oneqplus.jsp?MENUM"+ targetUrl);
+		
+	}
+</script>
+
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- //layer: GNB -->
+				
+
+					<!-- cont_area -->
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript">
+var pageNo = "1";
+var totalPage = "3";
+var isListLoading = false;
+
+function winLoadFn(){
+	if("" != ""){
+		$(".searchOpenBtn").click();
+	}
+	//이벤트 탭
+	var lnb = $(".sorting-area--fixed").offset().top;
+	$(window).scroll(function() {
+		var window = $(this).scrollTop();
+
+		if(lnb <= window) {
+			$(".sorting-area--fixed").addClass("is-fixed");
+		}else{
+			$(".sorting-area--fixed").removeClass("is-fixed");
+		}
+	})
+
+		
+	
+	if("" != "") {
+		var lnb = $(".sorting-area--fixed").offset().top;
+		var pageCont = $(".contents-wrap .page-contents").offset().top;
+		
+		$("html, body").animate({scrollTop: lnb - pageCont}, 300);
+	}
+}
+
+
+function benfDetail(){
+	
+}
+
+
+function doSearchTxt(){
+	if($("#schTxt").val() == ""){
+		alert("검색어를 입력해 주세요.");
+		return;		
+	}
+
+	doSearch();
+}
+
+
+function doSearch(){		
+	$("#form").attr("action", "/MKEVT1000M.web").submit();
+}
+
+
+var prstCtg = "";
+function doSearchAjax(){
+	var url = "/MKEVT1000M.ajax";
+	var param = {
+		page : 1
+		,evnCate : $("#evnCate").val()
+	};
+
+	ajaxExceute2(url, param, function(dataMap) {
+		if( dataMap.RESULT == "SUCCESS") {
+			pageNo = dataMap.page;
+			totalPage = dataMap.eventListMap.totalPage;
+			
+    		var evnCateView = dataMap.evnCate;
+    		var viewList = dataMap.eventListMap.list;
+    		var dataView = "";
+    		
+    	if(viewList.length > 0){ 
+    		// 선택한 카테고리 활성화 & 포커스 처리
+    		if(prstCtg == "" || prstCtg == "00000"){
+    			$(".ctg_00000").removeClass("is-active");
+    		}else{
+    			$(".ctg_"+prstCtg).removeClass("is-active");
+    		}
+    		if(evnCateView == "" || evnCateView == "00000"){
+    			$(".ctg_00000").addClass("is-active");
+    			setTimeout(function() {
+    				$(".ctg_00000").focus();
+    			}, 100);
+    		}else{
+    			$(".ctg_"+evnCateView).addClass("is-active");
+    			setTimeout(function() {
+    				$(".ctg_"+evnCateView).focus();
+    			}, 100);
+    		}
+    		prstCtg = evnCateView;
+    	}
+
+    		if(viewList.length > 0){ 
+    			
+    			// [앱통합] 접근성 문제로 더보기 시 첫 목록에 포커스 처리
+    			$("#viewList > li").removeAttr("tabindex");
+    			
+    			for(var i = 0; i < viewList.length; i++) {
+    				
+    				// [앱통합] 접근성 문제로 더보기 시 첫 목록에 포커스 처리 
+					var tabindex = "";
+					if(i == 0){
+						tabindex = "tabindex='1'";
+					}
+					
+    				dataView += '<li class="usage-default-item type-line">'; // 무한스크롤 적용으로 인한 tabindex 삭제
+    				dataView += '	<div class="usage-default-block type-event">';
+    				dataView += '		<a href="javascript:void(0);" onclick="javascript:GA_Event_Fn(\'통합앱_이벤트\',\'#전체\',\''+viewList[i].EVN_TIT_NM+'\',\'\', detail(\'/MKEVT1010M.web\',\''+viewList[i].EVN_SEQ+'\'));" class="usage-default-left-group type-align-middle" role="button">';
+    				dataView += '			<div class="logo-image type-store type-medium">';
+    				dataView += '				<div class="logo-image-inner">';
+    				dataView += '					<img src="'+viewList[i].APN_FILE_NM+'" alt="'+viewList[i].LIST_IMG_TXT+'" onerror="this.parentNode.className += \' is-error\';" />';
+    				dataView += '				</div>';
+    				dataView += '			</div>';
+    				dataView += '			<div class="usage-default-left">';
+
+    				if(isNotEmpty(viewList[i].ITG_APP_EVN_MC_NM)){
+    					dataView += '			<div class="usage-default-brand type-multi-ellipsis">'+viewList[i].ITG_APP_EVN_MC_NM+'</div>';	
+    				}
+
+    				dataView += '				<div class="usage-default-title type-multi-ellipsis">'+viewList[i].EVN_TIT_NM+'</div>';
+    				dataView += '				<div class="usage-default-etc">';
+    				dataView += '					<div class="usage-default-etc-item">'+viewList[i].EVN_SDT+' ~ '+viewList[i].EVN_EDT+'</div>';
+    				dataView += '				</div>';
+    				dataView += '			</div>';  
+    				dataView += '		</a>';
+
+    				if(viewList[i].SCRP_YN == "Y"){
+    					if(viewList[i].FAVOR_YN == "Y"){
+    	    				dataView += '<div class="usage-default-right type-auto">';
+    	    				dataView += '	<span class="icon-heart margin-top-2 is-active">';
+    	    				dataView += '		<span class="for-a11y">(찜)</span>';
+    	    				dataView += '	</span>';  
+    	    				dataView += '</div>';		
+    					}
+    				}
+
+    				dataView += '	</div>';
+    				dataView += '</li>';
+    			}
+
+    			$('#viewList').html(dataView);
+
+    			// [앱통합] 접근성 문제로 더보기 시 첫 목록에 포커스 처리 > 무한스크롤 적용으로 인한 주석처리
+    			// $('#viewList > li[tabindex=1]').focus();
+			
+		    }else{
+		    	alert("해당 카테고리와 관련된 이벤트가 없습니다");
+			}
+    		
+    		// 카테고리 선택 시 애니메이션 처리
+    		var lnb = $(".sorting-area--fixed").offset().top;
+    		var pageCont = $(".contents-wrap .page-contents").offset().top;
+    		
+			$("html, body").animate({scrollTop: lnb - pageCont}, 300);
+		}
+		
+	},
+	function( dataMap, jqXHR) {
+		ajaxError(dataMap);	
+	},
+	{
+		isLoding:true
+	});
+}
+
+
+function detail(url, EVT_SEQ){
+	if( _isAppChannelRequest) {
+		appWebView(url+"?EVN_SEQ="+EVT_SEQ+"&EVN_FROM=LIST&_frame=noX");
+	} else {
+		goLinkWeb(url+"?EVN_SEQ="+EVT_SEQ);
+	}
+}
+
+
+var moreTotalList = "";
+function moreList(){
+	isListLoading = true;
+	var url = "/MKEVT1000M.ajax";
+	var param = {
+		page : Number(pageNo)+1
+		,schTxt : $("#schTxt").val()
+		,evnCate : $("#evnCate").val()
+	};
+
+	ajaxExceute2(url, param, function(dataMap) {
+		if( dataMap.RESULT == "SUCCESS") {
+    		pageNo = dataMap.page;
+    		
+    		var viewList = dataMap.eventListMap.list;
+    		var dataView = "";
+
+    		if(viewList.length > 0){ 
+    			
+    			// [앱통합] 접근성 문제로 더보기 시 첫 목록에 포커스 처리
+    			$("#viewList > li").removeAttr("tabindex");
+    			
+    			for(var i = 0; i < viewList.length; i++) {
+    				
+    				// [앱통합] 접근성 문제로 더보기 시 첫 목록에 포커스 처리 
+					var tabindex = "";
+					if(i == 0){
+						tabindex = "tabindex='1'";
+					}
+					
+					dataView += '<li class="usage-default-item type-line">'; // 무한스크롤 적용으로 인한 tabindex 삭제
+    				dataView += '	<div class="usage-default-block type-event">';
+    				dataView += '		<a href="javascript:void(0);" onclick="javascript:GA_Event_Fn(\'통합앱_이벤트\',\'#전체\',\''+viewList[i].EVN_TIT_NM+'\',\'\', detail(\'/MKEVT1010M.web\',\''+viewList[i].EVN_SEQ+'\'));" class="usage-default-left-group type-align-middle" role="button">';
+    				dataView += '			<div class="logo-image type-store type-medium">';
+    				dataView += '				<div class="logo-image-inner">';
+    				dataView += '					<img src="'+viewList[i].APN_FILE_NM+'" alt="'+viewList[i].LIST_IMG_TXT+'" onerror="this.parentNode.className += \' is-error\';" />';
+    				dataView += '				</div>';
+    				dataView += '			</div>';
+    				dataView += '			<div class="usage-default-left">';
+
+    				if(isNotEmpty(viewList[i].ITG_APP_EVN_MC_NM)){
+    					dataView += '			<div class="usage-default-brand type-multi-ellipsis">'+viewList[i].ITG_APP_EVN_MC_NM+'</div>';	
+    				}
+
+    				dataView += '				<div class="usage-default-title type-multi-ellipsis">'+viewList[i].EVN_TIT_NM+'</div>';
+    				dataView += '				<div class="usage-default-etc">';
+    				dataView += '					<div class="usage-default-etc-item">'+viewList[i].EVN_SDT+' ~ '+viewList[i].EVN_EDT+'</div>';
+    				dataView += '				</div>';
+    				dataView += '			</div>';  
+    				dataView += '		</a>';
+
+    				if(viewList[i].SCRP_YN == "Y"){
+    					if(viewList[i].FAVOR_YN == "Y"){
+    	    				dataView += '<div class="usage-default-right type-auto">';
+    	    				dataView += '	<span class="icon-heart margin-top-2 is-active">';
+    	    				dataView += '		<span class="for-a11y">(찜)</span>';
+    	    				dataView += '	</span>';  
+    	    				dataView += '</div>';		
+    					}
+    				}
+
+    				dataView += '	</div>';
+    				dataView += '</li>';
+    			}
+				
+				$('#viewList').append(dataView);
+				
+				// 이벤트 목록 추가 이후 탑버튼 노출을 위한 CSS 처리
+				$('.page-button-top-wrap').css({
+					position: 'fixed',
+					transform: 'translateY(0px) translateZ(0px)'
+				})
+				
+    			// [앱통합] 접근성 문제로 더보기 시 첫 목록에 포커스 처리 > 무한스크롤 적용으로 인한 주석처리
+    			// $('#viewList > li[tabindex=1]').focus();
+    			
+    		}
+	    }else{
+			ajaxError(dataMap);
+		}
+		
+		isListLoading = false;
+	},
+	function( dataMap, jqXHR) {
+		ajaxError(dataMap);	
+	},
+	{
+		isLoding:true
+	});
+}
+
+$(window).on("scroll", function() {
+	var scrollTop = $(window).scrollTop();
+	var windowHeight = $(window).height();
+	var documentHeight = $(document).height();
+	var isBottom = (scrollTop + windowHeight) >= documentHeight * 0.97;
+	
+	if (isListLoading || !isBottom) return;
+	
+	
+	
+	if (pageNo < totalPage) {
+		moreList();
+	}
+})
+</script>
+<div class="contents-wrap">
+	<form id="form" method="post">
+		<input type="hidden" id="EVN_SEQ" name="EVN_SEQ" value=""/>
+		<input type="hidden" id="evnCate" name="evnCate" value=""/>
+		
+		<div class="page-contents">
+			
+			<div class="icon-nav margin-bottom-30">
+				
+				
+				
+				<ul class="icon-nav-list type-col4 type-has-icon">
+					
+						<li class="icon-nav-item is-white">						
+							<a href="javascript:void(0);" class="icon-nav-link" role="button" onclick="javascript:GA_Event_Fn('앱통합','배너','AI맛집','', goBannerLink('00', '/MKCONT3000M.web', ''));">
+								<span class="icon-nav-img">
+									<img src="/ATTACH/MKA/images/banner/ic_top_food.png" alt="AI 맛집으로 내 주변 맛집 확인하기" onerror="this.parentNode.className += ' is-error';">
+								</span>
+								<span class="icon-nav-text ellipsis">AI맛집</span>
+							</a>
+						</li>
+					
+						<li class="icon-nav-item is-white">						
+							<a href="javascript:void(0);" class="icon-nav-link" role="button" onclick="javascript:GA_Event_Fn('앱통합','배너','일본호텔할인','', goBannerLink('00', '/MKEVT1010M.web?EVN_SEQ=8841', ''));">
+								<span class="icon-nav-img">
+									<img src="/ATTACH/MKA/images/banner/ic_top_8841_2.png" alt="일본호텔 할인" onerror="this.parentNode.className += ' is-error';">
+								</span>
+								<span class="icon-nav-text ellipsis">일본호텔할인</span>
+							</a>
+						</li>
+					
+						<li class="icon-nav-item is-white">						
+							<a href="javascript:void(0);" class="icon-nav-link" role="button" onclick="javascript:GA_Event_Fn('앱통합','배너','자동차지원금','', goBannerLink('00', '/MKFNFVR1010M.web?gubun=carInsurView', ''));">
+								<span class="icon-nav-img">
+									<img src="/ATTACH/MKA/images/banner/event_quick_menu_w9859_v2.png" alt="자동차지원금" onerror="this.parentNode.className += ' is-error';">
+								</span>
+								<span class="icon-nav-text ellipsis">자동차지원금</span>
+							</a>
+						</li>
+					
+						<li class="icon-nav-item is-white">						
+							<a href="javascript:void(0);" class="icon-nav-link" role="button" onclick="javascript:GA_Event_Fn('앱통합','배너','ChatGPT 혜택','', goBannerLink('00', '/MKEVT1010M.web?EVN_SEQ=60113', ''));">
+								<span class="icon-nav-img">
+									<img src="/ATTACH/MKA/images/banner/ic_top_chatgpt.png" alt="ChatGPT 혜택" onerror="this.parentNode.className += ' is-error';">
+								</span>
+								<span class="icon-nav-text ellipsis">ChatGPT 혜택</span>
+							</a>
+						</li>
+					
+						<li class="icon-nav-item is-white">						
+							<a href="javascript:void(0);" class="icon-nav-link" role="button" onclick="javascript:GA_Event_Fn('앱통합','배너','적립챌린지','', goBannerLink('00', '/MKTRVB4030N.web', ''));">
+								<span class="icon-nav-img">
+									<img src="/ATTACH/MKA/images/banner/ic_top____.png" alt="적립챌린지" onerror="this.parentNode.className += ' is-error';">
+								</span>
+								<span class="icon-nav-text ellipsis">적립챌린지</span>
+							</a>
+						</li>
+					
+						<li class="icon-nav-item is-white">						
+							<a href="javascript:void(0);" class="icon-nav-link" role="button" onclick="javascript:GA_Event_Fn('앱통합','배너','정기구독','', goBannerLink('00', '/MKEVT1010M.web?EVN_SEQ=60150', ''));">
+								<span class="icon-nav-img">
+									<img src="/ATTACH/MKA/images/banner/ic_top_youtube12.png" alt="정기구독" onerror="this.parentNode.className += ' is-error';">
+								</span>
+								<span class="icon-nav-text ellipsis">정기구독</span>
+							</a>
+						</li>
+					
+						<li class="icon-nav-item is-white">						
+							<a href="javascript:void(0);" class="icon-nav-link" role="button" onclick="javascript:GA_Event_Fn('앱통합','배너','간편실손청구','', goBannerLink('03', 'https://external-claim.zzalang.kr/?partnerCode=HANA_CARD&amp;secretKey=X74wfcnkdB6DE7MvPtfq4BgE&amp;deepLink=https://m.hanacard.co.kr/MKLANDINGM.web?url=/qwt/mydata.jsp?surl=/QW501102001DWBM.web', ''));">
+								<span class="icon-nav-img">
+									<img src="/ATTACH/MKA/images/banner/ic_top_hospital.png" alt="간편실손청구" onerror="this.parentNode.className += ' is-error';">
+								</span>
+								<span class="icon-nav-text ellipsis">간편실손청구</span>
+							</a>
+						</li>
+					
+						<li class="icon-nav-item is-white">						
+							<a href="javascript:void(0);" class="icon-nav-link" role="button" onclick="javascript:GA_Event_Fn('앱통합','배너','하나손해보험','', goBannerLink('00', '/MKEVT1010M.web?EVN_SEQ=7909', ''));">
+								<span class="icon-nav-img">
+									<img src="/ATTACH/MKA/images/banner/ic_top_7909.png" alt="하나손해보험 8만원 캐시백" onerror="this.parentNode.className += ' is-error';">
+								</span>
+								<span class="icon-nav-text ellipsis">하나손해보험</span>
+							</a>
+						</li>
+					
+				</ul>
+				
+			</div>
+			
+	
+			<div class="toggle-search type-no-line margin-top-none">
+				<div class="toggle-search-tab">
+					<div class="ui-buttons type-scroll">
+						<ul class="ui-buttons-list">
+							<li class="ui-buttons-item">
+								<a href="javascript:void(0);" onclick="javascript:goLinkWeb('/MKEVT6001M.web');" class="ui-basic-button type-tiny type-gray" role="button">찜한 혜택</a>
+							</li>
+							<li class="ui-buttons-item">
+								<a href="javascript:void(0);" onclick="javascript:goLinkWeb('/MKEVT9000M.web');" class="ui-basic-button type-tiny type-gray" role="button">응모현황</a>
+							</li>
+							<li class="ui-buttons-item">
+								<a href="javascript:void(0);" onclick="javascript:goLinkWeb('/MKEVT3000M.web');" class="ui-basic-button type-tiny type-gray" role="button">종료 이벤트</a>
+							</li>
+						</ul>
+					</div>
+					<button type="button"  class="ui-button toggle-search-button type-open searchOpenBtn">
+						<span class="for-a11y">검색 폼 열기</span>
+					</button>
+				</div>
+				<div class="toggle-search-form">
+					<div class="search-word-area">						
+						<div class="ui-input-block type-use-delete type-search">							
+							<input type="search" id="schTxt" name="schTxt" value="" onkeypress="if(event.keyCode==13){doSearchTxt(); return false;}" class="ui-input" title="검색어 입력" placeholder="검색어를 입력해 주세요." />							
+							<button type="button" class="ui-button ui-input-delete">
+								<span class="for-a11y">입력 내용 지우기</span>
+							</button>
+							<button type="button" class="ui-button ui-input-search" onclick="javascript:doSearchTxt();">
+								<span class="for-a11y">검색</span>
+							</button>
+						</div>
+					</div>
+					<button type="button" onclick="javascript:$('#schTxt').val('');" class="ui-button toggle-search-button type-close">
+						<span class="for-a11y">검색 폼 닫기</span>
+					</button>
+				</div>
+			</div>
+
+			<div class="sorting-area js-ui-accordion sorting-area--fixed" data-focus-open="false">
+				<div class="sorting-inner js-ui-accordion__item">
+					<button type="button" class="sorting-opener js-ui-accordion__opener">
+						<span class="for-a11y">
+							탭 영역
+							<span class="open-text">펼치기</span>
+							<span class="close-text">닫기</span>
+						</span>
+					</button>
+					<div class="sorting-layer js-ui-accordion__layer">
+						<div class="sorting-contents">
+							<div class="sorting-list">
+							
+								<div class="sorting-item">
+									<div class="ui-radio-block type-tab">
+										<a href="javascript:void(0);" onclick="javascript:$('#evnCate').val('');doSearchAjax();" class="ui-label ctg_00000 is-active">
+											<span class="ui-label-text">전체</span>
+										</a>
+									</div>
+								</div>
+						
+								<div class="sorting-item">
+									<div class="ui-radio-block type-tab">
+										<a href="javascript:void(0);" onclick="javascript:$('#evnCate').val('00106');doSearchAjax();" class="ui-label ctg_00106 ">
+											<span class="ui-label-text">정기결제</span>
+										</a>
+									</div>
+								</div>
+								
+								<div class="sorting-item">
+									<div class="ui-radio-block type-tab">
+										<a href="javascript:void(0);" onclick="javascript:$('#evnCate').val('10001');doSearchAjax();" class="ui-label ctg_10001 ">
+											<span class="ui-label-text">트래블로그</span>
+										</a>
+									</div>
+								</div>
+								
+								<div class="sorting-item">
+									<div class="ui-radio-block type-tab">
+										<a href="javascript:void(0);" onclick="javascript:$('#evnCate').val('00108');doSearchAjax();" class="ui-label ctg_00108 ">
+											<span class="ui-label-text">QR결제</span>
+										</a>
+									</div>
+								</div>
+								
+								<div class="sorting-item">
+									<div class="ui-radio-block type-tab">
+										<a href="javascript:void(0);" onclick="javascript:$('#evnCate').val('00001');doSearchAjax();" class="ui-label ctg_00001 ">
+											<span class="ui-label-text">쇼핑/무이자</span>
+										</a>
+									</div>
+								</div>
+								
+								
+								<div class="sorting-item">
+									<div class="ui-radio-block type-tab">
+										<a href="javascript:void(0);" onclick="javascript:$('#evnCate').val('00102');doSearchAjax();" class="ui-label ctg_00102 ">
+											<span class="ui-label-text">여행/해외</span>
+										</a>
+									</div>
+								</div>
+								
+								<div class="sorting-item">
+									<div class="ui-radio-block type-tab">
+										<a href="javascript:void(0);" onclick="javascript:$('#evnCate').val('00103');doSearchAjax();" class="ui-label ctg_00103 ">
+											<span class="ui-label-text">문화/생활</span>
+										</a>
+									</div>
+								</div>
+								
+								<div class="sorting-item">
+									<div class="ui-radio-block type-tab">
+										<a href="javascript:void(0);" onclick="javascript:$('#evnCate').val('10000');doSearchAjax();" class="ui-label ctg_10000 ">
+											<span class="ui-label-text">할인/캐쉬백</span>
+										</a>
+									</div>
+								</div>
+								
+								<div class="sorting-item">
+									<div class="ui-radio-block type-tab">
+										<a href="javascript:void(0);" onclick="javascript:$('#evnCate').val('00020');doSearchAjax();" class="ui-label ctg_00020 ">
+											<span class="ui-label-text">응모/경품</span>
+										</a>
+									</div>
+								</div>
+								
+								
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="page-section-group type-line margin-top-none">
+				<div class="usage-default margin-top-minus-10">
+					<ul class="usage-default-list" id="viewList">
+				
+						<li class="usage-default-item type-line">
+							<div class="usage-default-block type-event">
+								<a href="javascript:void(0);" onclick="javascript:GA_Event_Fn('통합앱_이벤트','#전체','트래블로그 카드와 떠나는 여행','', detail('/MKEVT1010M.web','60103'));" class="usage-default-left-group type-align-middle" role="button">
+									<div class="logo-image type-store type-medium">
+										<div class="logo-image-inner">
+											<img src="/ATTACH/MKA/images/event/mobile_event_list_8085.png" alt="하나카드 아이콘" onerror="this.parentNode.className += ' is-error';" />
+										</div>
+									</div>
+								
+									<div class="usage-default-left">
+										<div class="usage-default-brand type-multi-ellipsis">유니온페이 (UPI)</div>
+										<div class="usage-default-title type-multi-ellipsis">트래블로그 카드와 떠나는 여행</div>
+										<div class="usage-default-etc">
+											<div class="usage-default-etc-item">2025.11.25 ~ 2026.06.30</div>
+										</div>
+									</div>
+								</a>
+							
+								
+							</div>
+						</li>
+				
+						<li class="usage-default-item type-line">
+							<div class="usage-default-block type-event">
+								<a href="javascript:void(0);" onclick="javascript:GA_Event_Fn('통합앱_이벤트','#전체','한 곳에서 쇼핑만 해도 캐시백이 쌓여요!','', detail('/MKEVT1010M.web','60040'));" class="usage-default-left-group type-align-middle" role="button">
+									<div class="logo-image type-store type-medium">
+										<div class="logo-image-inner">
+											<img src="/ATTACH/MKA/images/event/ev_logoset_online_shopping.png" alt="온라인쇼핑 아이콘" onerror="this.parentNode.className += ' is-error';" />
+										</div>
+									</div>
+								
+									<div class="usage-default-left">
+										<div class="usage-default-brand type-multi-ellipsis">쇼핑 캐시백</div>
+										<div class="usage-default-title type-multi-ellipsis">한 곳에서 쇼핑만 해도 캐시백이 쌓여요!</div>
+										<div class="usage-default-etc">
+											<div class="usage-default-etc-item">2026.01.15 ~ 2999.12.31</div>
+										</div>
+									</div>
+								</a>
+							
+								
+							</div>
+						</li>
+				
+						<li class="usage-default-item type-line">
+							<div class="usage-default-block type-event">
+								<a href="javascript:void(0);" onclick="javascript:GA_Event_Fn('통합앱_이벤트','#전체','하나카드 K-패스 더블적립 이벤트','', detail('/MKEVT1010M.web','60043'));" class="usage-default-left-group type-align-middle" role="button">
+									<div class="logo-image type-store type-medium">
+										<div class="logo-image-inner">
+											<img src="/ATTACH/MKA/images/event/thum_umobile_logo.png" alt="U+유모바일 아이콘" onerror="this.parentNode.className += ' is-error';" />
+										</div>
+									</div>
+								
+									<div class="usage-default-left">
+										<div class="usage-default-brand type-multi-ellipsis">U+유모바일</div>
+										<div class="usage-default-title type-multi-ellipsis">하나카드 K-패스 더블적립 이벤트</div>
+										<div class="usage-default-etc">
+											<div class="usage-default-etc-item">2026.01.12 ~ 2026.10.31</div>
+										</div>
+									</div>
+								</a>
+							
+								
+							</div>
+						</li>
+				
+						<li class="usage-default-item type-line">
+							<div class="usage-default-block type-event">
+								<a href="javascript:void(0);" onclick="javascript:GA_Event_Fn('통합앱_이벤트','#전체','전세계 호텔 20% 즉시할인','', detail('/MKEVT1010M.web','60132'));" class="usage-default-left-group type-align-middle" role="button">
+									<div class="logo-image type-store type-medium">
+										<div class="logo-image-inner">
+											<img src="" alt="" onerror="this.parentNode.className += ' is-error';" />
+										</div>
+									</div>
+								
+									<div class="usage-default-left">
+										<div class="usage-default-brand type-multi-ellipsis">AGODA</div>
+										<div class="usage-default-title type-multi-ellipsis">전세계 호텔 20% 즉시할인</div>
+										<div class="usage-default-etc">
+											<div class="usage-default-etc-item">2026.01.09 ~ 2026.01.31</div>
+										</div>
+									</div>
+								</a>
+							
+								
+							</div>
+						</li>
+				
+						<li class="usage-default-item type-line">
+							<div class="usage-default-block type-event">
+								<a href="javascript:void(0);" onclick="javascript:GA_Event_Fn('통합앱_이벤트','#전체','설 맞이 대형마트 선물세트 할인','', detail('/MKEVT1010M.web','60172'));" class="usage-default-left-group type-align-middle" role="button">
+									<div class="logo-image type-store type-medium">
+										<div class="logo-image-inner">
+											<img src="/ATTACH/MKA/images/event/ev_logoset_mart.png" alt="설맞이 대형마트 이미지" onerror="this.parentNode.className += ' is-error';" />
+										</div>
+									</div>
+								
+									<div class="usage-default-left">
+										<div class="usage-default-brand type-multi-ellipsis">4대 대형마트</div>
+										<div class="usage-default-title type-multi-ellipsis">설 맞이 대형마트 선물세트 할인</div>
+										<div class="usage-default-etc">
+											<div class="usage-default-etc-item">2026.01.01 ~ 2026.02.17</div>
+										</div>
+									</div>
+								</a>
+							
+								
+							</div>
+						</li>
+				
+						<li class="usage-default-item type-line">
+							<div class="usage-default-block type-event">
+								<a href="javascript:void(0);" onclick="javascript:GA_Event_Fn('통합앱_이벤트','#전체','Apple 장기 할부 서비스','', detail('/MKEVT1010M.web','8605'));" class="usage-default-left-group type-align-middle" role="button">
+									<div class="logo-image type-store type-medium">
+										<div class="logo-image-inner">
+											<img src="/ATTACH/MKA/images/event/mka_icon_8605.png" alt="애플로고" onerror="this.parentNode.className += ' is-error';" />
+										</div>
+									</div>
+								
+									<div class="usage-default-left">
+										<div class="usage-default-brand type-multi-ellipsis">Apple</div>
+										<div class="usage-default-title type-multi-ellipsis">Apple 장기 할부 서비스</div>
+										<div class="usage-default-etc">
+											<div class="usage-default-etc-item">2026.01.06 ~ 2026.03.31</div>
+										</div>
+									</div>
+								</a>
+							
+								
+							</div>
+						</li>
+				
+						<li class="usage-default-item type-line">
+							<div class="usage-default-block type-event">
+								<a href="javascript:void(0);" onclick="javascript:GA_Event_Fn('통합앱_이벤트','#전체','하나 나라사랑카드의 서비스 혜택','', detail('/MKEVT1010M.web','60171'));" class="usage-default-left-group type-align-middle" role="button">
+									<div class="logo-image type-store type-medium">
+										<div class="logo-image-inner">
+											<img src="" alt="하나 나라사랑카드의 서비스 혜택" onerror="this.parentNode.className += ' is-error';" />
+										</div>
+									</div>
+								
+									<div class="usage-default-left">
+										<div class="usage-default-brand type-multi-ellipsis">나의 첫 나라사랑카드</div>
+										<div class="usage-default-title type-multi-ellipsis">하나 나라사랑카드의 서비스 혜택</div>
+										<div class="usage-default-etc">
+											<div class="usage-default-etc-item">2026.01.05 ~ 2026.06.30</div>
+										</div>
+									</div>
+								</a>
+							
+								
+							</div>
+						</li>
+				
+						<li class="usage-default-item type-line">
+							<div class="usage-default-block type-event">
+								<a href="javascript:void(0);" onclick="javascript:GA_Event_Fn('통합앱_이벤트','#전체','금융상품 이용동의만 해도 최대 5만 하나머니 당첨','', detail('/MKEVT1010M.web','60129'));" class="usage-default-left-group type-align-middle" role="button">
+									<div class="logo-image type-store type-medium">
+										<div class="logo-image-inner">
+											<img src="/ATTACH/MKA/images/event/9907000.png" alt="카드 아이콘" onerror="this.parentNode.className += ' is-error';" />
+										</div>
+									</div>
+								
+									<div class="usage-default-left">
+										<div class="usage-default-brand type-multi-ellipsis">슬기로운 금융생활</div>
+										<div class="usage-default-title type-multi-ellipsis">금융상품 이용동의만 해도 최대 5만 하나머니 당첨</div>
+										<div class="usage-default-etc">
+											<div class="usage-default-etc-item">2026.01.06 ~ 2026.03.31</div>
+										</div>
+									</div>
+								</a>
+							
+								
+							</div>
+						</li>
+				
+						<li class="usage-default-item type-line">
+							<div class="usage-default-block type-event">
+								<a href="javascript:void(0);" onclick="javascript:GA_Event_Fn('통합앱_이벤트','#전체','대인 통합권 최대 58% 현장할인','', detail('/MKEVT1010M.web','8359'));" class="usage-default-left-group type-align-middle" role="button">
+									<div class="logo-image type-store type-medium">
+										<div class="logo-image-inner">
+											<img src="/ATTACH/MKA/images/event/mka_icon_8359.png" alt="클럽디 오아시스 로고" onerror="this.parentNode.className += ' is-error';" />
+										</div>
+									</div>
+								
+									<div class="usage-default-left">
+										<div class="usage-default-brand type-multi-ellipsis">클럽디 오아시스</div>
+										<div class="usage-default-title type-multi-ellipsis">대인 통합권 최대 58% 현장할인</div>
+										<div class="usage-default-etc">
+											<div class="usage-default-etc-item">2026.01.05 ~ 2026.01.31</div>
+										</div>
+									</div>
+								</a>
+							
+								
+							</div>
+						</li>
+				
+						<li class="usage-default-item type-line">
+							<div class="usage-default-block type-event">
+								<a href="javascript:void(0);" onclick="javascript:GA_Event_Fn('통합앱_이벤트','#전체','올해의 첫 용돈 끝까지 오르기!!','', detail('/MKEVT1010M.web','60140'));" class="usage-default-left-group type-align-middle" role="button">
+									<div class="logo-image type-store type-medium">
+										<div class="logo-image-inner">
+											<img src="/ATTACH/MKA/images/event/9907000.png" alt="카드 아이콘" onerror="this.parentNode.className += ' is-error';" />
+										</div>
+									</div>
+								
+									<div class="usage-default-left">
+										<div class="usage-default-brand type-multi-ellipsis">오늘의 용돈</div>
+										<div class="usage-default-title type-multi-ellipsis">올해의 첫 용돈 끝까지 오르기!!</div>
+										<div class="usage-default-etc">
+											<div class="usage-default-etc-item">2026.01.02 ~ 2026.01.31</div>
+										</div>
+									</div>
+								</a>
+							
+								
+							</div>
+						</li>
+				
+						<li class="usage-default-item type-line">
+							<div class="usage-default-block type-event">
+								<a href="javascript:void(0);" onclick="javascript:GA_Event_Fn('통합앱_이벤트','#전체','자동차 살 때, 최대 1.3% 돌려받자','', detail('/MKEVT1010M.web','6954'));" class="usage-default-left-group type-align-middle" role="button">
+									<div class="logo-image type-store type-medium">
+										<div class="logo-image-inner">
+											<img src="/ATTACH/MKA/images/event/sum_car_m.png" alt="자동차 아이콘" onerror="this.parentNode.className += ' is-error';" />
+										</div>
+									</div>
+								
+									<div class="usage-default-left">
+										<div class="usage-default-brand type-multi-ellipsis">오토캐시백</div>
+										<div class="usage-default-title type-multi-ellipsis">자동차 살 때, 최대 1.3% 돌려받자</div>
+										<div class="usage-default-etc">
+											<div class="usage-default-etc-item">2026.01.02 ~ 2026.12.31</div>
+										</div>
+									</div>
+								</a>
+							
+								
+							</div>
+						</li>
+				
+						<li class="usage-default-item type-line">
+							<div class="usage-default-block type-event">
+								<a href="javascript:void(0);" onclick="javascript:GA_Event_Fn('통합앱_이벤트','#전체','최대 53만원 환급!  나는 얼마일까?','', detail('/MKEVT1010M.web','8561'));" class="usage-default-left-group type-align-middle" role="button">
+									<div class="logo-image type-store type-medium">
+										<div class="logo-image-inner">
+											<img src="/ATTACH/MKA/images/event/sum_card_m.png" alt="카드아이콘" onerror="this.parentNode.className += ' is-error';" />
+										</div>
+									</div>
+								
+									<div class="usage-default-left">
+										<div class="usage-default-brand type-multi-ellipsis">대신청구</div>
+										<div class="usage-default-title type-multi-ellipsis">최대 53만원 환급!  나는 얼마일까?</div>
+										<div class="usage-default-etc">
+											<div class="usage-default-etc-item">2026.01.01 ~ 2026.12.31</div>
+										</div>
+									</div>
+								</a>
+							
+								
+							</div>
+						</li>
+				
+						<li class="usage-default-item type-line">
+							<div class="usage-default-block type-event">
+								<a href="javascript:void(0);" onclick="javascript:GA_Event_Fn('통합앱_이벤트','#전체','트래블로그 PRESTIGE 시즌서비스 기프트 마일리지 5천 Mile','', detail('/MKEVT1010M.web','8086'));" class="usage-default-left-group type-align-middle" role="button">
+									<div class="logo-image type-store type-medium">
+										<div class="logo-image-inner">
+											<img src="/ATTACH/MKA/images/event/mobile_event_list_8086.png" alt="하나카드 아이콘" onerror="this.parentNode.className += ' is-error';" />
+										</div>
+									</div>
+								
+									<div class="usage-default-left">
+										<div class="usage-default-brand type-multi-ellipsis">트래블로그 PRESTIGE 신용카드</div>
+										<div class="usage-default-title type-multi-ellipsis">트래블로그 PRESTIGE 시즌서비스 기프트 마일리지 5천 Mile</div>
+										<div class="usage-default-etc">
+											<div class="usage-default-etc-item">2026.01.01 ~ 2026.12.31</div>
+										</div>
+									</div>
+								</a>
+							
+								
+							</div>
+						</li>
+				
+						<li class="usage-default-item type-line">
+							<div class="usage-default-block type-event">
+								<a href="javascript:void(0);" onclick="javascript:GA_Event_Fn('통합앱_이벤트','#전체','트래블로그 SKYPASS 시즌서비스 1,500원당 최대 3Mile 적립','', detail('/MKEVT1010M.web','8085'));" class="usage-default-left-group type-align-middle" role="button">
+									<div class="logo-image type-store type-medium">
+										<div class="logo-image-inner">
+											<img src="/ATTACH/MKA/images/event/mobile_event_list_8085.png" alt="하나카드 아이콘" onerror="this.parentNode.className += ' is-error';" />
+										</div>
+									</div>
+								
+									<div class="usage-default-left">
+										<div class="usage-default-brand type-multi-ellipsis">트래블로그 SKYPASS 신용카드</div>
+										<div class="usage-default-title type-multi-ellipsis">트래블로그 SKYPASS 시즌서비스 1,500원당 최대 3Mile 적립</div>
+										<div class="usage-default-etc">
+											<div class="usage-default-etc-item">2026.01.01 ~ 2026.12.31</div>
+										</div>
+									</div>
+								</a>
+							
+								
+							</div>
+						</li>
+				
+						<li class="usage-default-item type-line">
+							<div class="usage-default-block type-event">
+								<a href="javascript:void(0);" onclick="javascript:GA_Event_Fn('통합앱_이벤트','#전체','최대 12만 캐시백 제공','', detail('/MKEVT1010M.web','60158'));" class="usage-default-left-group type-align-middle" role="button">
+									<div class="logo-image type-store type-medium">
+										<div class="logo-image-inner">
+											<img src="/ATTACH/MKA/images/event/mobile_event_list_8085.png" alt="하나카드 아이콘" onerror="this.parentNode.className += ' is-error';" />
+										</div>
+									</div>
+								
+									<div class="usage-default-left">
+										<div class="usage-default-brand type-multi-ellipsis">신세계 트래블GO 카드</div>
+										<div class="usage-default-title type-multi-ellipsis">최대 12만 캐시백 제공</div>
+										<div class="usage-default-etc">
+											<div class="usage-default-etc-item">2026.01.02 ~ 2026.02.28</div>
+										</div>
+									</div>
+								</a>
+							
+								
+							</div>
+						</li>
+				
+						<li class="usage-default-item type-line">
+							<div class="usage-default-block type-event">
+								<a href="javascript:void(0);" onclick="javascript:GA_Event_Fn('통합앱_이벤트','#전체','여행 혜택','', detail('/MKEVT1010M.web','60154'));" class="usage-default-left-group type-align-middle" role="button">
+									<div class="logo-image type-store type-medium">
+										<div class="logo-image-inner">
+											<img src="/ATTACH/MKA/images/event/sum_air_m.png" alt="여행 아이콘" onerror="this.parentNode.className += ' is-error';" />
+										</div>
+									</div>
+								
+									<div class="usage-default-left">
+										<div class="usage-default-brand type-multi-ellipsis">온·오프라인</div>
+										<div class="usage-default-title type-multi-ellipsis">여행 혜택</div>
+										<div class="usage-default-etc">
+											<div class="usage-default-etc-item">2026.01.01 ~ 2026.01.31</div>
+										</div>
+									</div>
+								</a>
+							
+								
+							</div>
+						</li>
+				
+						<li class="usage-default-item type-line">
+							<div class="usage-default-block type-event">
+								<a href="javascript:void(0);" onclick="javascript:GA_Event_Fn('통합앱_이벤트','#전체','대형마트·편의점 혜택','', detail('/MKEVT1010M.web','60153'));" class="usage-default-left-group type-align-middle" role="button">
+									<div class="logo-image type-store type-medium">
+										<div class="logo-image-inner">
+											<img src="/ATTACH/MKA/images/event/ev_logoset_mart.png" alt="마트 아이콘" onerror="this.parentNode.className += ' is-error';" />
+										</div>
+									</div>
+								
+									<div class="usage-default-left">
+										<div class="usage-default-brand type-multi-ellipsis">온·오프라인</div>
+										<div class="usage-default-title type-multi-ellipsis">대형마트·편의점 혜택</div>
+										<div class="usage-default-etc">
+											<div class="usage-default-etc-item">2026.01.01 ~ 2026.01.31</div>
+										</div>
+									</div>
+								</a>
+							
+								
+							</div>
+						</li>
+				
+						<li class="usage-default-item type-line">
+							<div class="usage-default-block type-event">
+								<a href="javascript:void(0);" onclick="javascript:GA_Event_Fn('통합앱_이벤트','#전체','온라인쇼핑 생활 혜택','', detail('/MKEVT1010M.web','60152'));" class="usage-default-left-group type-align-middle" role="button">
+									<div class="logo-image type-store type-medium">
+										<div class="logo-image-inner">
+											<img src="/ATTACH/MKA/images/event/ev_logoset_online_shopping.png" alt="온라인쇼핑 아이콘" onerror="this.parentNode.className += ' is-error';" />
+										</div>
+									</div>
+								
+									<div class="usage-default-left">
+										<div class="usage-default-brand type-multi-ellipsis">온·오프라인</div>
+										<div class="usage-default-title type-multi-ellipsis">온라인쇼핑 생활 혜택</div>
+										<div class="usage-default-etc">
+											<div class="usage-default-etc-item">2026.01.01 ~ 2026.01.31</div>
+										</div>
+									</div>
+								</a>
+							
+								
+							</div>
+						</li>
+				
+						<li class="usage-default-item type-line">
+							<div class="usage-default-block type-event">
+								<a href="javascript:void(0);" onclick="javascript:GA_Event_Fn('통합앱_이벤트','#전체','정기구독하고 1만 머니','', detail('/MKEVT1010M.web','60150'));" class="usage-default-left-group type-align-middle" role="button">
+									<div class="logo-image type-store type-medium">
+										<div class="logo-image-inner">
+											<img src="/ATTACH/MKA/images/event/mobile_event_list_hanacard.png" alt="하나카드 로고" onerror="this.parentNode.className += ' is-error';" />
+										</div>
+									</div>
+								
+									<div class="usage-default-left">
+										<div class="usage-default-brand type-multi-ellipsis">쿠팡,네이버,넷플릭스,유튜브</div>
+										<div class="usage-default-title type-multi-ellipsis">정기구독하고 1만 머니</div>
+										<div class="usage-default-etc">
+											<div class="usage-default-etc-item">2026.01.01 ~ 2026.01.31</div>
+										</div>
+									</div>
+								</a>
+							
+								
+							</div>
+						</li>
+				
+						<li class="usage-default-item type-line">
+							<div class="usage-default-block type-event">
+								<a href="javascript:void(0);" onclick="javascript:GA_Event_Fn('통합앱_이벤트','#전체','결제계좌 변경하면 스타벅스 3잔♡','', detail('/MKEVT1010M.web','60149'));" class="usage-default-left-group type-align-middle" role="button">
+									<div class="logo-image type-store type-medium">
+										<div class="logo-image-inner">
+											<img src="/ATTACH/MKA/images/event/sum_hanapay_m.png" alt="하나은행 아이콘" onerror="this.parentNode.className += ' is-error';" />
+										</div>
+									</div>
+								
+									<div class="usage-default-left">
+										<div class="usage-default-brand type-multi-ellipsis">하나은행</div>
+										<div class="usage-default-title type-multi-ellipsis">결제계좌 변경하면 스타벅스 3잔♡</div>
+										<div class="usage-default-etc">
+											<div class="usage-default-etc-item">2026.01.01 ~ 2026.01.31</div>
+										</div>
+									</div>
+								</a>
+							
+								
+							</div>
+						</li>
+				
+					</ul>
+				</div>
+			</div>
+		</div>
+	</form>	
+</div>
+
+
+
+
+<script type="text/javascript">
+
+</script>
+
+<!-- layer: 로그인 간편응모-->
+<div class="layer-wrap layer-wrap--full layer-wrap--confirm" data-layer="layer-simpleAuthPop">
+	<div class="layer-container">
+		<section class="ui-layer">
+			<div class="ui-layer__head">
+				<div class="header">
+					<div class="header__right">
+						<button type="button" class="ui-button header__button header__button--close" data-role="layerClose">
+							<span class="for-a11y">레이어 닫기</span>
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="ui-layer__body">
+				<div class="header">
+					<h2 class="header__title">
+						이벤트 응모를 위해<br />
+						회원정보를 입력해 주세요.
+					</h2>
+				</div>
+				<div class="js-ui-tab-panel">
+					<div class="ui-tab">
+						<ul class="ui-tab-list">
+							<li class="ui-tab-item">
+								<button type="button" class="ui-button ui-tab-link" data-tab-open="layer-tab-enter-event">간편응모</button>
+							</li>
+							<li class="ui-tab-item">
+								<a href="javascript:void(0);" onclick="javascript:doLoginCheck2();" class="ui-tab-link" role="button">로그인</a>
+							</li>
+						</ul>
+					</div>
+					<div class="ui-tab-panel" data-tab="layer-tab-enter-event">
+						<!-- 2022.07.22 : mod : 탭패널 헤딩 추가 -->
+						<h3 class="for-a11y">간편응모</h3>
+						<!-- 2022.07.22 : mod : .margin-top-none 클래스 추가 -->
+						<div class="form-list margin-top-none">
+							<div class="form-item">
+								<div class="form-title">
+									<strong class="title">이름</strong>
+								</div>
+								<div class="form-group">
+									<div class="ui-input-block type-use-delete">
+										<input type="text" id="SIMPLE_NAME" class="ui-input" title="이름 입력" placeholder="이름 입력" required />
+										<button type="button" class="ui-button ui-input-delete">
+											<span class="for-a11y">입력 내용 지우기</span>
+										</button>
+									</div>
+								</div>
+							</div>
+							<div class="form-item">
+								<div class="form-title">
+									<strong class="title">생년월일</strong>
+								</div>
+								<div class="form-group">
+									<div class="ui-input-block">
+										<input type="number"  id="SIMPLE_BIRD" pattern="\d*" class="ui-input" title="생년월일 입력" placeholder="생년월일 6자리 (예시 : 880101)" maxlength="6" oninput="maxLengthChk(this);" />
+									</div>
+								</div>
+							</div>
+							<div class="form-item">
+								<div class="form-title">
+									<strong class="title">휴대폰번호 뒤 4자리</strong>
+								</div>
+								<div class="form-group">
+									<div class="ui-input-block">
+										<input type="number" id="SIMPLE_MTLNO" pattern="\d*" class="ui-input" title="휴대폰번호 뒤 4자리 입력" placeholder="번호입력" maxlength="4" oninput="maxLengthChk(this);" />
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="terms-area js-ui-accordion margin-top-35">
+							<div class="terms-item js-ui-accordion__item">
+								<div class="ui-checkbox-block type-align-top">
+									<input type="checkbox" id="auth_agree" class="ui-checkbox" />
+									<label for="auth_agree" class="ui-label">
+										<span class="ui-checkbox-object"></span>
+										<span class="ui-label-text">개인(신용)정보 수집 및 이용 동의</span>
+									</label>
+								</div>
+								<button type="button" class="terms-opener js-ui-accordion__opener">
+									<span class="for-a11y">
+										상세내용
+										<span class="open-text">열기</span>
+										<span class="close-text">닫기</span>
+									</span>
+								</button>
+								<div class="terms-detail js-ui-accordion__layer">
+									<div class="small-text color-blur">
+										개인(신용)정보 수집 및 이용 동의(필수)
+										<ul class="info-list type-inherit margin-top-10">
+											<li class="info-item type-indent">
+												<span class="indent">1.</span>
+												<div class="indent-block">
+													<div>개인(신용)정보 수집, 이용목적</div>
+													<ul class="info-list type-inherit">
+														<li class="info-item type-indent"><span class="indent">-</span>하나카드 온라인 이벤트 응모를 위한 정보 조회</li>
+													</ul>
+												</div>
+											</li>
+											<li class="info-item type-indent">
+												<span class="indent">2.</span>
+												<div class="indent-block">
+													<div>수집, 이용할 개인(신용)정보 항목</div>
+													<ul class="info-list type-inherit">
+														<li class="info-item type-indent"><span class="indent">-</span>성명, 생년월일, 휴대폰번호(뒤 4자리) 정보</li>
+													</ul>
+												</div>
+											</li>
+											<li class="info-item type-indent">
+												<span class="indent">3.</span>
+												<div class="indent-block">
+													<div>개인(신용)정보의 보유, 이용기간</div>
+													<ul class="info-list type-inherit">
+														<li class="info-item type-indent"><span class="indent">-</span>하나카드 온라인 이벤트 응모 자격 확인 후 별도 보관하지 않음</li>
+													</ul>
+												</div>
+											</li>
+										</ul>
+										<ul class="info-list type-inherit margin-top-10">
+											<li class="info-item type-presa">위 사항에 대해 동의를 거부할 수 있으나 동의하지 않으시는 경우에는 본 행사 참여가 불가능함을 알려 드립니다.</li>
+											<li class="info-item type-presa">하나카드㈜는 단순조회 용도로 정보를 이용하고 있습니다. 상기사항에 동의하지 않은 경우 이벤트 응모 신청이 불가합니다.</li>
+											<li class="info-item type-presa">
+												하나카드㈜에 대하여 ‘별도의 개인(신용)정보에 관한 동의’를 한 경우 (금융거래 등 상거래의 체결&middot;유지?관리 목적 등)로서 해당 동의 목적으로 위 개인정보가 수집 및
+												이용되는 경우에는 해당 동의에 따른 보유 및 이용기간이 적용됩니다.
+											</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="ui-layer__foot">
+				<div class="ui-buttons">
+					<ul class="ui-buttons-list">
+						<li class="ui-buttons-item">
+							<button type="button" onclick="javascript:simpleAuth();" class="ui-button ui-basic-button type-primary" >응모하기</button>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</section>
+	</div>
+</div>
+<!-- //layer: 로그인 간편응모-->
+
+<!-- layer: 스트랩 삭제안내 -->
+<div class="layer-wrap layer-wrap--slide" data-layer="layer-scrap_delete_popup">
+	<div class="layer-container">
+		<section class="ui-layer">
+			<div class="ui-layer__head type-message">
+				<h2 class="for-a11y">안내</h2>
+				<div class="header">
+					<p class="header__title" id="deleteAlterTxt">
+					</p>
+				</div>
+			</div>
+			<div class="ui-layer__foot">
+				<div class="ui-buttons">
+					<ul class="ui-buttons-list">
+						<li class="ui-buttons-item type-narrow">
+							<button type="button" class="ui-button ui-basic-button" id="deleteAlterNoBtn" data-role="layerClose">아니오</button>
+						</li>
+						<li class="ui-buttons-item" >
+							<button type="button" id="deleteAlterYesBtn" class="ui-button ui-basic-button type-primary">네</button>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</section>
+	</div>
+</div>
+<!-- layer: 스트랩 삭제안내 -->
+
+<!-- layer: 기부캠페인 이벤트 참여 완료팝업 -->
+<div class="layer-wrap layer-wrap--slide" data-layer="layer-donation-campaign-complete">
+	<div class="layer-container">
+		<section class="ui-layer">
+			<div class="ui-layer__head">
+				<div class="header">
+					<h2 class="header__title align-center" style="color:#fb5a5b">기부캠페인 참여 완료!</h2>
+					<div class="header__right" style="position: absolute; top:30px; right:24px;">
+						<button type="button" class="ui-button header__button header__button--close" data-role="layerClose">
+							<span class="for-a11y">레이어 닫기</span>
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="ui-layer__body event-case donation-campaign">
+				<div class="ui-layer__body-inner">
+					<div class="page-section-group">
+						<div class="image-wrap">
+							<img src="/images/event/img_donation_campaign.png" alt="기부캠페인 참여완료 사랑+나눔 이미지" class="image-only">
+						</div>
+					</div>
+					<div class="page-info">
+						<p class="page-info-title margin-top-30">
+							<span class="medium-text">기부캠페인에 참여해주셔서 감사합니다.</span>
+						</p>
+						<p class="page-info-title margin-top-30" style="display:none;">
+							<span class="medium-text"><span id="possCnt">N</span>번 더 참여 가능해요!</span>
+						</p>
+					</div>
+				</div>
+			</div>
+			<div class="ui-layer__foot">
+				<div class="ui-buttons">
+					<ul class="ui-buttons-list">
+						<li class="ui-buttons-item">
+							<a href="" class="ui-basic-button type-primary" role="button" data-role="layerClose">확인</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</section>
+	</div>
+</div>
+<!-- //layer: 기부캠페인 이벤트 참여 완료팝업 -->
+
+
+
+
+
+
+
+
+<script type="text/javascript" src="//developers.kakao.com/sdk/js/kakao.min.js"></script>
+
+<script type="text/javascript">
+//<![CDATA[
+/**
+ * OS 단말 별 SMS 문자 구분
+ *  - AOS       : [?]
+ *  - IOS8 이하 : [;]
+ *  - IOS9 이상 : [&]
+ */
+function smsDeviceType() {
+	var smsDeviceType = "";
+	
+	if (_isAosDeviceRequest) {
+		console.log("_isAosDeviceRequest");
+		smsDeviceType = "?";
+		
+	} else if (_isIosDeviceRequest) {
+		console.log("_isIosDeviceRequest");
+		var iosDevice  = navigator.userAgent.match(/iPhone OS [0-9]+/).pop().split(' ')[2];
+		var iosVersion = parseInt(iosDevice.split('_')[0]);
+		if (iosVersion > 8) {
+			console.log("ios9 이상");
+			smsDeviceType = "&";
+		} else {
+			console.log("ios8 이하");
+			smsDeviceType = ";";
+		}
+	} else {
+		// nothing.
+	}
+	
+	return smsDeviceType;
+}
+ 
+/**
+ * [공유하기]  
+ *  * 카카오톡
+ *   - KAKAO 개발자 사이트에서 발급 된 Javascript Key 설정 후 등록 한 플랫폼으로 시작되는 URL 경로만 공유 가능
+ *   - App 공유
+ *  * 페이스북
+ *   - Facebook 개발자 사이트에 별도 등록 없이 URL 로 공유 가능
+ *   - Web 공유
+ *  * 트위터
+ *   - Twitter 개발자 사이트에 별도 등록 없이 URL 로 공유 가능
+ *   - Web 공유
+ *  * 문자
+ *   - OS 단말 별 SMS 문자 공유
+ *  * URL 복사
+ *   - OS 단말 Clipboard 복사
+ * 
+ * [설정 필요]
+ *  - 카카오톡 : url, title, imgUrl, btnTxt
+ *  - 페이스북 : url, title
+ *  - 트위터   : url, title
+ */
+
+//var ORGN_URL = _svrDomain;
+ var ORGN_URL = "https://m.hanacard.co.kr";
+ 
+
+var URL;
+var TITLE;
+var KAKAO_IMG;
+var KAKAO_IMG_SRC;
+var KAKAO_IMG_RATIO;
+var KAKAO_IMG_WIDTH;
+var KAKAO_IMG_HEIGHT;
+var KAKAO_IMG_NTL_WIDTH;
+var KAKAO_IMG_NTL_HEIGHT;
+var KAKAO_BTN_TXT;
+
+var _targetObj;
+
+
+/**
+ * 공유하기
+ *  - url    : 링크 URL
+ *  - title  : 제목
+ *  - imgUrl : 카카오톡 공유 시 중단 영역에 노출되는 이미지 URL
+ *  - btnTxt : 카카오톡 공유 시 하단 영역에 노출되는 버튼 문구
+ *  - targetId : 공유하기 버튼 object (팝업 닫히고 팝업 실행으로 포커스 이동:웹접근성 관련 추가)
+ */
+function share(url, title, imgUrl, btnTxt, targetObj) {
+	URL   = shareUrl(url);
+	TITLE = title;
+	
+	_targetObj = targetObj;
+	
+	if(_isWebChannelRequest){
+		
+		KAKAO_IMG_SRC = shareImg(imgUrl);
+		console.log("KAKAO_IMG_SRC : "+ KAKAO_IMG_SRC);
+//		alert("KAKAO_IMG_SRC : "+ KAKAO_IMG_SRC);
+		
+		// 카카오 공유 이미지
+		KAKAO_IMG = new Image();
+		KAKAO_IMG.src = KAKAO_IMG_SRC;
+		console.log("KAKAO_IMG.src : "+ KAKAO_IMG.src);
+//		alert("KAKAO_IMG.src : "+ KAKAO_IMG.src);
+		
+		// 카카오 버튼 문구
+		KAKAO_BTN_TXT = shareBtn(btnTxt);
+		
+		
+			// SMS 공유기능 특정폰 파라미터 짤림 현상 수정 
+			if (smsDeviceType() == "?") { // AOS
+				document.getElementById("sms").setAttribute("href", "sms:"+ smsDeviceType() +"body="+ encodeURIComponent(URL.replace(/&/gi,"%26")));
+			} else { // IOS
+				document.getElementById("sms").setAttribute("href", "sms:"+ smsDeviceType() +"body="+ encodeURIComponent(URL));
+			}
+		
+		
+		// URL 복사
+		document.getElementById("clipboard").value = URL;
+		$("#copyClipboard").html(URL);
+		//$("#clipboard").val(URL);
+		//uiJSLayer.open("popShare");
+		
+		
+		//GA추가
+		GA_Virtual("공유하기", "MKEVT1000M.web");
+		
+		uiJSLayer.open('popShare', targetObj);
+		
+	}else{
+		//앱 경우 공유하기 스킴호출
+		appShare(URL, TITLE);
+	}
+	
+
+}
+
+/**
+ * 공유 URL
+ *  - 있는 경우 : URL
+ *  - 없는 경우 : MOU 기본 URL
+ */
+function shareUrl(url) {
+	var shareUrl;
+	
+	if (isEmpty(url)) {
+		shareUrl = ORGN_URL;
+	} else if (url.indexOf("http") > -1) {
+		shareUrl = url;
+	} else if (url.substr(0, 1) == "/") {
+		shareUrl = ORGN_URL + url;
+	} else {
+		shareUrl = ORGN_URL +"/"+ url;
+	}
+	
+	return shareUrl;
+}
+
+/**
+ * 공유 이미지
+ *  - 있는 경우 : 이미지
+ *  - 없는 경우 : 하나카드 shortcut icon
+ */
+function shareImg(imgUrl) {
+	var shareImg;
+	
+	if (isEmpty(imgUrl)) {
+		shareImg = ORGN_URL +"/images/contents/img_card_default.png"; // TODO 270*270 기본이미지 필요
+	} else if (imgUrl.indexOf("http") > -1) {
+		shareImg = imgUrl;
+	} else if (imgUrl.substr(0, 1) == "/") {
+		shareImg = ORGN_URL + imgUrl;
+	} else {
+		shareImg = ORGN_URL +"/"+ imgUrl;
+	}
+	
+	return shareImg;
+}
+
+/**
+ * 공유 버튼 문구
+ *  - 있는 경우 : 지정 문구
+ *  - 없는 경우 : "자세히 보기"
+ */
+function shareBtn(btnTxt) {
+	var shareBtn;
+	
+	if (isEmpty(btnTxt)) {
+		shareBtn = "자세히 보기";
+	} else {
+		shareBtn = btnTxt;
+	}
+	
+	return shareBtn;
+}
+
+
+
+Kakao.init("33fd0ea4a1a55982e06ce57c2b03d7c3");
+
+// 카카오톡
+function kakaotalk() {
+	if (isEmpty(KAKAO_IMG_RATIO)) {
+		/**
+		 * 공유 이미지 있는 경우
+		 *  - KAKAO_IMG_SRC   : 공유 이미지 URL
+		 *  - KAKAO_IMG_RATIO : 공유 이미지 비율 (실제높이 / 실제너비)
+		 * 
+		 * 공유 이미지 없는 경우
+		 *  - KAKAO_IMG_SRC   : 하나카드 GMH shortcut icon
+		 *  - KAKAO_IMG_RATIO : 1
+		 */
+		KAKAO_IMG_NTL_WIDTH  = KAKAO_IMG.naturalWidth;
+		KAKAO_IMG_NTL_HEIGHT = KAKAO_IMG.naturalHeight;
+		KAKAO_IMG_RATIO      = (KAKAO_IMG_NTL_HEIGHT > 0 && KAKAO_IMG_NTL_WIDTH > 0) ? (KAKAO_IMG_NTL_HEIGHT / KAKAO_IMG_NTL_WIDTH) : 1;
+		KAKAO_IMG_WIDTH      = 800;
+		KAKAO_IMG_HEIGHT     = parseInt(KAKAO_IMG_WIDTH * KAKAO_IMG_RATIO, 10);
+		
+		console.log("KAKAO_IMG_NTL_WIDTH  : "+ KAKAO_IMG_NTL_WIDTH);
+		console.log("KAKAO_IMG_NTL_HEIGHT : "+ KAKAO_IMG_NTL_HEIGHT);
+		console.log("KAKAO_IMG_RATIO      : "+ KAKAO_IMG_RATIO);
+		console.log("KAKAO_IMG_WIDTH      : "+ KAKAO_IMG_WIDTH);
+		console.log("KAKAO_IMG_HEIGHT     : "+ KAKAO_IMG_HEIGHT);
+		
+	} else {
+		console.log(":: KAKAO_IMG_RATIO IS NOT NULL ::");
+	}
+	
+	/*
+	// AS-IS
+	Kakao.Link.sendTalkLink({
+		image : {
+			src    : KAKAO_IMG_SRC,
+			width  : KAKAO_IMG_WIDTH,
+			height : KAKAO_IMG_HEIGHT
+		},
+		label : TITLE,
+		webButton: {
+			text : KAKAO_BTN_TXT,
+			url  : URL
+		}
+	});
+	*/
+	
+	/**
+	 * 이미지 노출
+	 *  - 개발계 확인 시 이미지 접근 URL 이 유효하지 않아 imageUrl 미노출
+	 *  - 상용계 반영 후 이미지 노출 확인 필요
+	 * 
+	 * 단말 버전 (KAKAO 정책)
+	 *  - AOS 4.4.# 미만 미지원 (갤럭시노트2, 갤럭시3 ...)
+	 *  - IOS 8.4.1 이하 미지원
+	 */
+	Kakao.Link.sendDefault({
+		objectType : "feed",
+		content : {
+			title : TITLE,
+		//	imageUrl : ORGN_URL +"/mou/images/layout/app_270.png",
+		//	imageUrl : "https://m.global.hanacard.co.kr/mou/images/layout/app_270.png",
+			imageUrl : KAKAO_IMG_SRC,
+			imageWidth  : KAKAO_IMG_WIDTH,
+			imageHeight	: KAKAO_IMG_HEIGHT,
+			/*
+			imageUrl : "http://mud-kage.kakao.co.kr/dn/Q2iNx/btqgeRgV54P/VLdBs9cvyn8BJXB3o7N8UK/kakaolink40_original.png",
+			
+			imageUrl : "https://m.global.hanacard.co.kr/ATTACH/mou/images/event/list/gmh_open_evt_bn.jpg",
+			imageWidth : 800,
+			imageHeight	: 800,
+			*/
+			link : {
+				mobileWebUrl : URL,
+				webUrl : URL
+			}
+		},
+		buttons : [{
+			title : KAKAO_BTN_TXT,
+			link : {
+				mobileWebUrl : URL,
+				webUrl : URL
+			}
+		}]
+	});
+}
+
+/**
+ * 공유하기
+ *  - url    : 링크 URL
+ *  - title  : 제목
+ *  - imgUrl : 카카오톡 공유 시 중단 영역에 노출되는 이미지 URL
+ *  - btnTxt : 카카오톡 공유 시 하단 영역에 노출되는 버튼 문구
+ */
+function shareKko(url, title, imgUrl, btnTxt) {
+	URL   = shareUrl(url);
+	TITLE = title;
+	
+	KAKAO_IMG_SRC = shareImg(imgUrl);
+	console.log("KAKAO_IMG_SRC : "+ KAKAO_IMG_SRC);
+//	alert("KAKAO_IMG_SRC : "+ KAKAO_IMG_SRC);
+	
+	// 카카오 공유 이미지
+	KAKAO_IMG = new Image();
+	KAKAO_IMG.src = KAKAO_IMG_SRC;
+	console.log("KAKAO_IMG.src : "+ KAKAO_IMG.src);
+//	alert("KAKAO_IMG.src : "+ KAKAO_IMG.src);
+	
+	// 카카오 버튼 문구
+	KAKAO_BTN_TXT = shareBtn(btnTxt);
+	
+	// URL 복사
+	document.getElementById("clipboard").value = URL;
+	
+	kakaotalk();
+}
+// 페이스북
+function facebook() {
+	/*
+	window.open(
+		"https://www.facebook.com/sharer/sharer.php?u="+ encodeURIComponent(URL) +"&t="+ encodeURIComponent(TITLE),
+		"_blank",
+		"menubar=no,toolbar=no,resizable=yes,scrollbars=yes"
+	);
+	*/
+//	extOpen("https://www.facebook.com/sharer/sharer.php?u="+ encodeURIComponent(URL) +"&t="+ encodeURIComponent(TITLE));
+	goNewWin("https://www.facebook.com/sharer/sharer.php?u="+ encodeURIComponent(URL) +"&t="+ encodeURIComponent(TITLE));
+	
+	return false;
+}
+
+// 트위터
+function twitter() {
+	/*
+	window.open(
+		"https://twitter.com/intent/tweet?url="+ encodeURIComponent(URL) +"&text="+ encodeURIComponent(TITLE),
+		"_blank",
+		"menubar=no,toolbar=no,resizable=yes,scrollbars=yes"
+	);
+	*/
+//	extOpen("https://twitter.com/intent/tweet?url="+ encodeURIComponent(URL) +"&text="+ encodeURIComponent(TITLE));
+	goNewWin("https://twitter.com/intent/tweet?url="+ encodeURIComponent(URL) +"&text="+ encodeURIComponent(TITLE));
+	
+	return false;
+}
+
+// 복사
+function copy() {
+  	var clipboard = document.getElementById("clipboard");
+	var userAgent = navigator.userAgent.toLowerCase();
+	if (userAgent.match("android")) {
+		 $("#clipboard").select();
+	} else {
+		var range = document.createRange();
+			range.selectNodeContents(clipboard);
+		var selection = window.getSelection();
+			selection.addRange(range);
+		
+		clipboard.setSelectionRange(0, 9999);
+	}
+	
+	document.execCommand("Copy"); 
+	
+}
+
+
+//]]>
+</script>
+
+
+<div class="layer-wrap layer-wrap--slide" data-layer="popShare">
+	<div class="layer-container">
+		<section class="ui-layer">
+			<div class="ui-layer__head">
+				<div class="header">
+					<h2 class="header__title">친구에게 공유하기</h2>
+					<div class="header__right">
+						<button type="button" class="ui-button header__button header__button--close" data-role="layerClose">
+							<span class="for-a11y">레이어 닫기</span>
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="ui-layer__body">
+				<div class="ui-layer__body-inner">
+					<div class="sns-area">
+						<ul class="sns-list">
+						
+						<!-- 카드신청이고 은행 디지털 채널인 경우 -->
+							
+								<li class="sns-item type-kakao"><button type="button" class="sns-button" onclick="kakaotalk();" title="새창열림">카카오톡</button></li>
+								<li class="sns-item type-facebook"><button type="button" class="sns-button" onclick="facebook();" title="새창열림">페이스북</button></li>
+								<li class="sns-item type-twitter"><button type="button" class="sns-button" onclick="twitter();" title="새창열림">트위터</button></li>
+								<li class="sns-item type-sms"><a href="" class="sns-button" id="sms">SMS</a></li>
+							
+							
+						</ul>
+					</div>
+					<div class="form-list">
+						<div class="form-item">
+							<div class="form-title">
+								<strong class="title">URL 복사</strong>
+							</div>
+							<div class="form-group">
+								<div class="form-flex">
+									<div class="form-flex-cell type-flexible type-has-unit">
+										<div class="ui-input-block">
+											<input type="text" class="ui-input" title="URL" id="clipboard" value="" readonly />
+										</div>
+									</div>
+									<div class="form-flex-cell">
+										<div data-clipboard-target="copyURL" id="copyClipboard"></div>
+										<button type="button" class="ui-button ui-basic-button type-small type-gray" data-clipboard="copyURL" >URL 복사</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+</div>
+
+
+<!-- layer: QR 코드 보기 -->
+<div class="layer-wrap layer-wrap--full layer-qr-code" data-layer="popQrcode" id="popQrcode">
+	<div class="layer-container">
+		<section class="ui-layer">
+			<div class="ui-layer__head">
+				<div class="header">
+					<h2 class="header__title">친구에게 공유하기</h2>
+					<div class="header__right">
+						<button type="button" class="ui-button header__button header__button--close" data-role="layerClose">
+							<span class="for-a11y">레이어 닫기</span>
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="ui-layer__body">
+				<div class="ui-layer__body-inner">
+					<div class="qr-code">
+						
+							
+						
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+</div>
+<!-- //layer: QR 코드 보기 -->
+			
+
+
+
+
+<script>
+
+if(typeof EVN_SEQ == 'undefined'){
+	var EVN_SEQ = '';
+}
+if(typeof U_SDT == 'undefined'){
+	var U_SDT = '';
+}
+if(typeof U_EDT == 'undefined'){
+	var U_EDT = '';
+}
+if(typeof OUT_SDT == 'undefined'){
+	var OUT_SDT = '';
+}
+if(typeof OUT_EDT == 'undefined'){
+	var OUT_EDT = '';
+}
+if(typeof PAYGUBUN == 'undefined'){
+	var PAYGUBUN = '';
+	if( _isWebChannelRequest ){
+		PAYGUBUN = 'MKAW';
+	}else{
+		PAYGUBUN = 'MKAA';
+	}
+}
+if(typeof _isLogin == 'undefined'){
+	var _isLogin = false;
+	
+}
+
+var _prstUrl = _backUrl;
+
+function closeEventPop(){
+	uiJSLayer.close('layer-apply-event-pop');
+	_backUrl = _prstUrl;
+}
+
+
+function goEventPop(EVN_SEQ_in){
+	var url = "/MKEVT1011M.ajax";
+	var param = {
+		EVN_SEQ : EVN_SEQ_in
+	};
+
+	ajaxExceute2(url, param, function(dataMap) {
+		if( dataMap.RESULT == "SUCCESS") {
+			// html 영역 초기화
+			$('.bnDisplay_pop').hide();
+			$('.EVN_TARGET_pop').hide();
+			$('#assoEvent').hide();
+			$('#assoCouponList').hide();
+			$('#ADD_CLOB').hide();
+			$('#blLstBtn').hide();
+			
+			var U_SDT_pop = dataMap.eventDetail.EVN_SSP_SDT;
+			var U_EDT_pop = dataMap.eventDetail.EVN_SSP_EDT;
+			
+			if(U_SDT == ''){
+				U_SDT = U_SDT_pop;
+			}else if(U_SDT != U_SDT_pop){
+				U_SDT = U_SDT_pop;
+			}
+			
+			if(U_EDT == ''){
+				U_EDT = U_EDT_pop;
+			}else if(U_EDT != U_EDT_pop){
+				U_EDT = U_EDT_pop;
+			}
+			
+			var bannerDisplay = dataMap.utm_medium;
+			if(bannerDisplay == "lms"){
+				$('.bnDisplay_pop').show();
+			}
+			
+			var EVN_TIT_NM = dataMap.eventDetail.EVN_TIT_NM;
+			$('.EVN_TIT_NM_pop_top').find('.fix-txt').html(EVN_TIT_NM);
+			$('#view03_pop').find('.EVN_TIT_NM_pop').html(EVN_TIT_NM);
+			
+			//트래블로그 적립챌린지의 경우 
+			
+			
+			var ADD_VAR2 = dataMap.eventDetail.ADD_VAR2 == undefined ? "" : dataMap.eventDetail.ADD_VAR2;
+			var MAIN_IMG_TXT = dataMap.eventDetail.MAIN_IMG_TXT == undefined ? "" : dataMap.eventDetail.MAIN_IMG_TXT;
+			MAIN_IMG_TXT = replaceAll(MAIN_IMG_TXT, "\"","˝");
+			$('#view01_pop').html('<img src="'+ADD_VAR2+'" alt="'+MAIN_IMG_TXT+'" class="image-only" />')
+			
+			var view02_html = '';
+			var SHARE_YN = dataMap.eventDetail.SHARE_YN;
+			
+			var EVN_SEQ_pop = dataMap.eventDetail.EVN_SEQ;
+			if(EVN_SEQ == ''){
+				EVN_SEQ = EVN_SEQ_pop;
+			}else if(EVN_SEQ != EVN_SEQ_pop){
+				EVN_SEQ = EVN_SEQ_pop;
+			}
+			
+			if(SHARE_YN == 'Y'){
+				view02_html += "<a href=\"javascript:void(0);\" onclick=\"javascript:doShare_pop('"+EVN_SEQ_pop+"', '"+EVN_TIT_NM+"', '"+ADD_VAR2+"', '');\" class=\"coupon-detail-button type-share\" role=\"button\"><span class=\"for-a11y\">공유하기</span></a>";
+			}
+			
+			var SCRP_YN = dataMap.eventDetail.SCRP_YN;
+			var FAVOR_YN = dataMap.FAVOR_YN;
+			if(SCRP_YN == 'Y'){
+				if(FAVOR_YN == 'Y'){
+					view02_html += "<button type=\"button\" class=\"coupon-detail-button type-heart is-active\" id=\"scrapCon_pop\" onclick=\"javascript:scrap_pop('"+EVN_SEQ_pop+"','D', true)\" data-toggle=\"true\"><span class=\"for-a11y\">찜하기</span></button>";
+				}else{
+					view02_html += "<button type=\"button\" class=\"coupon-detail-button type-heart\" id=\"scrapCon_pop\" onclick=\"javascript:scrap_pop('"+EVN_SEQ_pop+"','I', false)\" data-toggle=\"true\"><span class=\"for-a11y\">찜하기</span></button>";
+				}
+			}
+			
+			$('#view02_pop').html(view02_html);
+			
+			var EVN_SDT_pop = dataMap.eventDetail.EVN_SDT == undefined ? "" : dataMap.eventDetail.EVN_SDT;
+			var EVN_EDT_pop = dataMap.eventDetail.EVN_EDT == undefined ? "" : dataMap.eventDetail.EVN_EDT;
+			
+			if(OUT_SDT == ''){
+				OUT_SDT = EVN_SDT_pop;
+			}else if(OUT_SDT != EVN_SDT_pop){
+				OUT_SDT = EVN_SDT_pop;
+			}
+			
+			if(OUT_EDT == ''){
+				OUT_EDT = EVN_EDT_pop;
+			}else if(OUT_EDT != EVN_EDT_pop){
+				OUT_EDT = EVN_EDT_pop;
+			}
+			
+			$('.EVN_DT_pop').html(getDateFormat(EVN_SDT_pop, "yyyy.MM.dd")+' ~ '+getDateFormat(EVN_EDT_pop, "yyyy.MM.dd"));
+			
+			var EVN_TARGET = dataMap.eventDetail.EVN_TARGET == "" || dataMap.eventDetail.EVN_TARGET == undefined ? "" : dataMap.eventDetail.EVN_TARGET;
+			if(EVN_TARGET != ""){
+				$('.EVN_TARGET_pop').find('.basic-text').html(EVN_TARGET);
+				$('.EVN_TARGET_pop').show();
+			}
+			
+			var PSTS_CN = dataMap.eventDetail.PSTS_CN == undefined ? "": dataMap.eventDetail.PSTS_CN;//상세내용
+			$('#view04_pop').find('.event-data').html(PSTS_CN);
+			
+			var assoEventList = dataMap.eventDetail.assoEventList;
+			
+			var grpList = [];
+			var grpMap = {'EVN_GRP_NO':[], 'ASSO_EVN_NM':[]};
+			
+			for(var i=0; i<assoEventList.length; i++){
+				var dupChk = false;
+			
+				if(grpList != null){
+					for(var j=0; j<grpList.length; j++){
+						if(assoEventList[i].EVN_GRP_NO == grpList[j].EVN_GRP_NO){
+							dupChk = true;
+							break;
+						}
+					}
+				}
+				
+				if(!dupChk){
+					grpMap.EVN_GRP_NO.push(assoEventList[i].EVN_GRP_NO);
+					grpMap.ASSO_EVN_NM.push(assoEventList[i].ASSO_EVN_NM);
+				}
+			}
+			
+			grpList.push(grpMap);
+			
+			var assoHtml = '';
+			var grpListInx = 0;
+			
+			for(var i=0; i<grpMap.EVN_GRP_NO.length; i++){
+				
+				if(grpListInx > 0){
+					assoHtml += '<div class="page-section-group type-line">';
+				}else{
+					assoHtml += '<div class="page-section-group">';
+				}
+				
+				if(grpMap.ASSO_EVN_NM[i] != ''){
+					assoHtml += '<div class="section-title margin-bottom-15">';
+					assoHtml += '<h3 class="title">'+grpMap.ASSO_EVN_NM[i]+'</h3>';
+					assoHtml += '</div>';
+				}
+				
+				assoHtml += '<div class="usage-default">';
+				assoHtml += '<ul class="usage-default-list margin-top-none">';
+				
+				for(var j=0; j<assoEventList.length; j++){
+					var assoInfo = assoEventList[j];
+					if(grpMap.EVN_GRP_NO[i] == assoInfo.EVN_GRP_NO){
+						var asso_EVN_SEQ = assoInfo.EVN_SEQ;
+						var EVN_BULT_ST = assoInfo.EVN_BULT_ST;
+						var SRN_CONN_URL = assoInfo.SRN_CONN_URL;
+						var EVN_SSP_ST = assoInfo.EVN_SSP_ST;
+						var LIST_IMG_TXT = assoInfo.LIST_IMG_TXT;
+						var ITG_APP_EVN_MC_NM = assoInfo.ITG_APP_EVN_MC_NM;
+						var asso_EVN_TIT_NM = assoInfo.EVN_TIT_NM;
+						var ASSO_EVN_NM_HTM_CN = assoInfo.ASSO_EVN_NM_HTM_CN;
+						var EVN_SSP_SDT = assoInfo.EVN_SSP_SDT;
+						var EVN_SSP_EDT = assoInfo.EVN_SSP_EDT;
+						
+						// 진행중인 이벤트 링크
+						var assoEvnLink = "goLinkWeb('/MKEVT1010M.web?EVN_SEQ="+asso_EVN_SEQ+"')";
+						
+						// 종료된 이벤트 링크
+						if(EVN_BULT_ST == 'E'){
+							assoEvnLink = "goLinkWeb('/MKEVT3010M.web?EVN_SEQ="+asso_EVN_SEQ+"')";
+						}
+						
+						// 설정된 연관이벤트 링크
+						if(SRN_CONN_URL != '' && SRN_CONN_URL != undefined){
+							assoEvnLink = "goLinkWeb('"+SRN_CONN_URL+"')";
+						}
+						
+						assoEvnLink = "javascript:GA_Event_Fn('통합앱_이벤트','"+EVN_TIT_NM+"_연관이벤트','"+asso_EVN_TIT_NM+"','', "+assoEvnLink+");";
+						
+						// 이벤트 이미지 셋팅							
+						var evnImg = assoInfo.APN_FILE_NM;
+						
+						assoHtml += '<li class="usage-default-item type-box">';
+						
+						if(EVN_SSP_ST == 'I'){
+							assoHtml += '<a href="javascript:void(0);" onclick="'+assoEvnLink+'" class="usage-default-block type-align-middle">';	
+						}else{
+							assoHtml += '<a href="javascript:void(0);" onclick="'+assoEvnLink+'" class="usage-default-block type-align-middle type-disabled">';
+						}
+						
+						assoHtml += '<div class="usage-default-left-group type-align-middle">';
+						assoHtml += '<div class="logo-image type-store">';
+						assoHtml += '<div class="logo-image-inner">';
+						assoHtml += '<img src="'+evnImg+'" alt="'+LIST_IMG_TXT+'" onerror="this.parentNode.className += \' is-error\';" />';
+						assoHtml += '</div></div>';
+						assoHtml += '<div class="usage-default-left">';
+						
+						if(ASSO_EVN_NM_HTM_CN != ''){
+							assoHtml += ASSO_EVN_NM_HTM_CN;
+						}else{
+							if(ITG_APP_EVN_MC_NM != ''){
+								assoHtml += '<div class="usage-default-brand type-multi-ellipsis color-primary">'+ITG_APP_EVN_MC_NM+'</div>';
+							}
+							assoHtml += '<div class="usage-default-title type-multi-ellipsis">'+asso_EVN_TIT_NM+'</div>';
+						}
+						assoHtml += '<div class="usage-default-etc margin-top-10">';
+						
+						if(EVN_SSP_SDT != ""){
+							assoHtml += '<div class="usage-default-etc-item">'+EVN_SSP_SDT+' ~';
+						}
+						if(EVN_SSP_EDT != ""){
+							assoHtml += EVN_SSP_EDT;
+						}
+						
+						assoHtml += '</div></div></div></div>';
+						assoHtml += '<div class="usage-default-right type-auto">';
+						
+						if(EVN_SSP_ST == 'I'){
+							assoHtml += '<span class="ui-badge color-primary-fill ui-arrow">GO</span>';
+						}else{
+							assoHtml += '<span class="ui-badge">종료</span>';
+						}
+						
+						assoHtml += '</div></a></li>';
+					}
+				}
+				
+				assoHtml += '</ul></div></div>';
+				grpListInx++;
+				
+			}
+			
+			$('#assoEvent').html(assoHtml);
+			if(grpMap.EVN_GRP_NO.length > 0){
+				$('#assoEvent').show();
+			}
+			
+			var couponList = dataMap.couponList;
+			var couponListCnt = couponList.length;
+			var couponListHtml = "";
+			
+			for(i=0; i<couponList.length; i++){
+				var cpInfo = couponList[i];
+				var CPON_KNDC = cpInfo.CPON_KNDC;
+				
+				var _cponUrl = "javascript:GA_Event_Fn('통합앱_이벤트','"+EVN_TIT_NM+"_제휴쿠폰','"+cpInfo.ITG_APP_CPON_NM+"','', goLinkWeb('/MKCPON1020M.web?CPN_SEQ="+cpInfo.CPN_SEQ+"'));";
+				
+				couponListHtml += '<li class="coupons-item">';
+				couponListHtml += '<div class="coupon-card">';
+				
+				couponListHtml += '<div class="coupon-card-left">';
+				couponListHtml += '<div class="coupon-card-info">';
+				
+				couponListHtml += '<div class="logo-image type-store">';
+				couponListHtml += '<div class="logo-image-inner">';
+				couponListHtml += '<img src="'+cpInfo.LIT_IMG_PH_NM+'" alt="'+cpInfo.LIT_IMG_RPL_CN+'" onerror="this.parentNode.className += \' is-error\';" />';
+				couponListHtml += '</div></div>';
+				
+				couponListHtml += '<div class="coupon-card-brand">'+cpInfo.ITG_APP_CPON_MC_NM+'</div>';
+				couponListHtml += '<div class="coupon-card-name">'+cpInfo.ITG_APP_CPON_NM+'</div>';
+				couponListHtml += '<div class="coupon-card-date">'+cpInfo.U_SDT+' ~ '+cpInfo.U_EDT+'</div>';
+				couponListHtml += '<a href="javascript:void(0);" onclick="'+_cponUrl+'" class="coupon-card-link"><span class="for-a11y">상세보기</span></a>';
+				couponListHtml += '</div></div>';
+				couponListHtml += '<div class="coupon-card-right">';
+				
+				if(CPON_KNDC == '01' || CPON_KNDC == '04'){
+					couponListHtml += '<button type="button" onclick="'+_cponUrl+'" class="ui-button coupon-card-action type-download">';
+					couponListHtml += '<span class="for-a11y">쿠폰 바로가기</span>';
+					couponListHtml += '</button>';
+				}else if(CPON_KNDC == '03'){
+					couponListHtml += '<button type="button" onclick="'+_cponUrl+'" class="ui-button coupon-card-action type-link">';
+					couponListHtml += '<span class="for-a11y">쿠폰 바로가기</span>';
+					couponListHtml += '</button>';
+				}else if(CPON_KNDC == '02' || CPON_KNDC == '05'){
+					couponListHtml += '<button type="button" onclick="'+_cponUrl+'" class="ui-button coupon-card-action type-bar-code">';
+					couponListHtml += '<span class="for-a11y">쿠폰 바로가기</span>';
+					couponListHtml += '</button>';
+				}
+				
+				couponListHtml += '</div></div></li>';
+			}
+			
+			$('#assoCouponList').find('.coupons-list').html(couponListHtml);
+			if(couponListCnt > 0){
+				$('#assoCouponList').show();
+			}
+				
+			var ADD_CLOB = dataMap.eventDetail.ADD_CLOB;
+			if(ADD_CLOB != '' && ADD_CLOB != undefined){
+				$('#ADD_CLOB').find('.event-data').html(ADD_CLOB);
+				$('#ADD_CLOB').show();
+			}
+			
+			var ADD_VAR9 = dataMap.eventDetail.ADD_VAR9 == '' || dataMap.eventDetail.ADD_VAR9 == undefined ? "": dataMap.eventDetail.ADD_VAR9;//준법심의번호
+			$('.addVar9_pop').html(ADD_VAR9);
+			
+			var blLstBtnYn = dataMap.BL_LST_BTN == "" || dataMap.BL_LST_BTN == undefined ? "N" : "Y";
+			if(blLstBtnYn && EVN_SEQ_pop != '6605'){
+				$('#blLstBtn').show();
+			}
+			
+			$(".wcms-notice-item").addClass("is-opened");
+			
+			eventPopHfix();
+			//$('#layer-apply-event-pop').show();
+			uiJSLayer.open('layer-apply-event-pop');
+			 
+				_backUrl = closeEventPop;
+			
+			
+	    }else{
+	    	
+			ajaxError(dataMap);
+		}
+	},
+	function( dataMap, jqXHR) {
+		if(dataMap.DATA.RESULT == 'MKEVT3010M'){
+			goLinkWeb('MKEVT3010M.web?'+dataMap.DATA.EVN_SEQ);
+		}else{
+			ajaxError(dataMap);	
+		}
+	},
+	{
+		isLoding:true
+	});
+}
+
+
+
+function scrap_pop(seq,proc, orgIsActive) {
+  if(proc == "D"){
+		var EVN_SEQs = new Array();
+		EVN_SEQs.push(seq);
+
+		var param = {
+			targetMethod : "scrapDel"
+			, EVN_SEQs : EVN_SEQs
+		};
+	}else{
+		var param = {
+			targetMethod : "scrap"
+			, EVN_SEQ : seq
+		};
+	}
+
+	var url = "/MKEVT6010M.ajax";
+	
+	ajaxExceute2(url, param, function(dataMap) {
+		if(dataMap.RESULT == "SUCCESS"){
+			var _onclick = "";
+
+    		if(proc == "D"){
+				_onclick="javascript:scrap_pop('"+seq+"','I', false);";
+			}else{
+				_onclick="javascript:scrap_pop('"+seq+"','D', true);";
+				uiJSToastAlert('#toastAlert_pop', '이벤트를 찜했습니다.', '#zzim_pop');
+			}
+
+    		$("#scrapCon_pop").attr("onclick", _onclick);
+	    }else{
+			ajaxError(dataMap);
+		}
+	},
+	function( dataMap, jqXHR) {
+		if(orgIsActive){
+			$("#scrapCon_pop").addClass("is-active");	
+		}else{
+			$("#scrapCon_pop").removeClass("is-active");
+		}
+
+		if(dataMap.CODE == "MK001011"){
+			goLinkWeb('/MKLGN2000M.web');
+		}else{
+			ajaxError(dataMap);
+		}
+	},
+	{
+		isLoding:false
+	});
+}
+
+
+function doShare_pop(seq, name, img, btnTxt) {
+	if(img != "" && img != "undefined" && img != null && img != "null"){
+		img = "https://m.hanacard.co.kr" + img;
+	}else{
+		img = "https://m.hanacard.co.kr" + "/images/data/sum_default.jpg"
+	}
+
+	var shareUrl = "https://m.hanacard.co.kr" + "/MKEVT1010M.web?EVN_SEQ="+ seq;
+
+	share(shareUrl, name, img, btnTxt);
+}
+
+
+function eventPopHfix(){
+    $(".eventPopBody").scroll(function(){
+        var headerHeight = $(".eventPopBody .full-contents-pop").outerHeight();
+        var scrollT = $(".eventPopBody").scrollTop();
+        if(scrollT >= headerHeight + 1){
+            $(".EVN_TIT_NM_pop_top").addClass("fixed")
+        } else {
+            $(".EVN_TIT_NM_pop_top").removeClass("fixed")
+        }
+    })
+};
+</script>
+
+<!-- layer: 이벤트 팝업 -->
+<div class="layer-wrap layer-wrap--slide" data-layer="layer-apply-event-pop" id="layer-apply-event-pop">
+	<div class="layer-container">
+		<section class="ui-layer">
+			<div class="ui-layer__outtop">
+				<div class="ui-layer__outtop-right">
+					<button id="evnPopCloseBtn" type="button" class="ui-button ui-layer__outtop-close" data-role="layerClose">
+						<span class="for-a11y">레이어 닫기</span>
+					</button>
+				</div>
+			</div>
+			<div class="ui-layer__body none-scroll">
+				<div class="ui-layer__body-inner none-header-type eventPopBody">
+	            	<!-- 2023.04.25 추가 -->
+	                <div class="fix-scroll-header EVN_TIT_NM_pop_top">
+	                    <div class="fix-txt">
+	                    </div>
+	                </div>
+	                
+					<div class="layer-contents">
+                       <div class="event-detail-header">
+						<div class="full-contents-pop" id="view01_pop">
+                        </div>
+
+	                   	<div class="coupon-detail-buttons type-only margin-top-10" id="view02_pop">
+	                   	</div>
+	                   	
+	                   	<div class="page-section-group type-line margin-top-10" id="view03_pop">
+	                       <section class="page-section-group">
+	                           <div class="section-title">
+	                               <h2 class="title">제목</h2>
+	                           </div>
+	                           <p class="basic-text color-blur EVN_TIT_NM_pop"></p>
+	                       </section>
+	                       <section class="page-section-group margin-top-25">
+	                           <div class="section-title">
+	                               <h2 class="title">기간</h2>
+	                           </div>
+	                           <p class="basic-text color-blur EVN_DT_pop"></p>
+	                       </section>
+	                       <section class="page-section-group margin-top-25 EVN_TARGET_pop" style="display:none;">
+	                           <div class="section-title">
+	                               <h2 class="title">대상</h2>
+	                           </div>
+	                           <p class="basic-text color-blur"></p>
+	                       </section>
+	                   </div>
+                      </div>
+					
+                   	  	<div class="page-section-group type-line" id="view04_pop">
+                   	 
+                        <div class="wcms-data">
+                            <section class="event-data">
+                             </section>
+                         </div>
+                      </div>
+                      
+                       <!-- 연관이벤트 -->
+					  <div class="page-section type-line" id="assoEvent" style="display:none">
+					  </div>
+					  <!-- //연관이벤트 -->
+						
+					  <!-- Case : 제휴쿠폰 -->
+					  <div class="page-section type-line" id="assoCouponList" style="display:none">
+						<div class="coupons">
+							<ul class="coupons-list">
+							</ul>
+						</div>
+					  </div>
+					  <!-- //Case : 제휴쿠폰 -->
+					  
+					  <!-- 이용안내 -->
+					  <div class="wcms-data margin-top-30" id="ADD_CLOB" style="display:none">
+						<section class="event-data">
+						</section>
+					  </div>
+					  <!-- //이용안내 -->
+					  <div class="page-section-group">
+						<p class="basic-text">
+							상환능력에 비해 신용카드 사용액이 과도할 경우, 귀하의 개인신용평점이 하락할 수 있습니다.<br />
+							개인신용평점 하락 시 금융거래와 관련된 불이익이 발생할 수 있습니다.<br />
+							일정기간 원리금을 연체할 경우, 모든 원리금을 변제할 의무가 발생할 수 있습니다.
+						</p>
+						<div class="wcms-data margin-top-15">
+							<!-- 준법심의번호 -->
+							<section class="event-data addVar9_pop">
+							</section>
+							<!-- //준법심의번호 -->
+							</div>
+					  </div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+</div>
+<!-- //layer: 이벤트 팝업 -->
+
+<!-- layer: 니콘내콘 회원가입 약관동의 -->
+<div class="layer-wrap layer-wrap--slide layer-wrap--select" data-layer="layer-nkion-nekon-join-terms">
+	<div class="layer-container">
+		<section class="ui-layer">
+			<div class="ui-layer__head">
+				<div class="header">
+					<h2 class="header__title">
+						최저가 쿠폰 득템하려면</br>니콘내콘 가입에 동의해주세요
+					</h2>
+					<div class="header__right">
+						<button type="button" class="ui-button header__button header__button--close" data-role="layerClose">
+							<span class="for-a11y">레이어 닫기</span>
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="ui-layer__body">
+				<div class="ui-layer__body-inner">
+					<div class="ui-select-multiple-list">
+						<div class="ui-select-multiple-item type-all">
+							<div class="ui-checkbox-block type-large">
+								<input type="checkbox" class="ui-checkbox" id="selectCheckbox1-all" data-checkbox-group="selectCheckbox1"/>
+								<label for="selectCheckbox1-all" class="ui-label">
+									<span class="ui-checkbox-object"></span>
+									<span class="ui-label-text">약관 전체 동의</span>
+								</label>
+							</div>
+						</div>
+						<div class="ui-select-multiple-item">
+							<div class="ui-checkbox-block">
+								<input type="checkbox" class="ui-checkbox" id="selectCheckbox1-1" data-checkbox-group-child="selectCheckbox1" data-area-disabled="ncncNextButton" data-area-disabled-type="multi" />
+								<label for="selectCheckbox1-1" class="ui-label">
+									<span class="ui-checkbox-object"></span>
+									<span class="ui-label-text">(필수) 서비스 이용 동의</span>
+								</label>
+								<button type="button" onclick="javascript:mkaTermCnts('NC01');" class="ui-arrow-button"><span class="for-a11y">약관 상세 보기</span></button>
+							</div>
+						</div>
+						<div class="ui-select-multiple-item">
+							<div class="ui-checkbox-block">
+								<input type="checkbox" class="ui-checkbox" id="selectCheckbox1-2" data-checkbox-group-child="selectCheckbox1" data-area-disabled="ncncNextButton" data-area-disabled-type="multi" />
+								<label for="selectCheckbox1-2" class="ui-label">
+									<span class="ui-checkbox-object"></span>
+									<span class="ui-label-text">(필수) 개인정보 수집 및 이용 동의</span>
+								</label>
+								<button type="button" onclick="javascript:mkaTermCnts('NC02');" class="ui-arrow-button"><span class="for-a11y">약관 상세 보기</span></button>
+							</div>
+						</div>
+						<div class="ui-select-multiple-item">
+							<div class="ui-checkbox-block">
+								<input type="checkbox" class="ui-checkbox" id="selectCheckbox1-3" data-checkbox-group-child="selectCheckbox1" data-area-disabled="ncncNextButton" data-area-disabled-type="multi" />
+								<label for="selectCheckbox1-3" class="ui-label">
+									<span class="ui-checkbox-object"></span>
+									<span class="ui-label-text">(필수) 하나카드 개인정보 제3자 제공 동의</span>
+								</label>
+								<button type="button" onclick="javascript:mkaTermCnts('QW78');" class="ui-arrow-button"><span class="for-a11y">약관 상세 보기</span></button>
+							</div>
+						</div>
+						<div class="ui-select-multiple-item">
+							<div class="ui-checkbox-block">
+								<input type="checkbox" class="ui-checkbox" id="selectCheckbox1-4" data-checkbox-group-child="selectCheckbox1" />
+								<label for="selectCheckbox1-4" class="ui-label">
+									<span class="ui-checkbox-object"></span>
+									<span class="ui-label-text">(선택) 니콘내콘 마케팅 광고 수신 동의</span>
+								</label>
+								<button type="button" onclick="javascript:mkaTermCnts('NC03');" class="ui-arrow-button"><span class="for-a11y">약관 상세 보기</span></button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="ui-layer__foot">
+				<div class="ui-buttons">
+					<ul class="ui-buttons-list">
+						<li class="ui-buttons-item">
+							<button type="button" class="ui-button ui-basic-button type-primary" data-area-disabled-target="ncncNextButton" onclick="javascript:doNcncJoin();">해당 약관에 동의합니다.</button>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</section>
+	</div>
+</div>
+<!-- //layer: 니콘내콘 회원가입 약관동의 -->
+
+<!-- 찜하기 -->
+<div class="heart_box zzim" style="display: none; z-index: 999999;" id="zzim_pop"></div>
+<div class="ui-toast-alert" id="toastAlert_pop"><div class="ui-toast-alert-inner"></div></div>
+
+<!-- //cont_area -->
+					
+
+				
+
+
+    <div class="footer-wrap">
+          <footer class="footer">
+          
+			
+        		
+          	
+          		
+          			<div class="footer-nav">
+						<ul class="footer-nav-list">
+							<li class="footer-nav-item">
+								<a class="footer-nav-link" role="button" onclick="goBannerLink('00', '/MKCNTR0010M.web', '');">고객센터</a>
+							</li>
+							<li class="footer-nav-item">
+								<a class="footer-nav-link" role="button" onclick="goBannerLink('00', '/MKCDLR1010M.web', '');">분실·사고신고</a>
+							</li>
+							<li class="footer-nav-item">
+								<!-- [2024-06-11 폰트컬러 초록색으로 변경 : HDH] -->
+								<a class="footer-nav-link color-primary font-weight-medium" role="button" onclick="goBannerLink('00', '/MKPROV1040M.web', '');">개인정보처리방침</a>
+							</li>
+							<li class="footer-nav-item">
+                <!-- [2025-06-23 KJH] [WPM-11558] 접근성 타이틀 추가 -->
+								<a class="footer-nav-link" role="button" onclick="goNewWin('https://hanacard.co.kr');" title="새창열림">하나페이</a>
+							</li>
+						</ul>
+					</div>
+					<div class="footer-tel">
+						<ul class="footer-tel-list">
+							<!-- 2023.07.04 전화연결 버튼에 title 추가 -->
+							<li class="footer-tel-item">
+								<a href="tel:1800-1111" class="footer-tel-link" title="하나카드 '고객센터' 전화번호로 연결">전화상담 1800-1111</a>
+							</li>
+							<li class="footer-tel-item">
+								<a href="tel:82-1800-1111" class="footer-tel-link" title="하나카드 '해외상담' 전화번호로 연결">해외상담 82-1800-1111</a>
+							</li>
+						
+						</ul>
+					</div>
+					<address class="footer-address">서울특별시 중구 을지로 66</address>
+					<div class="footer-text">
+						<ul class="footer-text-list">
+							<li class="footer-text-item">대표이사 성영수</li>
+							<li class="footer-text-item">사업자번호 104-86-56659</li>
+						</ul>
+					</div>
+					<address class="footer-copy">COPYRIGHT&copy; 2017 Hana Card, ALL RIGHTS RESERVERD.
+					
+					    
+					    
+					</address>
+					<div class="footer-logo">
+						<span class="for-a11y">하나카드</span>
+					</div>
+					<div class="footer-marks">
+						<ul class="footer-marks-list">
+							<li class="footer-marks-item">
+								<div class="footer-marks-logo type-ccm"></div>
+								<div class="footer-marks-text">
+									소비자중심경영 인증<br />
+									(2021.1.1 ~ 2027.12.31)
+								</div>
+							</li>							
+							<!-- 20230918 모바일웹일때만 보이도록 분기처리 필요(개발) -->
+							<li class="footer-marks-item" onclick="goNewWin('http://www.webwatch.or.kr');" role="button">
+								<div class="footer-marks-logo type-webwatch"></div>
+								<div class="footer-marks-text">
+									웹접근성 인증<br>
+									웹와치 주식회사
+								</div>
+							</li>
+							<!-- //20230918 모바일웹일때만 보이도록 분기처리 필요(개발) -->
+                            <!--23.11.02 내용 수정-->
+							<li class="footer-marks-item">
+								<div class="footer-marks-logo type-kcpi"></div>
+								<div class="footer-marks-text">
+									한국능률협회컨설팅 주관<br/>
+									4년 연속 금융소비자보호<br/>
+									우수기업(2022년~2025년)
+								</div> <!-- [2025-12-02 KEJ] [WPM-13222] 수정 -->
+							</li>
+                            <!--// 23.11.02 내용 수정-->
+              <!-- [2025-07-09 KJH] [WPM-11243] 7년으로 원복 되어 있음 / 버전 확인했는데 개발작업 때문에 원복 됨 / 다시 8년으로 수정 -->
+							<li class="footer-marks-item">
+								<div class="footer-marks-logo type-ksql"></div>
+								<div class="footer-marks-text">
+									<!-- 한국능률협회컨설팅 주관<br>7년 연속 우수콜센터 선정<br>(2018년~2024년) -->
+                  					한국능률협회컨설팅 주관 <br>8년 연속 우수콜센터 선정 <br>(2018년~2025년)
+								</div>
+							</li>
+              <!-- // [2025-07-09 KJH] [WPM-11243] 7년으로 원복 되어 있음 / 버전 확인했는데 개발작업 때문에 원복 됨 / 다시 8년으로 수정 -->
+							<li class="form-flex">
+								<div class="footer-marks-logo type-isms"></div>
+								<div class="footer-marks-text">
+									정보보호 관리체계 인증 (ISMS)<br>
+									[인증범위] 대고객 홈페이지 운영(웹, 모바일)<br/>
+									[유효기간] 2025.11.28 ~ 2028.11.27
+								</div>
+							</li><!-- [2026-01-02 KEJ] 추가 -->
+						</ul>
+					</div>
+          		
+        	
+						
+          </footer>
+        </div>
+
+
+
+			
+			
+			<div class="page-button-top-wrap">
+				<a href="#wrap" class="page-button-top" role="button"><span class="for-a11y">페이지 최상단으로 이동</span></a>
+			</div>
+			
+			
+			
+
+
+
+
+
+<!--챗봇 닫기버튼 선택 시, 노출되는 팝업 --> 
+<div class="layer-wrap layer-alert" data-layer="layer-info-change-pw-chat">
+	<div class="layer-container">
+		<section class="ui-alert">
+			<div class="ui-alert__head">
+				<div class="ui-alert-header">
+					<!-- 2021.10.26 텍스트 수정 -->
+					<h2 class="ui-alert-header__title">
+						챗봇을 닫을까요?<br />
+					</h2>
+				</div>
+			</div>
+			<div class="ui-alert__body">
+				<div class="ui-alert__body-inner">
+					<div class="ui-alert-message">
+						<!-- 2021.10.26 텍스트 수정 -->
+						<p class="paragraph">
+							지금 닫으면 앱/웹 재접속시<br />
+							다시 이용할 수 있어요.
+						</p>
+					</div>
+				</div>
+			</div>
+			<div class="ui-alert__foot">
+				<div class="ui-buttons">
+					<ul class="ui-buttons-list">
+						<li class="ui-buttons-item">
+							<button type="button" class="ui-button ui-regular-button" data-role="layerClose" onclick="goChatBot('X');">닫기</button>
+						</li>
+						<li class="ui-buttons-item">
+							<button type="button" class="ui-button ui-regular-button type-primary" onclick="keepChatPopup();">유지하기</button>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</section>
+	</div>
+</div>
+<!--//챗봇 닫기버튼 선택 시, 노출되는 팝업 -->
+
+			
+			
+			
+			
+
+
+
+
+
+
+			
+			
+			
+
+
+
+
+
+      </div>
+    </div>    
+    
+	
+
+
+	
+    <!-- script -->
+    <script type="text/javascript" charset="utf-8" src="/js/jquery.cookie.js"></script>
+    <script type="text/javascript" charset="utf-8" src="/js/swiper.min.js"></script>
+    <script type="text/javascript" charset="euc-kr" src="/js/ui-script.js?20260124233"></script>
+    <!-- //script -->
+	<script type="text/javascript" charset="utf-8" src="/js/mka/mkaApp.js?20260124233"></script>
+
+	<script type="text/javascript" charset="utf-8" src="/js/mka/mkaCommon.js?20260124233"></script>
+	<script type="text/javascript" charset="utf-8" src="/js/mka/mkaService.js?20260124233"></script>
+	<script type="text/javascript" charset="utf-8" src="/js/mka/mkaServiceUtils.js?20260124233"></script>
+	<script type="text/javascript" charset="utf-8" src="/js/mka/mkaUtils.js?20260124233"></script>
+	<script type="text/javascript" charset="utf-8" src="/js/mka/mkaEventUtils.js?20260124233"></script>
+	
+	<script type="text/javascript" charset="utf-8" src="/js/duet-date-picker/duet.js"></script>
+	
+	<!-- 통합인증 js -->
+	<script type="text/javascript" src="/js/integrated-auth.js?20260124233"></script> 
+	
+		
+	<!-- 2022.02.14 : add : wcms 컨텐츠용 js 추가 -->
+	<script type="text/javascript" src="/js/wcms-data.js?20260124233"></script>
+	<!-- //2022.02.14 : add : wcms 컨텐츠용 js 추가 -->
+
+	<script type="text/javascript">	
+	window.onload = function(){
+		mkaEfdsInit();
+
+		
+		if( _isAppChannelRequest ){		
+			setLoading(false);
+			
+			try {
+				if( _isAosDeviceRequest && $(".fix-top-wrap .header .header-left .type-back").length > 0 ) {
+					appBackEvent("aosBackEvent");
+				}
+			}
+			catch(e) {}
+		}
+		
+	};
+	
+	function aosBackEvent(){		
+		$(".fix-top-wrap .header .header-left .type-back").click();
+	}
+	
+	function _commWinLoadFn(){
+		//각 확면별 window load function
+		if( "function" === typeof(winLoadFn) ){
+			winLoadFn();
+		}
+		
+		//본인인증 Init 
+		if( "function" === typeof(_AuthInit) ){
+			_AuthInit();
+		}
+		
+		mkaRebm("", "");
+	}
+	
+	//이전페이지
+  	 function goBackWeb(){
+			if( "function"=== typeof(_backUrl) ){
+				_backUrl();
+			}else{
+				goLinkWeb(_backUrl);	
+			}
+		}
+ 
+	
+	/**
+	* urlTy
+    *    - 00 : URL
+    *    - 01 : NATIVE
+    *    - 02 : SCRIPT
+    *    - 03 : 외부링크 (새창 or 외부브라우저)
+    *    - 10 : SSO (내부 WEBVIEW)
+    *    - 11 : SSO (외부 브라우저)
+    *    - 99 : 링크없음
+	*/
+	function goBannerLink(urlTy, url, appMenuId, menuTitle){	
+		if( _isAppChannelRequest && "00"==urlTy && undefined != appMenuId && appMenuId.length > 0){
+			urlTy = "01";
+		}
+
+		if( "00"==urlTy && url.indexOf("#") > -1 ){
+			return;
+		}
+		
+		//마이데이터, 오픈뱅킹, 전자문서 지갑
+		if( !_isAppChannelRequest 
+				&& (url.indexOf("/qwt/mydata.jsp") > -1 || url.indexOf("MKOBQ") > -1 || url.indexOf("MKEW") > -1) ){
+			newWinConfirm.openLayer("PAYWEB", "APP", encodeURIComponent(url));
+			return false;
+		}
+		
+		switch( urlTy ){
+			case "00":
+				if( _isAppChannelRequest && url.indexOf("http") == 0) {
+					appWebView(url, menuTitle);
+				} else if (_isAppChannelRequest && url.indexOf("EVN_SEQ") > -1) {
+					appWebView(url+"&_frame=noX");
+				} else{
+					if( _isMainTab ){
+						goLinkWebView(url);
+					}else{
+						goLinkWeb(url);
+					}
+				}				
+				break;
+				
+			case "01":
+				goPayNative(appMenuId)
+				break;
+				
+			case "02":
+				eval(url);
+				break;
+				
+			case "03":
+				if( url.indexOf("http") != 0 ){
+					url = "https://m.hanacard.co.kr" + url;
+				}
+				goNewWin(url);
+				break;
+				
+			case "10":
+				if( _isAppChannelRequest ){
+					if( url.indexOf("?") ==- 1 ){
+						url = url+"?";
+					}else{
+						url = url+"&";
+					}
+					
+					url = url +"_frame=no";
+					
+					
+					appSsoWebView("https://m.hanacard.co.kr/qwt/cardsvc.jsp?surl="+ encodeURIComponent(url), menuTitle);
+					
+				}else{
+					// goBannerLink("00", "/MKQWT1000M.web?surl="+ encodeURIComponent(url));
+					goLinkWeb("/qwt/cardsvc.jsp?surl="+ encodeURIComponent(url));
+				}
+				
+				break;
+				
+			case "11":
+				ajaxExceute2(
+					"/MKQWT1000M.ajax"
+					, { targetMethod : "generateToken" }
+					, function(dataMap) {
+						// goBannerLink("03", "/MKQWT1000M.web?token=" + dataMap.token + "&surl="+ encodeURIComponent(url));
+						goBannerLink("03", "/qwt/cardsvc.jsp?token=" + dataMap.token + "&surl="+ encodeURIComponent(url));
+					  }
+					, null
+					, {}
+				);
+				break;
+			case "99":
+				//링크없음
+				break;
+		}
+	}
+    
+    function pop_close_focus(obj){ //23.8 웹접근성 처리 관련 레이업 팝업 닫고 초점 이동 추가
+		setTimeout(function(){
+			obj.focus();
+		}, 500);
+		
+	}
+    
+	</script>
+	
+<img src="" id="rebmTmp" style="display: none"/>
+
+
+
+
+<!-- OWN default script -->
+<script language="JavaScript" type="text/javascript" src="/nfilter/js/open_nFilter.js" charset="EUC-KR"></script>
+<script language="JavaScript" type="text/javascript" src="/nfilter/js/secretUtil.js" charset="EUC-KR"></script>
+
+<script type="text/javascript" charset="EUC-KR">
+
+    nshc.contextPath = "";
+    nshc.CSSPath = nshc.contextPath + "/nfilter/css";
+    nshc.imgPath = nshc.contextPath + "/nfilter/image";
+    nshc.randomIdLength = 10;
+    nshc.serviceNameKeypadManager = "nfilter/jsp/open_nFilter_keypad_manager.jsp";
+    nshc.algName = "RSA";
+    nshc.keyLength = "2048";
+    nshc.uuSessionUse = false;
+    nshc.NSCryptoUse = false;
+
+</script>
+
+
+<form id="nForm" name="nForm" method="post"></form>
+<div id="nfilter_document" class="ownKeypadWrap ownDrag" style="display: none"></div>
+
+<script type="text/javascript">
+	function mkaNfilterInit(ids, modes, callback){
+		$("#nfilter_document").remove();
+		nfilterInit(ids, modes, callback);
+	}
+
+	function mkaNfilterDataSet(frm){
+		if( _isWebChannelRequest ){
+			var nFilterValue = (_isWebChannelRequest == true ? nFilterEncrypted() : "") ;
+
+			frm.find("input[name='_nFilterEncryptValue']" ).remove();
+			frm.append($("<input/>", {type:"hidden", name:"_nFilterEncryptValue" , value:nFilterValue}));
+		}
+	}
+</script>
+
+
+
+	<script type="text/javascript">
+		nshc.setFinishedCallback(function(){
+			console.log("XXXXXXXXXXXXXXXXXXX>> nFilter Finished <<XXXXXXXXXXXXXXXXXXX");
+			setLoading(false, "sub");
+
+			//배경 화면 클릭시 nFilter Close
+			$(".ownKeypadBG").click(function(){
+				$("#nfilter_close").trigger("click");
+			});
+		});
+
+		function nFilterEncrypted(){
+			return nshc.encrypted();
+		}
+
+		function nfilterInit(ids, modes, callback){
+			setLoading(true, "sub");
+
+			nshc.setOnInitStart();
+
+			var sizeDefault       = 320;
+			var inputSpeedDefault = 200;
+
+			for(var i = 0; i < ids.length; i++) {
+				var id    = ids[i];
+		 		var mode  = "qwerty"; //qwerty | number
+				var dType = "pw";
+		 		
+				if( "CDNO" == ids[i] ) {
+					mode  = "number";
+					dType = "card2";
+
+				} else if( "RRNO" == ids[i] || "SSN" == ids[i] || "SSN3" == ids[i] || "FML_SSN" == ids[i] || "SPS_SSN" == ids[i] ) {
+					mode  = "number";
+					dType = "id2";
+
+				} else if( "PWD" == ids[i] || "PASSWORD" == ids[i] || "PASSWORD_OLD" == ids[i] || "PASSWORD_NEW" == ids[i] || "PASSWORD_CONFIRM" == ids[i] ) {
+					mode  = "qwerty";
+					dType = "pw";
+
+				} else if( "CD_PSWD" == ids[i] || "CARD_PASSWORD" == ids[i] || "CARD_PASSWORD_CONFIRM" == ids[i] || "CVV_VDT_V" == ids[i] || "AFC_PAY_ACNO" == ids[i]) {
+					mode = "number";
+					dType = "pw";
+
+				} else {
+	 				if( undefined != modes && null != modes && undefined != modes[i] && null != modes[i] ) {
+						mode  = modes[i];
+						dType = "pw";
+					}
+				}
+
+		 		if("card2" == dType){
+		 			nshc.setViewFormatting(id + "=-;4;2^2*;4*;4");
+		 			$("#"+id).attr("minLength","15");
+		 			nshc.setChgPatternImmediate(id);
+
+		 		}else if("id2" == dType){
+		 			nshc.setViewFormatting(id + "=-;6;1^6*");
+		 			$("#"+id).attr("minLength","13");
+
+		 		}
+				nshc.setCommon(document.getElementById(id), "mode=" + setMode(mode)); // PC, 쿼티
+
+
+				/**
+				 * callback(call)
+				 * - "close" : 키패드 X 눌러 닫을 때
+				 * - "enter" : 키패드 값 입력후 닫을 때
+				 */
+				if( "function" === typeof callback ) {
+					nshc.ownCallback = callback;
+				}
+				
+				//접근성 수정 talkback에서 이벤트 먹통방지 
+				$("#" + id).removeAttr("role");
+				$("#" + id).attr("aria-readonly", false);
+				
+				//접근성 수정, 보안키패드 표시 추가 2023.8
+				var asTitle = $("#" + id).attr("title");
+				
+				if(asTitle == undefined){
+					$("#" + id).attr("title"    , "보안키패드 입력");
+				} else {
+					$("#" + id).attr("title"    , asTitle+" (보안키패드)");	
+				}
+				
+				
+			}
+
+			nshc.setInit();
+		}
+
+		function setMode(mode){
+	 		/*
+	 		pcCKpd : PC 문자키패드
+	 		mCKpd  : 모바일 문자키패드
+	 		nAKpd  : 3x4 숫자키패드
+	 		nBKpd  : 4x3 숫자키패드
+	 		nCKpd  : 2x6 숫자키패드
+	 		*/
+
+	 		if("number" == mode){
+	 			mode = "nCKpd";
+	 		}else if("qwerty" == mode){
+	 			mode = "mCKpd";
+	 		}else{
+	 			mode = "mCKpd";
+	 		}
+
+	 		return mode;
+	 	}
+	</script>
+
+
+
+
+
+
+
+
+	<script type="text/javascript" src="/js/af/jquery.xdomainrequest.min.js" charset="euc-kr"></script>
+	<script type="text/javascript" src="/js/af/json2.js" charset="euc-kr"></script>
+	<script type="text/javascript" src="/js/af/swfobject-min.js" charset="euc-kr"></script>
+	
+		<script type="text/javascript" src="/js/af/itraceraf.cfg.js" charset="euc-kr"></script>
+	
+	<script type="text/javascript" src="/js/af/itraceraf.min.js" charset="euc-kr"></script>
+
+
+<script type="text/javascript">
+	function mkaEfdsInit(isLoading){
+		isLoading = isLoading==false ? false : true;		
+		setLoading(isLoading, "efds");
+
+		if( _isAppChannelRequest ){
+			appEfds("sendEfdsData");
+		}else{
+			iTracerAF.init(function (data) {
+				console.log("*** [mkaEfdsInit]iTracerAF.init OK! ");
+				/* clearTimeout(timeout);
+				*/
+				var AF_W_DATA = data.wdata;
+				var AF_UKEY = data.ukey.replace(/-/g,"");
+
+				$("#AF_WDATA").val(AF_W_DATA);
+				$("#U_DATA").val(AF_UKEY);
+
+				callbackMkaEfdsData("", "", "", AF_W_DATA, AF_UKEY);
+			});
+		}
+	}
+
+	// [APP] EFDS 수집 결과
+	function sendEfdsData(wData, natIp, uData) {
+		callbackMkaEfdsData(wData, natIp, uData, "", "");
+	}
+
+	/**
+	 *  모바일앱 수집 데이터 : wData, natIp, uData
+	 *  모바일웹 수집 데이터 : AF_W_DATA, AF_UKEY
+	 */
+	function callbackMkaEfdsData(wData, natIp, uData, AF_W_DATA, AF_UKEY) {
+		 /*{
+			$("#etcDebugingDiv").append("<br/> eFDS TEST");
+			$("#etcDebugingDiv").append("<br/>- wData : "+ wData);
+			$("#etcDebugingDiv").append("<br/>- natIp : "+ natIp);
+			$("#etcDebugingDiv").append("<br/>- uData : "+ uData);
+			$("#etcDebugingDiv").append("<br/>- AF_W_DATA : "+ AF_W_DATA);
+			$("#etcDebugingDiv").append("<br/>- AF_UKEY : "+ AF_UKEY);
+			$("#etcDebugingDiv").show();
+		}*/
+
+		ajaxExceute2(
+			 "/MKEFDS1000M.ajax"
+			,{
+				 ipinsideData  : wData
+				,ipinsideNAT   : natIp
+				,ipinsideUData : uData
+				,AF_W_DATA     : AF_W_DATA
+				,AF_UKEY       : AF_UKEY
+			}
+			,mkaEfdsAfterFn
+			,mkaEfdsAfterFn
+			,{
+				isLoding : false
+			 }
+		);
+	}
+
+	function mkaEfdsAfterFn(dataMap){
+		setLoading(false, "efds");
+
+		//각 확면별 window load function
+		_commWinLoadFn();
+	}
+</script>
+
+<!-- layer: CVV 안내 -->
+<div class="layer-wrap layer-wrap--slide type-no-dim" data-layer="layer-info-cvv">
+	<div class="layer-container">
+		<section class="ui-layer">
+			<div class="ui-layer__head">
+				<div class="header">
+					<h2 class="header__title">CVV 번호란?</h2>
+				</div>
+			</div>
+			<div class="ui-layer__body">
+				<div class="ui-layer__body-inner">
+					<div class="info-area type-cvv">
+						<ul class="info-list">
+							<li class="info-item">카드 뒷면 서명란 끝 3자리 숫자</li>
+							<li class="info-item">CVV번호를 연속 5회 잘못 입력할 경우 해당 카드로 온라인 서비스 이용이 중단됩니다.</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div class="ui-layer__foot">
+				<div class="ui-buttons">
+					<ul class="ui-buttons-list">
+						<li class="ui-buttons-item">
+							<button type="button" class="ui-button ui-basic-button type-primary" data-role="layerClose" onclick="javascript:pop_close_focus(cvvInfoBT);">확인</button>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</section>
+	</div>
+</div>
+<!-- //layer: CVV 안내 -->
+<!-- layer: 약관 상세 -->
+<div class="layer-wrap layer-wrap--full layer-clause-detail" data-layer="commonTerm_layer">
+	<div class="layer-container">
+		<section class="ui-layer">
+			<div class="ui-layer__head">
+				<div class="header">
+					<h2 class="header__title"></h2>
+					<div class="header__right">
+						<button type="button" class="ui-button header__button header__button--close" data-role="layerClose" onclick="javascript:pop_close_focus(mkaTermCntsA);">
+							<span class="for-a11y">레이어 닫기</span>
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="ui-layer__body">
+				<div class="ui-layer__body-inner">
+					<div class="wcms-data">
+						<section id="commonTermLayer_content" class="clause-data">
+						</section>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+</div>
+<!-- //layer: 약관 상세 -->
+
+
+
+	<!-- layer: 화면이동 안내 팝업 -->
+	<div class="layer-wrap layer-wrap--slide type-no-title" data-layer="newWinConfirm-layer">
+		<div class="layer-container">
+					<section class="ui-layer">
+						<div class="ui-layer__body">
+							<div class="ui-layer__body-inner">
+								<div class="form-flex">
+									<div class="form-flex-cell">
+										<img src="/images/common/logo-1-q.svg" alt="하나Pay" />
+									</div>
+									<div class="form-flex-cell">
+										<strong class="medium-text">하나Pay앱 열기</strong>
+										<div class="basic-text color-blur margin-top-5">앱으로 안전하고 간편하게</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="ui-layer__foot">
+							<div class="ui-buttons">
+								<ul class="ui-buttons-list">
+									<li class="ui-buttons-item type-narrow">
+										<button type="button" class="ui-button ui-basic-button" data-role="layerClose">아니오</button>
+									</li>
+									<li class="ui-buttons-item">
+										<button type="button" class="ui-button ui-basic-button type-primary" data-role="layerClose" onclick="newWinConfirm.goUrl();" title="새창열림">네</button>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</section>
+		</div>
+	</div>
+	<!-- //layer: 화면이동 안내 팝업 -->
+
+
+<!-- APP UPDATE POPUP -->
+
+
+
+<style>
+
+
+@keyframes flowGradient {
+	0%	{ background-position: 0% 50%; }
+	50%	{ background-position: 100% 50%; }
+	100%	{ background-position: 0% 50%; }
+}
+
+
+</style>
+
+
+
+
+
+<!-- APP UPDATE POPUP -->
+
+
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- layer: 국민비서 신청/알림 팝업 -->
+
+
+
+<!-- layer: 은행앱 접속 팝업 --> 
+
+
+
+
+
+<!-- layer: 피싱케어 풀팝업 노출 여부  -->
+
+
+
+
+<!-- 트래블로그 스위치 서비스 신청 유도 팝업 -->
+
+
+
+
+
+	
+	
+	
+	
+	
+	
+		
+	
+
+
+
+
+	
+	<!-- loading -->
+	<div class="ui-loading-wrap" style="display:none" id="page_load" >
+		<div class="ui-loading">
+			<div class="ui-loading-block">
+				<div></div>
+				<div></div>
+				<div></div>
+				<div></div>
+			</div>
+		</div>
+	</div>
+	<!-- //loading -->
+  </body>
+</html>
+

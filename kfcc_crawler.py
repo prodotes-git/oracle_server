@@ -147,7 +147,7 @@ async def fetch_bank_rates(client, bank):
         return res_data
 
 async def run_crawler():
-    async with httpx.AsyncClient(timeout=10.0) as client:
+    async with httpx.AsyncClient(timeout=10.0, verify=False) as client:
         print("Fetching bank lists...")
         bank_tasks = []
         for region in ALL_REGIONS:

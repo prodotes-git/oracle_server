@@ -6,20 +6,23 @@ import redis
 import psutil
 import time
 from datetime import datetime
+import json
+import ssl
 
 app = FastAPI()
 
-# Redis 연결 설정
-REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379")
-r = redis.from_url(REDIS_URL, decode_responses=True)
+# Redis 연결 시도 (실패 시 r=None으로 처리하여 앱이 죽지 않게 함)
+try:
+    r = redis.Redis(host='redis', port=6379, db=0, decode_responses=True)
+    r.ping() # 연결 테스트
+except Exception as e:
+    print(f"Warning: Redis connection failed ({e}). Running without cache.")
+    r = None
 
 # 서버 시작 시간 기록 (Uptime 계산용)
 boot_time = time.time()
 
 # 데이터 캐싱을 위한 설정
-DATA_URL = "https://raw.githubusercontent.com/if1live/shiroko-kfcc/interest-rate/summary/report_mat.json"
-CACHE_KEY = "kfcc_data_cache"
-KB_CACHE_KEY = "kb_card_events_cache_v3" # 이미지 정보를 포함한 v3
 SHINHAN_CACHE_KEY = "shinhan_card_events_cache_v1"
 SHINHAN_MYSHOP_CACHE_KEY = "shinhan_myshop_cache_v3" # 안정성 강화를 위한 v3
 CACHE_EXPIRE = 3600  # 1시간 동안 캐시 유지
@@ -114,7 +117,7 @@ async def crawl_shinhan_bg():
         all_events = []
         base_url = "https://www.shinhancard.com"
         
-        async with httpx.AsyncClient(timeout=15.0) as client:
+        async with httpx.AsyncClient(timeout=30.0, verify=False) as client:
             # 신한카드는 01, 02... 형식의 JSON 파일을 사용
             for i in range(1, 10): # 페이지 범위 확대
                 api_url = f"{base_url}/logic/json/evnPgsList0{i}.json"
@@ -158,9 +161,18 @@ async def crawl_shinhan_bg():
                 except Exception: continue
 
         if all_events:
-            with open("shinhan_data.json", "w", encoding="utf-8") as f:
-                json.dump(all_events, f, ensure_ascii=False)
-            r.setex(SHINHAN_CACHE_KEY, CACHE_EXPIRE, json.dumps(all_events))
+            try:
+                with open("shinhan_data.json", "w", encoding="utf-8") as f:
+                    json.dump(all_events, f, ensure_ascii=False)
+            except Exception as fe:
+                print(f"Shinhan file save failed: {fe}")
+
+            if r:
+                try:
+                    r.setex(SHINHAN_CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
+                except Exception as re:
+                    print(f"Shinhan Redis save failed: {re}")
+
             print(f"[{datetime.now()}] Shinhan crawl finished. {len(all_events)} events.")
             
     except Exception as e:
@@ -173,7 +185,7 @@ async def crawl_kb_bg():
         all_events = []
         api_url = "https://m.kbcard.com/BON/API/MBBACXHIABNC0064"
         
-        async with httpx.AsyncClient(timeout=15.0) as client:
+        async with httpx.AsyncClient(timeout=30.0, verify=False) as client:
             for page in range(1, 15):
                 payload = {
                     "evntStatus": "", "evntBonTag": "", "evntScp": "", 
@@ -216,9 +228,18 @@ async def crawl_kb_bg():
                 except Exception: break
         
         if all_events:
-            with open("kb_data.json", "w", encoding="utf-8") as f:
-                json.dump(all_events, f, ensure_ascii=False)
-            r.setex(KB_CACHE_KEY, CACHE_EXPIRE, json.dumps(all_events))
+            try:
+                with open("kb_data.json", "w", encoding="utf-8") as f:
+                    json.dump(all_events, f, ensure_ascii=False)
+            except Exception as fe:
+                print(f"KB file save failed: {fe}")
+
+            if r:
+                try:
+                    r.setex(KB_CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
+                except Exception as re:
+                     print(f"KB Redis save failed: {re}")
+
             print(f"[{datetime.now()}] KB crawl finished. {len(all_events)} events.")
             
     except Exception as e:
@@ -228,8 +249,9 @@ async def crawl_kb_bg():
 async def get_shinhan_cards():
     try:
         import json
-        cached = r.get(SHINHAN_CACHE_KEY)
-        if cached: return json.loads(cached)
+        if r:
+            cached = r.get(SHINHAN_CACHE_KEY)
+            if cached: return json.loads(cached)
 
         local_path = "shinhan_data.json"
         if os.path.exists(local_path):
@@ -240,7 +262,11 @@ async def get_shinhan_cards():
             last_updated = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
             
             response = {"last_updated": last_updated, "data": data}
-            r.setex(SHINHAN_CACHE_KEY, CACHE_EXPIRE, json.dumps(response))
+            if r:
+                try:
+                    r.setex(SHINHAN_CACHE_KEY, CACHE_EXPIRE, json.dumps(response))
+                except Exception as re:
+                    print(f"Shinhan Redis save failed: {re}")
             return response
         
         return {"last_updated": None, "data": []}
@@ -250,8 +276,9 @@ async def get_shinhan_cards():
 async def get_kb_cards():
     try:
         import json
-        cached = r.get(KB_CACHE_KEY)
-        if cached: return json.loads(cached)
+        if r:
+            cached = r.get(KB_CACHE_KEY)
+            if cached: return json.loads(cached)
 
         local_path = "kb_data.json"
         if os.path.exists(local_path):
@@ -262,7 +289,11 @@ async def get_kb_cards():
             last_updated = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
             
             response = {"last_updated": last_updated, "data": data}
-            r.setex(KB_CACHE_KEY, CACHE_EXPIRE, json.dumps(response))
+            if r:
+                try:
+                    r.setex(KB_CACHE_KEY, CACHE_EXPIRE, json.dumps(response))
+                except Exception as re:
+                    print(f"KB Redis save failed: {re}")
             return response
         
         return {"last_updated": None, "data": []}
@@ -288,7 +319,19 @@ async def crawl_hana_bg():
         base_url = "https://m.hanacard.co.kr"
         target_url = "https://m.hanacard.co.kr/MKEVT1000M.web"
 
-        async with httpx.AsyncClient(timeout=20.0, follow_redirects=True) as client:
+        # SSL Context 설정 (DH_KEY_TOO_SMALL 해결)
+        import ssl
+        try:
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+            # OpenSSL 3.0 이상에서 DH Key 허용을 위해 보안 레벨 낮춤
+            ssl_context.set_ciphers('DEFAULT@SECLEVEL=1')
+        except Exception:
+            # 설정 실패 시 기본값 (verify=False로 대체될 것임)
+            ssl_context = False
+
+        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True, verify=ssl_context) as client:
             headers = {
                 "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"
             }
@@ -354,9 +397,18 @@ async def crawl_hana_bg():
                         continue
 
         if all_events:
-            with open("hana_data.json", "w", encoding="utf-8") as f:
-                json.dump(all_events, f, ensure_ascii=False)
-            r.setex(HANA_CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
+            try:
+                with open("hana_data.json", "w", encoding="utf-8") as f:
+                    json.dump(all_events, f, ensure_ascii=False)
+            except Exception as fe:
+                print(f"Hana file save failed: {fe}")
+
+            if r:
+                try:
+                    r.setex(HANA_CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
+                except Exception as re:
+                     print(f"Hana Redis save failed: {re}")
+            
             print(f"[{datetime.now()}] Hana crawl finished. {len(all_events)} events.")
             
     except Exception as e:
@@ -459,16 +511,26 @@ async def background_crawl_kfcc():
     try:
         print(f"[{datetime.now()}] Starting KFCC background crawl...")
         from kfcc_crawler import run_crawler
-        import json
+        # json은 상단 import 사용
         
         data = await run_crawler()
         
         # 파일 저장
-        with open("kfcc_data.json", "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False)
+        try:
+            with open("kfcc_data.json", "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False)
+        except Exception as fe:
+            print(f"KFCC file save failed: {fe}")
             
         # 캐시 갱신
-        r.setex(CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
+        if r:
+            try:
+                r.setex(CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": data}))
+            except Exception as re:
+                print(f"KFCC Redis save failed: {re}")
+        else:
+            print("Redis not available, skipped cache update.")
+                
         print(f"[{datetime.now()}] KFCC background crawl finished. {len(data)-1} records updated.")
     except Exception as e:
         print(f"[{datetime.now()}] KFCC background crawl failed: {e}")
