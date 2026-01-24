@@ -1,5 +1,5 @@
 import httpx
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.responses import HTMLResponse
 import os
 import redis
@@ -270,41 +270,64 @@ def get_uptime():
 @app.get("/api/kfcc")
 async def get_kfcc_data():
     """
-    내 서버에서 독립적으로 데이터를 제공하는 API입니다.
-    Redis를 사용하여 데이터를 캐싱하되, Redis 오류 시 원본에서 직접 가져옵니다.
+    새마을금고 금리 데이터를 반환합니다.
+    1. Redis 캐시 우선 확인
+    2. 캐시 없으면 로컬 파일 확인
+    3. 둘 다 없으면 실시간 크롤링 (시간 소요됨)
     """
-    cached_data = None
     try:
-        # 1. 캐시에 데이터가 있는지 확인 (실패 시 조용히 넘어감)
+        import json
         cached_data = r.get(CACHE_KEY)
-    except Exception as e:
-        print(f"Redis 오류 (무시됨): {e}")
-
-    if cached_data:
-        try:
-            import json
+        if cached_data:
             return json.loads(cached_data)
-        except Exception:
-            pass
+            
+        # 로컬 파일 확인
+        local_path = "kfcc_data.json"
+        if os.path.exists(local_path):
+            with open(local_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                r.setex(CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
+                return data
 
-    # 2. 캐시가 없거나 Redis 오류 시 원본에서 가져옴
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(DATA_URL, timeout=10.0)
-            if response.status_code != 200:
-                raise HTTPException(status_code=500, detail="데이터 원본을 가져올 수 없습니다.")
-            
-            data = response.json()
-            
-            # 3. 가져온 데이터를 캐싱 시도 (실패해도 응답은 전달)
-            try:
-                r.setex(CACHE_KEY, CACHE_EXPIRE, response.text)
-            except Exception as e:
-                print(f"Redis 캐싱 실패 (무시됨): {e}")
-                
-            return data
+        # 데이터가 없으면 크롤링 시도 (오래 걸림)
+        from kfcc_crawler import run_crawler
+        data = await run_crawler()
+        
+        # 저장
+        with open(local_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False)
+        r.setex(CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
+        
+        return data
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"서버 내부 오류: {str(e)}")
+
+@app.post("/api/kfcc/update")
+async def update_kfcc_data(background_tasks: BackgroundTasks):
+    """
+    새마을금고 데이터 크롤링을 백그라운드에서 실행합니다.
+    """
+    background_tasks.add_task(background_crawl_kfcc)
+    return {"status": "started", "message": "KFCC data update started in background."}
+
+async def background_crawl_kfcc():
+    try:
+        print("Starting KFCC background crawl...")
+        from kfcc_crawler import run_crawler
+        import json
+        
+        data = await run_crawler()
+        
+        # 파일 저장
+        with open("kfcc_data.json", "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False)
+            
+        # 캐시 갱신
+        r.setex(CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
+        print(f"KFCC background crawl finished. {len(data)-1} records updated.")
+    except Exception as e:
+        print(f"KFCC background crawl failed: {e}")
 
 @app.get("/", response_class=HTMLResponse)
 def read_root():

@@ -3,3 +3,5 @@ uvicorn
 redis
 psutil
 httpx
+beautifulsoup4
+lxml
