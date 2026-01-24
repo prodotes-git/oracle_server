@@ -286,15 +286,24 @@ async def get_kfcc_data():
         if os.path.exists(local_path):
             with open(local_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                r.setex(CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
-                return data
+                
+            # 파일 수정 시간 가져오기
+            mtime = os.path.getmtime(local_path)
+            last_updated = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
+            
+            response_data = {
+                "last_updated": last_updated,
+                "data": data
+            }
+            
+            r.setex(CACHE_KEY, CACHE_EXPIRE, json.dumps(response_data))
+            return response_data
 
         # 3. 로컬 파일도 없으면 빈 값 반환 (실시간 크롤링 방지)
-        # 사용자가 /api/kfcc/update를 호출해야만 데이터가 생성됨
         if not os.path.exists(local_path):
-             return {"message": "데이터가 없습니다. /api/kfcc/update 로 데이터를 생성해주세요.", "data": []}
+             return {"last_updated": None, "message": "데이터가 없습니다.", "data": []}
         
-        return []
+        return {"last_updated": None, "data": []}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"서버 내부 오류: {str(e)}")
