@@ -34,27 +34,40 @@ def get_uptime():
 async def get_kfcc_data():
     """
     내 서버에서 독립적으로 데이터를 제공하는 API입니다.
-    Redis를 사용하여 데이터를 캐싱하므로 원본 사이트보다 훨씬 빠릅니다.
+    Redis를 사용하여 데이터를 캐싱하되, Redis 오류 시 원본에서 직접 가져옵니다.
     """
+    cached_data = None
     try:
-        # 1. 먼저 캐시에 데이터가 있는지 확인
+        # 1. 캐시에 데이터가 있는지 확인 (실패 시 조용히 넘어감)
         cached_data = r.get(CACHE_KEY)
-        if cached_data:
+    except Exception as e:
+        print(f"Redis 오류 (무시됨): {e}")
+
+    if cached_data:
+        try:
             import json
             return json.loads(cached_data)
+        except Exception:
+            pass
 
-        # 2. 캐시에 없으면 원본에서 가져와서 캐싱
+    # 2. 캐시가 없거나 Redis 오류 시 원본에서 가져옴
+    try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(DATA_URL)
+            response = await client.get(DATA_URL, timeout=10.0)
             if response.status_code != 200:
                 raise HTTPException(status_code=500, detail="데이터 원본을 가져올 수 없습니다.")
             
             data = response.json()
-            # Redis에 저장 (1시간 유효)
-            r.setex(CACHE_KEY, CACHE_EXPIRE, response.text)
+            
+            # 3. 가져온 데이터를 캐싱 시도 (실패해도 응답은 전달)
+            try:
+                r.setex(CACHE_KEY, CACHE_EXPIRE, response.text)
+            except Exception as e:
+                print(f"Redis 캐싱 실패 (무시됨): {e}")
+                
             return data
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"서버 내부 오류: {str(e)}")
 
 @app.get("/", response_class=HTMLResponse)
 def read_root():
