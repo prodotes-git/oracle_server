@@ -21,7 +21,7 @@ DATA_URL = "https://raw.githubusercontent.com/if1live/shiroko-kfcc/interest-rate
 CACHE_KEY = "kfcc_data_cache"
 KB_CACHE_KEY = "kb_card_events_cache_v3" # 이미지 정보를 포함한 v3
 SHINHAN_CACHE_KEY = "shinhan_card_events_cache_v1"
-SHINHAN_MYSHOP_CACHE_KEY = "shinhan_myshop_cache_v1"
+SHINHAN_MYSHOP_CACHE_KEY = "shinhan_myshop_cache_v2" # 경로 수정 반영을 위한 v2
 CACHE_EXPIRE = 3600  # 1시간 동안 캐시 유지
 
 @app.get("/api/shinhan-myshop")
@@ -36,6 +36,7 @@ async def get_shinhan_myshop():
             return json.loads(cached)
 
         api_url = "https://www.shinhancard.com/mob/MOBFM501N/MOBFM501R21.ajax"
+        base_url = "https://www.shinhancard.com"
         headers = {
             "Content-Type": "application/json",
             "X-Requested-With": "XMLHttpRequest",
@@ -64,8 +65,12 @@ async def get_shinhan_myshop():
                     benefit = benefits[i] if i < len(benefits) else ""
                     img = imgs[i] if i < len(imgs) else ""
                     end = ends[i] if i < len(ends) else ""
-                    link = links[i] if i < len(links) else "https://www.shinhancard.com/mob/MOBFM501N/MOBFM501R31.shc"
+                    link = links[i] if i < len(links) else f"{base_url}/mob/MOBFM501N/MOBFM501R31.shc"
                     
+                    # 이미지 경로 처리
+                    if img and not img.startswith('http'):
+                        img = f"{base_url}{img}"
+
                     if len(end) == 8:
                         end = f"~ {end[:4]}.{end[4:6]}.{end[6:]}"
 
