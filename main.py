@@ -324,6 +324,14 @@ def view_kfcc_page():
     except FileNotFoundError:
         return "kfcc.html not found"
 
+@app.post("/api/kfcc/update")
+async def update_kfcc_data(background_tasks: BackgroundTasks):
+    """
+    새마을금고 데이터 크롤링을 백그라운드에서 실행합니다.
+    """
+    background_tasks.add_task(background_crawl_kfcc)
+    return {"status": "started", "message": "KFCC data update started in background."}
+
 async def background_crawl_kfcc():
     try:
         print(f"[{datetime.now()}] Starting KFCC background crawl...")
