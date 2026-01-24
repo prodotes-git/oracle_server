@@ -49,12 +49,12 @@ def read_root():
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;600&display=swap" rel="stylesheet">
         <style>
             :root {{
-                --bg-color: #000000;
-                --card-bg: rgba(255, 255, 255, 0.04);
-                --accent-color: #ffffff;
-                --text-secondary: #86868b;
-                --glass-border: rgba(255, 255, 255, 0.08);
-                --success-color: #30d158;
+                --bg-color: #F5F5F7;
+                --card-bg: rgba(255, 255, 255, 0.7);
+                --accent-color: #1d1d1f;
+                --text-secondary: #6e6e73;
+                --glass-border: rgba(255, 255, 255, 0.5);
+                --success-color: #28cd41;
             }}
             
             * {{
@@ -66,138 +66,141 @@ def read_root():
             
             body {{
                 background-color: var(--bg-color);
-                color: white;
+                color: var(--accent-color);
                 font-family: 'Inter', sans-serif;
                 min-height: 100vh;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
-                background: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000000 100%);
+                background: linear-gradient(180deg, #FFFFFF 0%, #F5F5F7 100%);
                 padding: 2rem;
             }}
 
             .container {{
                 width: 100%;
                 max-width: 600px;
-                animation: fadeIn 1.5s ease-out;
+                animation: fadeIn 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
             }}
 
             @keyframes fadeIn {{
-                from {{ opacity: 0; transform: translateY(10px); }}
+                from {{ opacity: 0; transform: translateY(15px); }}
                 to {{ opacity: 1; transform: translateY(0); }}
             }}
 
             .main-card {{
                 background: var(--card-bg);
-                backdrop-filter: blur(30px);
-                -webkit-backdrop-filter: blur(30px);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
                 border: 1px solid var(--glass-border);
                 border-radius: 40px;
-                padding: 3rem;
+                padding: 3.5rem 3rem;
                 text-align: center;
                 margin-bottom: 1.5rem;
-                box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+                box-shadow: 0 30px 60px rgba(0,0,0,0.06);
             }}
 
             h1 {{
                 font-family: 'Outfit', sans-serif;
-                font-size: 2.8rem;
+                font-size: 3rem;
                 font-weight: 600;
-                letter-spacing: -0.03em;
-                margin-bottom: 2rem;
-                background: linear-gradient(180deg, #FFFFFF 0%, #888888 100%);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
+                letter-spacing: -0.04em;
+                margin-bottom: 2.5rem;
+                color: var(--accent-color);
             }}
 
             .grid-stats {{
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
-                gap: 1rem;
+                gap: 1.2rem;
                 margin-top: 1rem;
             }}
 
             .stat-box {{
-                background: rgba(255, 255, 255, 0.03);
-                border: 1px solid var(--glass-border);
+                background: rgba(0, 0, 0, 0.02);
+                border: 1px solid rgba(0, 0, 0, 0.05);
                 border-radius: 24px;
-                padding: 1.5rem 1rem;
-                transition: transform 0.3s ease;
+                padding: 1.8rem 1rem;
+                transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
             }}
 
             .stat-box:hover {{
-                transform: translateY(-5px);
-                background: rgba(255, 255, 255, 0.06);
+                transform: scale(1.02);
+                background: rgba(255, 255, 255, 0.9);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.04);
             }}
 
             .stat-label {{
-                font-size: 0.7rem;
+                font-size: 0.75rem;
                 color: var(--text-secondary);
                 text-transform: uppercase;
-                letter-spacing: 0.1em;
-                margin-bottom: 0.5rem;
+                letter-spacing: 0.12em;
+                margin-bottom: 0.8rem;
+                font-weight: 600;
             }}
 
             .stat-value {{
                 font-family: 'Outfit', sans-serif;
-                font-size: 1.4rem;
+                font-size: 1.6rem;
                 font-weight: 600;
                 color: var(--accent-color);
             }}
 
             .visits-section {{
-                margin-top: 3rem;
-                border-top: 1px solid var(--glass-border);
-                padding-top: 2rem;
+                margin-top: 3.5rem;
+                border-top: 1px solid rgba(0, 0, 0, 0.05);
+                padding-top: 2.5rem;
             }}
 
             .visits-label {{
-                font-size: 0.85rem;
+                font-size: 0.9rem;
                 color: var(--text-secondary);
-                margin-bottom: 0.5rem;
-                font-weight: 300;
+                margin-bottom: 0.8rem;
+                font-weight: 400;
+                letter-spacing: 0.02em;
             }}
 
             .visits-count {{
                 font-family: 'Outfit', sans-serif;
-                font-size: 3.5rem;
+                font-size: 4rem;
                 font-weight: 600;
                 color: var(--accent-color);
+                letter-spacing: -0.02em;
             }}
 
             .status-indicator {{
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 0.75rem;
+                font-size: 0.8rem;
                 color: var(--success-color);
-                margin-bottom: 1rem;
-                font-weight: 600;
-                letter-spacing: 0.05em;
+                margin-bottom: 1.2rem;
+                font-weight: 700;
+                letter-spacing: 0.08em;
             }}
 
             .dot {{
-                width: 6px;
-                height: 6px;
+                width: 8px;
+                height: 8px;
                 background-color: var(--success-color);
                 border-radius: 50%;
-                margin-right: 8px;
-                box-shadow: 0 0 12px var(--success-color);
-                animation: pulse 2s infinite;
+                margin-right: 10px;
+                box-shadow: 0 0 15px rgba(40, 205, 65, 0.3);
+                animation: pulse 2.5s infinite;
             }}
 
             @keyframes pulse {{
-                0% {{ opacity: 1; }}
-                50% {{ opacity: 0.4; }}
-                100% {{ opacity: 1; }}
+                0% {{ opacity: 1; transform: scale(1); }}
+                50% {{ opacity: 0.6; transform: scale(0.9); }}
+                100% {{ opacity: 1; transform: scale(1); }}
             }}
 
             .footer {{
-                margin-top: 2rem;
-                font-size: 0.7rem;
+                margin-top: 2.5rem;
+                font-size: 0.75rem;
                 color: var(--text-secondary);
-                letter-spacing: 0.2em;
+                letter-spacing: 0.25em;
+                font-weight: 500;
             }}
         </style>
     </head>
