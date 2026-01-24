@@ -231,14 +231,20 @@ async def get_shinhan_cards():
         cached = r.get(SHINHAN_CACHE_KEY)
         if cached: return json.loads(cached)
 
-        if os.path.exists("shinhan_data.json"):
-            with open("shinhan_data.json", "r", encoding="utf-8") as f:
+        local_path = "shinhan_data.json"
+        if os.path.exists(local_path):
+            with open(local_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                r.setex(SHINHAN_CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
-                return data
+                
+            mtime = os.path.getmtime(local_path)
+            last_updated = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
+            
+            response = {"last_updated": last_updated, "data": data}
+            r.setex(SHINHAN_CACHE_KEY, CACHE_EXPIRE, json.dumps(response))
+            return response
         
-        return []
-    except Exception: return []
+        return {"last_updated": None, "data": []}
+    except Exception: return {"last_updated": None, "data": []}
 
 @app.get("/api/kb-cards")
 async def get_kb_cards():
@@ -247,14 +253,20 @@ async def get_kb_cards():
         cached = r.get(KB_CACHE_KEY)
         if cached: return json.loads(cached)
 
-        if os.path.exists("kb_data.json"):
-            with open("kb_data.json", "r", encoding="utf-8") as f:
+        local_path = "kb_data.json"
+        if os.path.exists(local_path):
+            with open(local_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                r.setex(KB_CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
-                return data
+                
+            mtime = os.path.getmtime(local_path)
+            last_updated = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
+            
+            response = {"last_updated": last_updated, "data": data}
+            r.setex(KB_CACHE_KEY, CACHE_EXPIRE, json.dumps(response))
+            return response
         
-        return []
-    except Exception: return []
+        return {"last_updated": None, "data": []}
+    except Exception: return {"last_updated": None, "data": []}
 
 @app.post("/api/shinhan/update")
 async def update_shinhan(bg_tasks: BackgroundTasks):
