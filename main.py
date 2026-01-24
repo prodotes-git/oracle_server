@@ -19,7 +19,7 @@ boot_time = time.time()
 # 데이터 캐싱을 위한 설정
 DATA_URL = "https://raw.githubusercontent.com/if1live/shiroko-kfcc/interest-rate/summary/report_mat.json"
 CACHE_KEY = "kfcc_data_cache"
-KB_CACHE_KEY = "kb_card_events_cache_v2" # 키 변경으로 캐시 강제 갱신
+KB_CACHE_KEY = "kb_card_events_cache_v3" # 이미지 정보를 포함한 v3
 CACHE_EXPIRE = 3600  # 1시간 동안 캐시 유지
 
 @app.get("/api/kb-cards")
@@ -70,11 +70,18 @@ async def get_kb_cards():
                     category_map = {"01": "포인트/캐시백", "02": "할인/무이자", "03": "경품", "04": "기타"}
                     category = category_map.get(category_code, "이벤트")
                     
+                    # 이미지 경로 처리
+                    img_path = ev.get('evtImgPath', '')
+                    if img_path and not img_path.startswith('http'):
+                        img_path = f"https://img1.kbcard.com/ST/img/cxc{img_path}"
+
                     all_events.append({
                         "category": category,
                         "eventName": f"{ev.get('evtNm', '')} {ev.get('evtSubNm', '')}".strip(),
                         "period": ev.get("evtYMD", ""),
-                        "link": f"https://m.kbcard.com/BON/DVIEW/MBBMCXHIABNC0026?evntSerno={ev.get('evtNo')}&evntMain=Y"
+                        "link": f"https://m.kbcard.com/BON/DVIEW/MBBMCXHIABNC0026?evntSerno={ev.get('evtNo')}&evntMain=Y",
+                        "image": img_path,
+                        "bgColor": ev.get('bckgColrCtt', '#f2f2f7')
                     })
                 
                 if page >= res_json.get("totalPageCount", 0):
@@ -794,10 +801,10 @@ def kb_card_events():
                 z-index: 100; padding: 1rem; border-bottom: 1px solid var(--border-color);
             }
 
-            .nav-content { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+            .nav-content { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
             .back-btn { text-decoration: none; color: var(--blue-color); font-weight: 500; }
             
-            .main-content { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; }
+            .main-content { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; }
             h1 { font-family: 'Outfit', sans-serif; font-size: 2rem; margin-bottom: 1.5rem; }
 
             .search-section {
@@ -810,21 +817,42 @@ def kb_card_events():
             }
             .search-input:focus { border-color: var(--kb-color); box-shadow: 0 4px 12px rgba(255,188,0,0.15); }
 
-            .event-list { display: grid; gap: 1rem; }
+            .event-list { 
+                display: grid; 
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
+                gap: 1.5rem; 
+            }
             .event-card {
-                background: white; border-radius: 20px; padding: 1.5rem; display: flex; flex-direction: column;
-                border: 1px solid var(--border-color); text-decoration: none; color: inherit; transition: all 0.2s;
+                background: white; border-radius: 24px; overflow: hidden; display: flex; flex-direction: column;
+                border: 1px solid var(--border-color); text-decoration: none; color: inherit; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+                height: 100%;
             }
-            .event-card:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(0,0,0,0.05); }
+            .event-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
 
-            .card-upper { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem; }
+            .thumb-area {
+                width: 100%;
+                aspect-ratio: 16/9;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                overflow: hidden;
+            }
+            .thumb-img {
+                width: 80%;
+                height: 80%;
+                object-fit: contain;
+                z-index: 2;
+            }
+            .card-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
             .category-tag {
-                background: #f2f2f7; color: var(--text-secondary); padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 600;
+                background: #f2f2f7; color: var(--text-secondary); padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;
+                align-self: flex-start; margin-bottom: 0.8rem;
             }
-            .event-title { font-size: 1.15rem; font-weight: 700; line-height: 1.4; margin-bottom: 0.8rem; flex: 1; }
-            .event-period { font-size: 0.85rem; color: var(--text-secondary); }
+            .event-title { font-size: 1rem; font-weight: 700; line-height: 1.4; margin-bottom: 0.8rem; flex: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+            .event-period { font-size: 0.75rem; color: var(--text-secondary); }
 
-            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); }
+            .loading { text-align: center; padding: 4rem; grid-column: 1 / -1; color: var(--text-secondary); }
             .stats { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; }
         </style>
     </head>
@@ -885,11 +913,14 @@ def kb_card_events():
 
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
-                        <div class="card-upper">
-                            <span class="category-tag">${ev.category}</span>
+                        <div class="thumb-area" style="background-color: ${ev.bgColor}">
+                            <img src="${ev.image}" class="thumb-img" onerror="this.style.display='none'">
                         </div>
-                        <div class="event-title">${ev.eventName}</div>
-                        <div class="event-period">${ev.period}</div>
+                        <div class="card-body">
+                            <span class="category-tag">${ev.category}</span>
+                            <div class="event-title">${ev.eventName}</div>
+                            <div class="event-period">${ev.period}</div>
+                        </div>
                     </a>
                 `).join('');
             }
