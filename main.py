@@ -1306,7 +1306,8 @@ def kb_card_events():
             async function fetchEvents() {
                 try {
                     const response = await fetch('/api/kb-cards');
-                    allEvents = await response.json();
+                    const json = await response.json();
+                    allEvents = Array.isArray(json) ? json : (json.data || []);
                     renderEvents(allEvents);
                 } catch (error) {
                     document.getElementById('eventList').innerHTML = '<div class="loading">정보를 불러오지 못했습니다.</div>';
@@ -1316,8 +1317,8 @@ def kb_card_events():
             function filterEvents() {
                 const search = document.getElementById('searchInput').value.toLowerCase();
                 const filtered = allEvents.filter(ev => 
-                    ev.eventName.toLowerCase().includes(search) || 
-                    ev.category.toLowerCase().includes(search)
+                    (ev.eventName || "").toLowerCase().includes(search) || 
+                    (ev.category || "").toLowerCase().includes(search)
                 );
                 renderEvents(filtered);
             }
