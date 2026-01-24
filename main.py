@@ -21,7 +21,69 @@ DATA_URL = "https://raw.githubusercontent.com/if1live/shiroko-kfcc/interest-rate
 CACHE_KEY = "kfcc_data_cache"
 KB_CACHE_KEY = "kb_card_events_cache_v3" # 이미지 정보를 포함한 v3
 SHINHAN_CACHE_KEY = "shinhan_card_events_cache_v1"
+SHINHAN_MYSHOP_CACHE_KEY = "shinhan_myshop_cache_v1"
 CACHE_EXPIRE = 3600  # 1시간 동안 캐시 유지
+
+@app.get("/api/shinhan-myshop")
+async def get_shinhan_myshop():
+    """
+    신한카드 마이샵 쿠폰 데이터를 가져와서 정제하여 반환합니다.
+    """
+    try:
+        import json
+        cached = r.get(SHINHAN_MYSHOP_CACHE_KEY)
+        if cached:
+            return json.loads(cached)
+
+        api_url = "https://www.shinhancard.com/mob/MOBFM501N/MOBFM501R21.ajax"
+        headers = {
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+            "Referer": "https://www.shinhancard.com/mob/MOBFM501N/MOBFM501R31.shc",
+            "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"
+        }
+        payload = {"QY_CCD": "T"}
+        
+        all_coupons = []
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            response = await client.post(api_url, json=payload, headers=headers)
+            if response.status_code == 200:
+                data = response.json()
+                # GRID1에 쿠폰 정보들이 담겨 있음
+                grid = data.get("mbw_message", {}).get("GRID1", {})
+                
+                # 병렬 리스트 형식이므로 인덱스로 순회
+                names = grid.get("SSG_NM", [])
+                benefits = grid.get("MCT_CRD_SV_RG_TT", [])
+                imgs = grid.get("MYH_CUP_IMG_URL_AR", [])
+                ends = grid.get("MCT_PLF_MO_EDD", [])
+                links = grid.get("MYH_SRM_ONL_SPP_MLL_URL_AR", [])
+                
+                for i in range(len(names)):
+                    name = names[i]
+                    benefit = benefits[i] if i < len(benefits) else ""
+                    img = imgs[i] if i < len(imgs) else ""
+                    end = ends[i] if i < len(ends) else ""
+                    link = links[i] if i < len(links) else "https://www.shinhancard.com/mob/MOBFM501N/MOBFM501R31.shc"
+                    
+                    if len(end) == 8:
+                        end = f"~ {end[:4]}.{end[4:6]}.{end[6:]}"
+
+                    all_coupons.append({
+                        "category": "마이샵 쿠폰",
+                        "eventName": f"[{name}] {benefit}",
+                        "period": end,
+                        "link": link,
+                        "image": img,
+                        "bgColor": "#ffffff"
+                    })
+
+        if all_coupons:
+            r.setex(SHINHAN_MYSHOP_CACHE_KEY, CACHE_EXPIRE, json.dumps(all_coupons))
+        return all_coupons
+    except Exception as e:
+        print(f"Shinhan MyShop API Error: {e}")
+        return []
 
 @app.get("/api/shinhan-cards")
 async def get_shinhan_cards():
@@ -1103,9 +1165,13 @@ def shinhan_card_events():
 
         <div class="main-content">
             <h1>이벤트 전체 검색</h1>
-            <a href="https://www.shinhancard.com/mob/MOBFM829N/MOBFM829R03.shc?sourcePage=R01" target="_blank" class="official-link">공식 홈페이지 이벤트 목록 방문하기 ↗</a>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <a href="https://www.shinhancard.com/mob/MOBFM829N/MOBFM829R03.shc?sourcePage=R01" target="_blank" class="official-link">공식 이벤트 목록 ↗</a>
+                <a href="https://www.shinhancard.com/mob/MOBFM501N/MOBFM501R31.shc" target="_blank" class="official-link" style="color: #e91e63;">공식 마이샵 쿠폰 ↗</a>
+            </div>
+            
             <div class="search-section">
-                <input type="text" id="searchInput" class="search-input" placeholder="관심 있는 이벤트를 검색해보세요..." onkeyup="filterEvents()">
+                <input type="text" id="searchInput" class="search-input" placeholder="이벤트 또는 마이샵 쿠폰을 검색해보세요..." onkeyup="filterEvents()">
             </div>
 
             <div id="stats" class="stats"></div>
@@ -1119,8 +1185,15 @@ def shinhan_card_events():
 
             async function fetchEvents() {
                 try {
-                    const response = await fetch('/api/shinhan-cards');
-                    allEvents = await response.json();
+                    const [eventsRes, myshopRes] = await Promise.all([
+                        fetch('/api/shinhan-cards'),
+                        fetch('/api/shinhan-myshop')
+                    ]);
+                    
+                    const events = await eventsRes.json();
+                    const myshop = await myshopRes.json();
+                    
+                    allEvents = [...events, ...myshop];
                     renderEvents(allEvents);
                 } catch (error) {
                     document.getElementById('eventList').innerHTML = '<div class="loading">정보를 불러오지 못했습니다.</div>';
@@ -1140,7 +1213,7 @@ def shinhan_card_events():
                 const list = document.getElementById('eventList');
                 const stats = document.getElementById('stats');
                 
-                stats.innerText = `총 ${events.length}개의 이벤트 검색됨`;
+                stats.innerText = `총 ${events.length}개의 혜택 검색됨`;
                 
                 if (events.length === 0) {
                     list.innerHTML = '<div class="loading">검색 결과가 없습니다.</div>';
@@ -1150,10 +1223,10 @@ def shinhan_card_events():
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
                         <div class="thumb-area">
-                            <img src="${ev.image}" class="thumb-img" onerror="this.src='https://www.shinhancard.com/pconts/images/dx/common/no_image.png'">
+                            <img src="${ev.image}" class="thumb-img" style="object-fit: contain; width: 85%; height: 85%;" onerror="this.src='https://www.shinhancard.com/pconts/images/dx/common/no_image.png'">
                         </div>
                         <div class="card-body">
-                            <span class="category-tag">${ev.category}</span>
+                            <span class="category-tag" style="${ev.category === '마이샵 쿠폰' ? 'background: #ffe1ed; color: #e91e63;' : ''}">${ev.category}</span>
                             <div class="event-title">${ev.eventName}</div>
                             <div class="event-period">${ev.period}</div>
                         </div>
