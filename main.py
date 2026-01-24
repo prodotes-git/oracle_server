@@ -186,7 +186,7 @@ async def crawl_kb_bg():
         api_url = "https://m.kbcard.com/BON/API/MBBACXHIABNC0064"
         
         async with httpx.AsyncClient(timeout=30.0, verify=False) as client:
-            for page in range(1, 15):
+            for page in range(1, 50): # 충분히 넉넉하게 잡음
                 payload = {
                     "evntStatus": "", "evntBonTag": "", "evntScp": "", 
                     "evntAi": "", "evntVip": "", "pageCount": page, "evtName": ""
@@ -207,25 +207,36 @@ async def crawl_kb_bg():
                     if not events: break
                     
                     for ev in events:
+                        # 카테고리 매핑
                         category_code = ev.get("evntBonContents", "")
                         category_map = {"01": "포인트/캐시백", "02": "할인/무이자", "03": "경품", "04": "기타"}
                         category = category_map.get(category_code, "이벤트")
                         
+                        # 이미지 경로 보정
                         img_path = ev.get('evtImgPath', '')
                         if img_path and not img_path.startswith('http'):
+                            # API 분석 결과 kbcard 이미지는 이 경로를 따름
                             img_path = f"https://img1.kbcard.com/ST/img/cxc{img_path}"
+
+                        # 상세 페이지 링크
+                        evt_no = ev.get('evtNo', '')
+                        link = f"https://m.kbcard.com/BON/DVIEW/MBBMCXHIABNC0026?evntSerno={evt_no}&evntMain=Y"
 
                         all_events.append({
                             "category": category,
                             "eventName": f"{ev.get('evtNm', '')} {ev.get('evtSubNm', '')}".strip(),
                             "period": ev.get("evtYMD", ""),
-                            "link": f"https://m.kbcard.com/BON/DVIEW/MBBMCXHIABNC0026?evntSerno={ev.get('evtNo')}&evntMain=Y",
+                            "link": link,
                             "image": img_path,
-                            "bgColor": ev.get('bckgColrCtt', '#f2f2f7')
+                            "bgColor": ev.get('bckgColrCtt', '#ffffff')
                         })
                     
-                    if page >= res_json.get("totalPageCount", 0): break
-                except Exception: break
+                    total_pages = int(res_json.get("totalPageCount", 0))
+                    if page >= total_pages: break
+                    
+                except Exception as e:
+                    print(f"Error parsing KB page {page}: {e}")
+                    break
         
         if all_events:
             try:
