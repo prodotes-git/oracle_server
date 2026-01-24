@@ -278,6 +278,117 @@ async def update_kb(bg_tasks: BackgroundTasks):
     bg_tasks.add_task(crawl_kb_bg)
     return {"status": "started"}
 
+HANA_CACHE_KEY = "hana_card_events_cache_v1"
+
+# 하나카드 데이터 갱신 (백그라운드)
+async def crawl_hana_bg():
+    try:
+        print(f"[{datetime.now()}] Starting Hana background crawl...")
+        all_events = []
+        base_url = "https://m.hanacard.co.kr"
+        target_url = "https://m.hanacard.co.kr/MKEVT1000M.web"
+
+        async with httpx.AsyncClient(timeout=20.0, follow_redirects=True) as client:
+            headers = {
+                "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"
+            }
+            response = await client.get(target_url, headers=headers)
+            
+            if response.status_code == 200:
+                # euc-kr 디코딩 시도 (하나카드는 euc-kr 사용)
+                try:
+                    html = response.content.decode("euc-kr")
+                except UnicodeDecodeError:
+                    html = response.text
+
+                from bs4 import BeautifulSoup
+                import re
+
+                soup = BeautifulSoup(html, "lxml")
+                # 이벤트 리스트 아이템 선택
+                items = soup.select("li.usage-default-item")
+                
+                for item in items:
+                    try:
+                        # 링크 및 ID 추출
+                        anchor = item.select_one("a")
+                        if not anchor: continue
+                        
+                        onclick = anchor.get("onclick", "")
+                        # detail('/MKEVT1010M.web','8086') 패턴 추출
+                        match = re.search(r"detail\('([^']+)',\s*'([^']+)'\)", onclick)
+                        
+                        link = ""
+                        if match:
+                            path, seq = match.groups()
+                            link = f"{base_url}{path}?EVN_SEQ={seq}"
+                        else:
+                            # 다른 패턴 (goLinkWeb 등)
+                            continue
+
+                        # 이미지
+                        img_tag = item.select_one("img")
+                        img_src = img_tag.get("src", "") if img_tag else ""
+                        if img_src and not img_src.startswith("http"):
+                            img_src = f"{base_url}{img_src}"
+
+                        # 텍스트 정보
+                        brand_div = item.select_one(".usage-default-brand")
+                        category = brand_div.text.strip() if brand_div else "하나카드"
+                        
+                        title_div = item.select_one(".usage-default-title")
+                        title = title_div.text.strip() if title_div else "이벤트"
+                        
+                        date_div = item.select_one(".usage-default-etc-item")
+                        period = date_div.text.strip() if date_div else ""
+
+                        all_events.append({
+                            "category": category,
+                            "eventName": title,
+                            "period": period,
+                            "link": link,
+                            "image": img_src,
+                            "bgColor": "#ffffff"
+                        })
+                    except Exception:
+                        continue
+
+        if all_events:
+            with open("hana_data.json", "w", encoding="utf-8") as f:
+                json.dump(all_events, f, ensure_ascii=False)
+            r.setex(HANA_CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
+            print(f"[{datetime.now()}] Hana crawl finished. {len(all_events)} events.")
+            
+    except Exception as e:
+        print(f"[{datetime.now()}] Hana crawl failed: {e}")
+
+@app.get("/api/hana-cards")
+async def get_hana_cards():
+    try:
+        import json
+        cached = r.get(HANA_CACHE_KEY)
+        if cached: return json.loads(cached)
+
+        local_path = "hana_data.json"
+        if os.path.exists(local_path):
+            with open(local_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                
+            mtime = os.path.getmtime(local_path)
+            last_updated = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
+            
+            response = {"last_updated": last_updated, "data": data}
+            r.setex(HANA_CACHE_KEY, CACHE_EXPIRE, json.dumps(response))
+            return response
+        
+        return {"last_updated": None, "data": []}
+    except Exception: return {"last_updated": None, "data": []}
+
+@app.post("/api/hana/update")
+async def update_hana(bg_tasks: BackgroundTasks):
+    bg_tasks.add_task(crawl_hana_bg)
+    return {"status": "started"}
+
 def get_uptime():
     uptime_seconds = int(time.time() - boot_time)
     days, rem = divmod(uptime_seconds, 86400)
@@ -376,6 +487,8 @@ async def start_scheduler():
     scheduler.add_job(crawl_shinhan_bg, 'cron', hour=4, minute=5)
     # 4시 10분에 KB카드
     scheduler.add_job(crawl_kb_bg, 'cron', hour=4, minute=10)
+    # 4시 15분에 하나카드
+    scheduler.add_job(crawl_hana_bg, 'cron', hour=4, minute=15)
     
     scheduler.start()
     print("Scheduler started. All tasks scheduled.")
