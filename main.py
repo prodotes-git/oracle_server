@@ -20,7 +20,81 @@ boot_time = time.time()
 DATA_URL = "https://raw.githubusercontent.com/if1live/shiroko-kfcc/interest-rate/summary/report_mat.json"
 CACHE_KEY = "kfcc_data_cache"
 KB_CACHE_KEY = "kb_card_events_cache_v3" # 이미지 정보를 포함한 v3
+SHINHAN_CACHE_KEY = "shinhan_card_events_cache_v1"
 CACHE_EXPIRE = 3600  # 1시간 동안 캐시 유지
+
+@app.get("/api/shinhan-cards")
+async def get_shinhan_cards():
+    """
+    신한카드 이벤트 데이터를 가져와서 정제하여 반환합니다.
+    """
+    try:
+        import json
+        # 1. 캐시 확인
+        try:
+            cached = r.get(SHINHAN_CACHE_KEY)
+            if cached:
+                data = json.loads(cached)
+                if data: return data
+        except Exception: pass
+
+        all_events = []
+        base_url = "https://www.shinhancard.com"
+        
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            # 신한카드는 01, 02... 형식의 JSON 파일을 사용
+            for i in range(1, 5):
+                api_url = f"{base_url}/logic/json/evnPgsList0{i}.json"
+                headers = {
+                    "Referer": "https://www.shinhancard.com/",
+                    "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"
+                }
+                
+                response = await client.get(api_url, headers=headers)
+                if response.status_code != 200:
+                    break
+                
+                data = response.json()
+                events = data.get("root", {}).get("evnlist", [])
+                if not events:
+                    break
+                
+                for ev in events:
+                    # 기간 포맷팅 (YYYYMMDD -> YYYY.MM.DD)
+                    start = ev.get('mobWbEvtStd', '')
+                    end = ev.get('mobWbEvtEdd', '')
+                    if len(start) == 8: start = f"{start[:4]}.{start[4:6]}.{start[6:]}"
+                    if len(end) == 8: end = f"{end[:4]}.{end[4:6]}.{end[6:]}"
+                    
+                    # 이미지 및 링크 처리
+                    img_url = ev.get('hpgEvtCtgImgUrlAr', '')
+                    if img_url and not img_url.startswith('http'):
+                        img_url = f"{base_url}{img_url}"
+                    
+                    link_url = ev.get('hpgEvtDlPgeUrlAr', '')
+                    if link_url and not link_url.startswith('http'):
+                        link_url = f"{base_url}{link_url}"
+
+                    all_events.append({
+                        "category": ev.get('hpgEvtSmrTt', '이벤트'),
+                        "eventName": f"{ev.get('evtImgSlTilNm', '')} {ev.get('mobWbEvtNm', '')}".strip(),
+                        "period": f"{start} ~ {end}" if start and end else "상시 진행",
+                        "link": link_url,
+                        "image": img_url,
+                        "bgColor": "#ffffff" # 신한카드는 주로 화이트 배경
+                    })
+        
+        # 2. 결과가 있을 때만 캐싱
+        if all_events:
+            try:
+                r.setex(SHINHAN_CACHE_KEY, CACHE_EXPIRE, json.dumps(all_events))
+            except Exception: pass
+                
+        return all_events
+        
+    except Exception as e:
+        print(f"Shinhan Card API Error: {e}")
+        return []
 
 @app.get("/api/kb-cards")
 async def get_kb_cards():
@@ -711,10 +785,10 @@ def card_events():
             </div>
 
             <div class="card-grid" id="cardGrid">
-                <a href="https://www.shinhancard.com/pconts/html/benefit/event/benefitEventList.html" target="_blank" class="card-link" data-name="신한카드">
+                <a href="/card-events/shinhan" class="card-link" data-name="신한카드">
                     <div class="card-logo" style="background: #0046ff; color: white;">S</div>
                     <div class="card-name">신한카드</div>
-                    <div class="card-desc">진행중인 이벤트 보기</div>
+                    <div class="card-desc">이벤트 전체 검색하기</div>
                 </a>
                 <a href="https://www.samsungcard.com/personal/event/ing/list" target="_blank" class="card-link" data-name="삼성카드">
                     <div class="card-logo" style="background: #0056b3; color: white;">S</div>
@@ -915,6 +989,168 @@ def kb_card_events():
                     <a href="${ev.link}" target="_blank" class="event-card">
                         <div class="thumb-area" style="background-color: ${ev.bgColor}">
                             <img src="${ev.image}" class="thumb-img" onerror="this.style.display='none'">
+                        </div>
+                        <div class="card-body">
+                            <span class="category-tag">${ev.category}</span>
+                            <div class="event-title">${ev.eventName}</div>
+                            <div class="event-period">${ev.period}</div>
+                        </div>
+                    </a>
+                `).join('');
+            }
+
+            fetchEvents();
+        </script>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
+
+@app.get("/card-events/shinhan", response_class=HTMLResponse)
+def shinhan_card_events():
+    html_content = """
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>신한카드 이벤트 검색</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;600&display=swap" rel="stylesheet">
+        <style>
+            :root {
+                --bg-color: #F5F5F7;
+                --accent-color: #1d1d1f;
+                --text-secondary: #6e6e73;
+                --blue-color: #0071e3;
+                --border-color: rgba(0,0,0,0.1);
+                --sh-color: #0046ff;
+            }
+            
+            body { background-color: var(--bg-color); color: var(--accent-color); font-family: 'Inter', sans-serif; padding-bottom: 50px; }
+
+            .nav-header {
+                position: sticky; top: 0; background: rgba(245, 245, 247, 0.8); backdrop-filter: blur(20px);
+                z-index: 100; padding: 1rem; border-bottom: 1px solid var(--border-color);
+            }
+
+            .nav-content { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+            .back-btn { text-decoration: none; color: var(--blue-color); font-weight: 500; }
+            
+            .main-content { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; }
+            h1 { font-family: 'Outfit', sans-serif; font-size: 2rem; margin-bottom: 0.5rem; }
+            .official-link { display: inline-block; margin-bottom: 1.5rem; color: var(--sh-color); text-decoration: none; font-size: 0.9rem; font-weight: 500; }
+            .official-link:hover { text-decoration: underline; }
+
+            .search-section {
+                display: flex; gap: 1rem; margin-bottom: 2rem;
+            }
+
+            .search-input {
+                flex: 1; padding: 16px 20px; border-radius: 16px; border: 1px solid var(--border-color);
+                box-shadow: 0 4px 6px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 1rem;
+            }
+            .search-input:focus { border-color: var(--sh-color); box-shadow: 0 4px 12px rgba(0,70,255,0.15); }
+
+            .event-list { 
+                display: grid; 
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
+                gap: 1.5rem; 
+            }
+            .event-card {
+                background: white; border-radius: 24px; overflow: hidden; display: flex; flex-direction: column;
+                border: 1px solid var(--border-color); text-decoration: none; color: inherit; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+                height: 100%;
+            }
+            .event-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+
+            .thumb-area {
+                width: 100%;
+                aspect-ratio: 16/9;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                overflow: hidden;
+            }
+            .thumb-img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: transform 0.5s ease;
+            }
+            .event-card:hover .thumb-img { transform: scale(1.05); }
+
+            .card-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
+            .category-tag {
+                background: #f2f2f7; color: var(--text-secondary); padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;
+                align-self: flex-start; margin-bottom: 0.8rem;
+            }
+            .event-title { font-size: 1rem; font-weight: 700; line-height: 1.4; margin-bottom: 0.8rem; flex: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+            .event-period { font-size: 0.75rem; color: var(--text-secondary); }
+
+            .loading { text-align: center; padding: 4rem; grid-column: 1 / -1; color: var(--text-secondary); }
+            .stats { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; }
+        </style>
+    </head>
+    <body>
+        <div class="nav-header">
+            <div class="nav-content">
+                <a href="/card-events" class="back-btn">← 카드사 목록</a>
+                <div style="font-weight: 600;">신한카드 이벤트</div>
+                <div style="width: 80px;"></div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <h1>이벤트 전체 검색</h1>
+            <a href="https://www.shinhancard.com/mob/MOBFM829N/MOBFM829R03.shc?sourcePage=R01" target="_blank" class="official-link">공식 홈페이지 이벤트 목록 방문하기 ↗</a>
+            <div class="search-section">
+                <input type="text" id="searchInput" class="search-input" placeholder="관심 있는 이벤트를 검색해보세요..." onkeyup="filterEvents()">
+            </div>
+
+            <div id="stats" class="stats"></div>
+            <div id="eventList" class="event-list">
+                <div class="loading">이벤트를 불러오는 중입니다...</div>
+            </div>
+        </div>
+
+        <script>
+            let allEvents = [];
+
+            async function fetchEvents() {
+                try {
+                    const response = await fetch('/api/shinhan-cards');
+                    allEvents = await response.json();
+                    renderEvents(allEvents);
+                } catch (error) {
+                    document.getElementById('eventList').innerHTML = '<div class="loading">정보를 불러오지 못했습니다.</div>';
+                }
+            }
+
+            function filterEvents() {
+                const search = document.getElementById('searchInput').value.toLowerCase();
+                const filtered = allEvents.filter(ev => 
+                    ev.eventName.toLowerCase().includes(search) || 
+                    ev.category.toLowerCase().includes(search)
+                );
+                renderEvents(filtered);
+            }
+
+            function renderEvents(events) {
+                const list = document.getElementById('eventList');
+                const stats = document.getElementById('stats');
+                
+                stats.innerText = `총 ${events.length}개의 이벤트 검색됨`;
+                
+                if (events.length === 0) {
+                    list.innerHTML = '<div class="loading">검색 결과가 없습니다.</div>';
+                    return;
+                }
+
+                list.innerHTML = events.map(ev => `
+                    <a href="${ev.link}" target="_blank" class="event-card">
+                        <div class="thumb-area">
+                            <img src="${ev.image}" class="thumb-img" onerror="this.src='https://www.shinhancard.com/pconts/images/dx/common/no_image.png'">
                         </div>
                         <div class="card-body">
                             <span class="category-tag">${ev.category}</span>
