@@ -5,7 +5,7 @@ app = FastAPI()
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World", "Server": "Oracle Cloud Free Tier"}
+    return {"Hello": "World (Updated)", "Server": "Oracle Cloud Free Tier"}
 
 @app.get("/health")
 def health_check():
