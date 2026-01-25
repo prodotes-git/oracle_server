@@ -153,9 +153,14 @@ async def crawl_shinhan_bg():
                         if link_url and not link_url.startswith('http'):
                             link_url = f"{base_url}{link_url}"
 
+                        title = ev.get('mobWbEvtNm', '')
+                        sub_title = ev.get('evtImgSlTilNm', '')
+                        if sub_title and sub_title != title:
+                            title = f"{sub_title} {title}"
+                            
                         all_events.append({
                             "category": ev.get('hpgEvtKindNm', '이벤트'),
-                            "eventName": ev.get('hpgEvtTitNm', ''),
+                            "eventName": title.strip(),
                             "period": f"{start} ~ {end}",
                             "link": link_url,
                             "image": img_url,
@@ -1302,48 +1307,52 @@ def kb_card_events():
                 z-index: 100; padding: 1rem; border-bottom: 1px solid var(--border-color);
             }
 
-            .nav-content { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+            .nav-content { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
             .back-btn { text-decoration: none; color: var(--blue-color); font-weight: 500; }
             
-            .main-content { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; }
+            .main-content { max-width: 1400px; margin: 2rem auto; padding: 0 1.5rem; }
             h1 { font-family: 'Outfit', sans-serif; font-size: 2rem; margin-bottom: 1.5rem; }
 
+            
             
             .search-section {
                 display: flex; gap: 1rem; margin-bottom: 2rem;
             }
             .search-input {
-                flex: 1; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color);
-                box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 1rem;
+                flex: 1; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-color);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 0.95rem;
             }
             .search-input:focus { border-color: var(--blue-color); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
 
             .event-list { 
-                display: flex; 
-                flex-direction: column; 
-                gap: 0.5rem; 
+                display: grid; 
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+                gap: 0.8rem; 
                 margin-top: 1rem; 
             }
             .event-card {
                 background: white; 
-                border-radius: 12px; 
-                padding: 1rem 1.25rem; 
+                border-radius: 16px; 
+                padding: 1.25rem; 
                 display: flex; 
-                align-items: center; 
-                justify-content: space-between; 
+                flex-direction: column; 
                 border: 1px solid rgba(0,0,0,0.06); 
                 text-decoration: none; 
                 color: inherit; 
                 transition: all 0.2s ease;
-                min-height: 60px;
+                height: 100%;
+                min-height: 140px;
+                position: relative;
             }
             .event-card:hover { 
-                background-color: #f9f9f9;
-                transform: translateX(4px);
+                transform: translateY(-4px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+                border-color: rgba(0,0,0,0.1);
             }
             
-            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; }
-            .stats { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; }
+            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; grid-column: 1 / -1; }
+            .stats { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.8rem; text-align: right; }
+
 
         </style>
     </head>
@@ -1393,11 +1402,12 @@ def kb_card_events():
             }
 
             
+            
             function renderEvents(events) {
                 const list = document.getElementById('eventList');
                 const stats = document.getElementById('stats');
                 
-                stats.innerText = `총 ${events.length}개의 이벤트가 있습니다`;
+                stats.innerText = `총 ${events.length}개의 이벤트`;
                 
                 if (events.length === 0) {
                     list.innerHTML = '<div class="loading">이벤트가 없습니다.</div>';
@@ -1406,22 +1416,16 @@ def kb_card_events():
 
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
-                        <div style="flex:1;display:flex;align-items:center;gap:1rem;min-width:0">
-                            <div style="width:8px;height:8px;border-radius:50%;background:${ev.bgColor};flex-shrink:0"></div>
-                            <div style="flex:1;min-width:0">
-                                <div style="font-size:0.95rem;font-weight:600;color:#1d1d1f;margin-bottom:0.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.eventName}</div>
-                                <div style="font-size:0.8rem;color:#6e6e73;display:flex;align-items:center;gap:0.75rem">
-                                    <span style="background:#f5f5f7;padding:2px 8px;border-radius:6px;font-weight:500;font-size:0.75rem">${ev.category}</span>
-                                    <span>${ev.period}</span>
-                                </div>
-                            </div>
+                        <div style="width:100%;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem">
+                            <span style="background:#f5f5f7;padding:3px 8px;border-radius:6px;font-weight:600;font-size:0.65rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
+                            <div style="width:6px;height:6px;border-radius:50%;background:${ev.bgColor}"></div>
                         </div>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;margin-left:1rem">
-                            <path d="M7.5 15L12.5 10L7.5 5" stroke="#6e6e73" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
+                        <div style="font-size:0.9rem;font-weight:700;color:#1d1d1f;margin-bottom:0.5rem;line-height:1.35;letter-spacing:-0.02em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1;word-break:keep-all">${ev.eventName}</div>
+                        <div style="font-size:0.7rem;color:#86868b;margin-top:auto;letter-spacing:-0.01em">${ev.period}</div>
                     </a>
                 `).join('');
             }
+
 
 
             fetchEvents();
@@ -1458,48 +1462,52 @@ def hana_card_events():
                 z-index: 100; padding: 1rem; border-bottom: 1px solid var(--border-color);
             }
 
-            .nav-content { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+            .nav-content { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
             .back-btn { text-decoration: none; color: var(--blue-color); font-weight: 500; }
             
-            .main-content { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; }
+            .main-content { max-width: 1400px; margin: 2rem auto; padding: 0 1.5rem; }
             h1 { font-family: 'Outfit', sans-serif; font-size: 2rem; margin-bottom: 1.5rem; }
 
+            
             
             .search-section {
                 display: flex; gap: 1rem; margin-bottom: 2rem;
             }
             .search-input {
-                flex: 1; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color);
-                box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 1rem;
+                flex: 1; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-color);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 0.95rem;
             }
             .search-input:focus { border-color: var(--blue-color); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
 
             .event-list { 
-                display: flex; 
-                flex-direction: column; 
-                gap: 0.5rem; 
+                display: grid; 
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+                gap: 0.8rem; 
                 margin-top: 1rem; 
             }
             .event-card {
                 background: white; 
-                border-radius: 12px; 
-                padding: 1rem 1.25rem; 
+                border-radius: 16px; 
+                padding: 1.25rem; 
                 display: flex; 
-                align-items: center; 
-                justify-content: space-between; 
+                flex-direction: column; 
                 border: 1px solid rgba(0,0,0,0.06); 
                 text-decoration: none; 
                 color: inherit; 
                 transition: all 0.2s ease;
-                min-height: 60px;
+                height: 100%;
+                min-height: 140px;
+                position: relative;
             }
             .event-card:hover { 
-                background-color: #f9f9f9;
-                transform: translateX(4px);
+                transform: translateY(-4px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+                border-color: rgba(0,0,0,0.1);
             }
             
-            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; }
-            .stats { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; }
+            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; grid-column: 1 / -1; }
+            .stats { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.8rem; text-align: right; }
+
 
         </style>
     </head>
@@ -1550,11 +1558,12 @@ def hana_card_events():
             }
 
             
+            
             function renderEvents(events) {
                 const list = document.getElementById('eventList');
                 const stats = document.getElementById('stats');
                 
-                stats.innerText = `총 ${events.length}개의 이벤트가 있습니다`;
+                stats.innerText = `총 ${events.length}개의 이벤트`;
                 
                 if (events.length === 0) {
                     list.innerHTML = '<div class="loading">이벤트가 없습니다.</div>';
@@ -1563,22 +1572,16 @@ def hana_card_events():
 
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
-                        <div style="flex:1;display:flex;align-items:center;gap:1rem;min-width:0">
-                            <div style="width:8px;height:8px;border-radius:50%;background:${ev.bgColor};flex-shrink:0"></div>
-                            <div style="flex:1;min-width:0">
-                                <div style="font-size:0.95rem;font-weight:600;color:#1d1d1f;margin-bottom:0.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.eventName}</div>
-                                <div style="font-size:0.8rem;color:#6e6e73;display:flex;align-items:center;gap:0.75rem">
-                                    <span style="background:#f5f5f7;padding:2px 8px;border-radius:6px;font-weight:500;font-size:0.75rem">${ev.category}</span>
-                                    <span>${ev.period}</span>
-                                </div>
-                            </div>
+                        <div style="width:100%;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem">
+                            <span style="background:#f5f5f7;padding:3px 8px;border-radius:6px;font-weight:600;font-size:0.65rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
+                            <div style="width:6px;height:6px;border-radius:50%;background:${ev.bgColor}"></div>
                         </div>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;margin-left:1rem">
-                            <path d="M7.5 15L12.5 10L7.5 5" stroke="#6e6e73" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
+                        <div style="font-size:0.9rem;font-weight:700;color:#1d1d1f;margin-bottom:0.5rem;line-height:1.35;letter-spacing:-0.02em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1;word-break:keep-all">${ev.eventName}</div>
+                        <div style="font-size:0.7rem;color:#86868b;margin-top:auto;letter-spacing:-0.01em">${ev.period}</div>
                     </a>
                 `).join('');
             }
+
 
 
             fetchEvents();
@@ -1615,50 +1618,54 @@ def shinhan_card_events():
                 z-index: 100; padding: 1rem; border-bottom: 1px solid var(--border-color);
             }
 
-            .nav-content { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+            .nav-content { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
             .back-btn { text-decoration: none; color: var(--blue-color); font-weight: 500; }
             
-            .main-content { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; }
+            .main-content { max-width: 1400px; margin: 2rem auto; padding: 0 1.5rem; }
             h1 { font-family: 'Outfit', sans-serif; font-size: 2rem; margin-bottom: 0.5rem; }
             .official-link { display: inline-block; margin-bottom: 1.5rem; color: var(--sh-color); text-decoration: none; font-size: 0.9rem; font-weight: 500; }
             .official-link:hover { text-decoration: underline; }
 
             
+            
             .search-section {
                 display: flex; gap: 1rem; margin-bottom: 2rem;
             }
             .search-input {
-                flex: 1; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color);
-                box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 1rem;
+                flex: 1; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-color);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 0.95rem;
             }
             .search-input:focus { border-color: var(--blue-color); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
 
             .event-list { 
-                display: flex; 
-                flex-direction: column; 
-                gap: 0.5rem; 
+                display: grid; 
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+                gap: 0.8rem; 
                 margin-top: 1rem; 
             }
             .event-card {
                 background: white; 
-                border-radius: 12px; 
-                padding: 1rem 1.25rem; 
+                border-radius: 16px; 
+                padding: 1.25rem; 
                 display: flex; 
-                align-items: center; 
-                justify-content: space-between; 
+                flex-direction: column; 
                 border: 1px solid rgba(0,0,0,0.06); 
                 text-decoration: none; 
                 color: inherit; 
                 transition: all 0.2s ease;
-                min-height: 60px;
+                height: 100%;
+                min-height: 140px;
+                position: relative;
             }
             .event-card:hover { 
-                background-color: #f9f9f9;
-                transform: translateX(4px);
+                transform: translateY(-4px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+                border-color: rgba(0,0,0,0.1);
             }
             
-            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; }
-            .stats { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; }
+            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; grid-column: 1 / -1; }
+            .stats { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.8rem; text-align: right; }
+
 
         </style>
     </head>
@@ -1722,11 +1729,12 @@ def shinhan_card_events():
             }
 
             
+            
             function renderEvents(events) {
                 const list = document.getElementById('eventList');
                 const stats = document.getElementById('stats');
                 
-                stats.innerText = `총 ${events.length}개의 이벤트가 있습니다`;
+                stats.innerText = `총 ${events.length}개의 이벤트`;
                 
                 if (events.length === 0) {
                     list.innerHTML = '<div class="loading">이벤트가 없습니다.</div>';
@@ -1735,22 +1743,16 @@ def shinhan_card_events():
 
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
-                        <div style="flex:1;display:flex;align-items:center;gap:1rem;min-width:0">
-                            <div style="width:8px;height:8px;border-radius:50%;background:${ev.bgColor};flex-shrink:0"></div>
-                            <div style="flex:1;min-width:0">
-                                <div style="font-size:0.95rem;font-weight:600;color:#1d1d1f;margin-bottom:0.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.eventName}</div>
-                                <div style="font-size:0.8rem;color:#6e6e73;display:flex;align-items:center;gap:0.75rem">
-                                    <span style="background:#f5f5f7;padding:2px 8px;border-radius:6px;font-weight:500;font-size:0.75rem">${ev.category}</span>
-                                    <span>${ev.period}</span>
-                                </div>
-                            </div>
+                        <div style="width:100%;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem">
+                            <span style="background:#f5f5f7;padding:3px 8px;border-radius:6px;font-weight:600;font-size:0.65rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
+                            <div style="width:6px;height:6px;border-radius:50%;background:${ev.bgColor}"></div>
                         </div>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;margin-left:1rem">
-                            <path d="M7.5 15L12.5 10L7.5 5" stroke="#6e6e73" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
+                        <div style="font-size:0.9rem;font-weight:700;color:#1d1d1f;margin-bottom:0.5rem;line-height:1.35;letter-spacing:-0.02em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1;word-break:keep-all">${ev.eventName}</div>
+                        <div style="font-size:0.7rem;color:#86868b;margin-top:auto;letter-spacing:-0.01em">${ev.period}</div>
                     </a>
                 `).join('');
             }
+
 
 
             fetchEvents();
@@ -2127,51 +2129,55 @@ def woori_card_events():
                 border-bottom: 1px solid var(--border-color); z-index: 100;
             }
             .nav-content {
-                max-width: 1200px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center;
+                max-width: 1400px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center;
             }
             .back-btn {
                 color: var(--blue-color); text-decoration: none; font-weight: 500; font-size: 0.95rem;
             }
 
-            .main-content { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+            .main-content { max-width: 1400px; margin: 0 auto; padding: 2rem 1.5rem; }
             h1 { font-size: 2.5rem; font-weight: 600; margin-bottom: 1rem; }
+            
             
             
             .search-section {
                 display: flex; gap: 1rem; margin-bottom: 2rem;
             }
             .search-input {
-                flex: 1; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color);
-                box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 1rem;
+                flex: 1; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-color);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 0.95rem;
             }
             .search-input:focus { border-color: var(--blue-color); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
 
             .event-list { 
-                display: flex; 
-                flex-direction: column; 
-                gap: 0.5rem; 
+                display: grid; 
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+                gap: 0.8rem; 
                 margin-top: 1rem; 
             }
             .event-card {
                 background: white; 
-                border-radius: 12px; 
-                padding: 1rem 1.25rem; 
+                border-radius: 16px; 
+                padding: 1.25rem; 
                 display: flex; 
-                align-items: center; 
-                justify-content: space-between; 
+                flex-direction: column; 
                 border: 1px solid rgba(0,0,0,0.06); 
                 text-decoration: none; 
                 color: inherit; 
                 transition: all 0.2s ease;
-                min-height: 60px;
+                height: 100%;
+                min-height: 140px;
+                position: relative;
             }
             .event-card:hover { 
-                background-color: #f9f9f9;
-                transform: translateX(4px);
+                transform: translateY(-4px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+                border-color: rgba(0,0,0,0.1);
             }
             
-            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; }
-            .stats { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; }
+            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; grid-column: 1 / -1; }
+            .stats { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.8rem; text-align: right; }
+
 
         </style>
     </head>
@@ -2221,11 +2227,12 @@ def woori_card_events():
             }
 
             
+            
             function renderEvents(events) {
                 const list = document.getElementById('eventList');
                 const stats = document.getElementById('stats');
                 
-                stats.innerText = `총 ${events.length}개의 이벤트가 있습니다`;
+                stats.innerText = `총 ${events.length}개의 이벤트`;
                 
                 if (events.length === 0) {
                     list.innerHTML = '<div class="loading">이벤트가 없습니다.</div>';
@@ -2234,22 +2241,16 @@ def woori_card_events():
 
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
-                        <div style="flex:1;display:flex;align-items:center;gap:1rem;min-width:0">
-                            <div style="width:8px;height:8px;border-radius:50%;background:${ev.bgColor};flex-shrink:0"></div>
-                            <div style="flex:1;min-width:0">
-                                <div style="font-size:0.95rem;font-weight:600;color:#1d1d1f;margin-bottom:0.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.eventName}</div>
-                                <div style="font-size:0.8rem;color:#6e6e73;display:flex;align-items:center;gap:0.75rem">
-                                    <span style="background:#f5f5f7;padding:2px 8px;border-radius:6px;font-weight:500;font-size:0.75rem">${ev.category}</span>
-                                    <span>${ev.period}</span>
-                                </div>
-                            </div>
+                        <div style="width:100%;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem">
+                            <span style="background:#f5f5f7;padding:3px 8px;border-radius:6px;font-weight:600;font-size:0.65rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
+                            <div style="width:6px;height:6px;border-radius:50%;background:${ev.bgColor}"></div>
                         </div>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;margin-left:1rem">
-                            <path d="M7.5 15L12.5 10L7.5 5" stroke="#6e6e73" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
+                        <div style="font-size:0.9rem;font-weight:700;color:#1d1d1f;margin-bottom:0.5rem;line-height:1.35;letter-spacing:-0.02em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1;word-break:keep-all">${ev.eventName}</div>
+                        <div style="font-size:0.7rem;color:#86868b;margin-top:auto;letter-spacing:-0.01em">${ev.period}</div>
                     </a>
                 `).join('');
             }
+
 
 
             fetchEvents();
@@ -2285,51 +2286,55 @@ def bc_card_events():
                 border-bottom: 1px solid var(--border-color); z-index: 100;
             }
             .nav-content {
-                max-width: 1200px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center;
+                max-width: 1400px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center;
             }
             .back-btn {
                 color: var(--blue-color); text-decoration: none; font-weight: 500; font-size: 0.95rem;
             }
 
-            .main-content { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+            .main-content { max-width: 1400px; margin: 0 auto; padding: 2rem 1.5rem; }
             h1 { font-size: 2.5rem; font-weight: 600; margin-bottom: 1rem; }
+            
             
             
             .search-section {
                 display: flex; gap: 1rem; margin-bottom: 2rem;
             }
             .search-input {
-                flex: 1; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color);
-                box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 1rem;
+                flex: 1; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-color);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 0.95rem;
             }
             .search-input:focus { border-color: var(--blue-color); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
 
             .event-list { 
-                display: flex; 
-                flex-direction: column; 
-                gap: 0.5rem; 
+                display: grid; 
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+                gap: 0.8rem; 
                 margin-top: 1rem; 
             }
             .event-card {
                 background: white; 
-                border-radius: 12px; 
-                padding: 1rem 1.25rem; 
+                border-radius: 16px; 
+                padding: 1.25rem; 
                 display: flex; 
-                align-items: center; 
-                justify-content: space-between; 
+                flex-direction: column; 
                 border: 1px solid rgba(0,0,0,0.06); 
                 text-decoration: none; 
                 color: inherit; 
                 transition: all 0.2s ease;
-                min-height: 60px;
+                height: 100%;
+                min-height: 140px;
+                position: relative;
             }
             .event-card:hover { 
-                background-color: #f9f9f9;
-                transform: translateX(4px);
+                transform: translateY(-4px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+                border-color: rgba(0,0,0,0.1);
             }
             
-            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; }
-            .stats { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; }
+            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; grid-column: 1 / -1; }
+            .stats { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.8rem; text-align: right; }
+
 
         </style>
     </head>
@@ -2379,11 +2384,12 @@ def bc_card_events():
             }
 
             
+            
             function renderEvents(events) {
                 const list = document.getElementById('eventList');
                 const stats = document.getElementById('stats');
                 
-                stats.innerText = `총 ${events.length}개의 이벤트가 있습니다`;
+                stats.innerText = `총 ${events.length}개의 이벤트`;
                 
                 if (events.length === 0) {
                     list.innerHTML = '<div class="loading">이벤트가 없습니다.</div>';
@@ -2392,22 +2398,16 @@ def bc_card_events():
 
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
-                        <div style="flex:1;display:flex;align-items:center;gap:1rem;min-width:0">
-                            <div style="width:8px;height:8px;border-radius:50%;background:${ev.bgColor};flex-shrink:0"></div>
-                            <div style="flex:1;min-width:0">
-                                <div style="font-size:0.95rem;font-weight:600;color:#1d1d1f;margin-bottom:0.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.eventName}</div>
-                                <div style="font-size:0.8rem;color:#6e6e73;display:flex;align-items:center;gap:0.75rem">
-                                    <span style="background:#f5f5f7;padding:2px 8px;border-radius:6px;font-weight:500;font-size:0.75rem">${ev.category}</span>
-                                    <span>${ev.period}</span>
-                                </div>
-                            </div>
+                        <div style="width:100%;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem">
+                            <span style="background:#f5f5f7;padding:3px 8px;border-radius:6px;font-weight:600;font-size:0.65rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
+                            <div style="width:6px;height:6px;border-radius:50%;background:${ev.bgColor}"></div>
                         </div>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;margin-left:1rem">
-                            <path d="M7.5 15L12.5 10L7.5 5" stroke="#6e6e73" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
+                        <div style="font-size:0.9rem;font-weight:700;color:#1d1d1f;margin-bottom:0.5rem;line-height:1.35;letter-spacing:-0.02em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1;word-break:keep-all">${ev.eventName}</div>
+                        <div style="font-size:0.7rem;color:#86868b;margin-top:auto;letter-spacing:-0.01em">${ev.period}</div>
                     </a>
                 `).join('');
             }
+
 
 
             fetchEvents();
@@ -2443,51 +2443,55 @@ def samsung_card_events():
                 border-bottom: 1px solid var(--border-color); z-index: 100;
             }
             .nav-content {
-                max-width: 1200px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center;
+                max-width: 1400px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center;
             }
             .back-btn {
                 color: var(--blue-color); text-decoration: none; font-weight: 500; font-size: 0.95rem;
             }
 
-            .main-content { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+            .main-content { max-width: 1400px; margin: 0 auto; padding: 2rem 1.5rem; }
             h1 { font-size: 2.5rem; font-weight: 600; margin-bottom: 1rem; }
+            
             
             
             .search-section {
                 display: flex; gap: 1rem; margin-bottom: 2rem;
             }
             .search-input {
-                flex: 1; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color);
-                box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 1rem;
+                flex: 1; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-color);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 0.95rem;
             }
             .search-input:focus { border-color: var(--blue-color); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
 
             .event-list { 
-                display: flex; 
-                flex-direction: column; 
-                gap: 0.5rem; 
+                display: grid; 
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+                gap: 0.8rem; 
                 margin-top: 1rem; 
             }
             .event-card {
                 background: white; 
-                border-radius: 12px; 
-                padding: 1rem 1.25rem; 
+                border-radius: 16px; 
+                padding: 1.25rem; 
                 display: flex; 
-                align-items: center; 
-                justify-content: space-between; 
+                flex-direction: column; 
                 border: 1px solid rgba(0,0,0,0.06); 
                 text-decoration: none; 
                 color: inherit; 
                 transition: all 0.2s ease;
-                min-height: 60px;
+                height: 100%;
+                min-height: 140px;
+                position: relative;
             }
             .event-card:hover { 
-                background-color: #f9f9f9;
-                transform: translateX(4px);
+                transform: translateY(-4px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+                border-color: rgba(0,0,0,0.1);
             }
             
-            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; }
-            .stats { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; }
+            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; grid-column: 1 / -1; }
+            .stats { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.8rem; text-align: right; }
+
 
         </style>
     </head>
@@ -2537,11 +2541,12 @@ def samsung_card_events():
             }
 
             
+            
             function renderEvents(events) {
                 const list = document.getElementById('eventList');
                 const stats = document.getElementById('stats');
                 
-                stats.innerText = `총 ${events.length}개의 이벤트가 있습니다`;
+                stats.innerText = `총 ${events.length}개의 이벤트`;
                 
                 if (events.length === 0) {
                     list.innerHTML = '<div class="loading">이벤트가 없습니다.</div>';
@@ -2550,22 +2555,16 @@ def samsung_card_events():
 
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
-                        <div style="flex:1;display:flex;align-items:center;gap:1rem;min-width:0">
-                            <div style="width:8px;height:8px;border-radius:50%;background:${ev.bgColor};flex-shrink:0"></div>
-                            <div style="flex:1;min-width:0">
-                                <div style="font-size:0.95rem;font-weight:600;color:#1d1d1f;margin-bottom:0.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.eventName}</div>
-                                <div style="font-size:0.8rem;color:#6e6e73;display:flex;align-items:center;gap:0.75rem">
-                                    <span style="background:#f5f5f7;padding:2px 8px;border-radius:6px;font-weight:500;font-size:0.75rem">${ev.category}</span>
-                                    <span>${ev.period}</span>
-                                </div>
-                            </div>
+                        <div style="width:100%;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem">
+                            <span style="background:#f5f5f7;padding:3px 8px;border-radius:6px;font-weight:600;font-size:0.65rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
+                            <div style="width:6px;height:6px;border-radius:50%;background:${ev.bgColor}"></div>
                         </div>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;margin-left:1rem">
-                            <path d="M7.5 15L12.5 10L7.5 5" stroke="#6e6e73" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
+                        <div style="font-size:0.9rem;font-weight:700;color:#1d1d1f;margin-bottom:0.5rem;line-height:1.35;letter-spacing:-0.02em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1;word-break:keep-all">${ev.eventName}</div>
+                        <div style="font-size:0.7rem;color:#86868b;margin-top:auto;letter-spacing:-0.01em">${ev.period}</div>
                     </a>
                 `).join('');
             }
+
 
 
             fetchEvents();
@@ -2601,51 +2600,55 @@ def card_events_search():
                 border-bottom: 1px solid var(--border-color); z-index: 100;
             }
             .nav-content {
-                max-width: 1200px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center;
+                max-width: 1400px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center;
             }
             .back-btn {
                 color: var(--blue-color); text-decoration: none; font-weight: 500; font-size: 0.95rem;
             }
 
-            .main-content { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+            .main-content { max-width: 1400px; margin: 0 auto; padding: 2rem 1.5rem; }
             h1 { font-size: 2.5rem; font-weight: 600; margin-bottom: 1rem; }
+            
             
             
             .search-section {
                 display: flex; gap: 1rem; margin-bottom: 2rem;
             }
             .search-input {
-                flex: 1; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color);
-                box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 1rem;
+                flex: 1; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-color);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 0.95rem;
             }
             .search-input:focus { border-color: var(--blue-color); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
 
             .event-list { 
-                display: flex; 
-                flex-direction: column; 
-                gap: 0.5rem; 
+                display: grid; 
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+                gap: 0.8rem; 
                 margin-top: 1rem; 
             }
             .event-card {
                 background: white; 
-                border-radius: 12px; 
-                padding: 1rem 1.25rem; 
+                border-radius: 16px; 
+                padding: 1.25rem; 
                 display: flex; 
-                align-items: center; 
-                justify-content: space-between; 
+                flex-direction: column; 
                 border: 1px solid rgba(0,0,0,0.06); 
                 text-decoration: none; 
                 color: inherit; 
                 transition: all 0.2s ease;
-                min-height: 60px;
+                height: 100%;
+                min-height: 140px;
+                position: relative;
             }
             .event-card:hover { 
-                background-color: #f9f9f9;
-                transform: translateX(4px);
+                transform: translateY(-4px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+                border-color: rgba(0,0,0,0.1);
             }
             
-            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; }
-            .stats { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; }
+            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; grid-column: 1 / -1; }
+            .stats { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.8rem; text-align: right; }
+
 
         </style>
     </head>
@@ -2717,11 +2720,12 @@ def card_events_search():
             }
 
             
+            
             function renderEvents(events) {
                 const list = document.getElementById('eventList');
                 const stats = document.getElementById('stats');
                 
-                stats.innerText = `총 ${events.length}개의 이벤트가 있습니다`;
+                stats.innerText = `총 ${events.length}개의 이벤트`;
                 
                 if (events.length === 0) {
                     list.innerHTML = '<div class="loading">이벤트가 없습니다.</div>';
@@ -2730,22 +2734,16 @@ def card_events_search():
 
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
-                        <div style="flex:1;display:flex;align-items:center;gap:1rem;min-width:0">
-                            <div style="width:8px;height:8px;border-radius:50%;background:${ev.bgColor};flex-shrink:0"></div>
-                            <div style="flex:1;min-width:0">
-                                <div style="font-size:0.95rem;font-weight:600;color:#1d1d1f;margin-bottom:0.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.eventName}</div>
-                                <div style="font-size:0.8rem;color:#6e6e73;display:flex;align-items:center;gap:0.75rem">
-                                    <span style="background:#f5f5f7;padding:2px 8px;border-radius:6px;font-weight:500;font-size:0.75rem">${ev.category}</span>
-                                    <span>${ev.period}</span>
-                                </div>
-                            </div>
+                        <div style="width:100%;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem">
+                            <span style="background:#f5f5f7;padding:3px 8px;border-radius:6px;font-weight:600;font-size:0.65rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
+                            <div style="width:6px;height:6px;border-radius:50%;background:${ev.bgColor}"></div>
                         </div>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;margin-left:1rem">
-                            <path d="M7.5 15L12.5 10L7.5 5" stroke="#6e6e73" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
+                        <div style="font-size:0.9rem;font-weight:700;color:#1d1d1f;margin-bottom:0.5rem;line-height:1.35;letter-spacing:-0.02em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1;word-break:keep-all">${ev.eventName}</div>
+                        <div style="font-size:0.7rem;color:#86868b;margin-top:auto;letter-spacing:-0.01em">${ev.period}</div>
                     </a>
                 `).join('');
             }
+
 
 
             fetchEvents();
