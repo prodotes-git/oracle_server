@@ -2070,6 +2070,66 @@ async def crawl_woori_bg():
         print(f"Woori crawl failed: {e}")
 
 
+# BC카드 크롤러 (실제 API 사용 - 복원)
+async def crawl_bc_bg():
+    try:
+        print(f"[{datetime.now()}] Starting BC background crawl...")
+        all_events = []
+        base_url = "https://web.paybooc.co.kr"
+        api_url = f"{base_url}/web/evnt/lst-evnt-data"
+        
+        async with httpx.AsyncClient(timeout=30.0, verify=False) as client:
+            headers = {
+                "Referer": "https://web.paybooc.co.kr/web/evnt/main",
+                "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"
+            }
+            
+            for page in range(1, 10):
+                params = {"reqType": "init" if page == 1 else "more", "inqrDv": "ING", "pgeNo": str(page), "pgeCnt": "20", "ordering": "RECENT"}
+                try:
+                    response = await client.get(api_url, params=params, headers=headers)
+                    if response.status_code != 200: break
+                    data = response.json()
+                    event_list = data.get("data", {}).get("evntInqrList", [])
+                    if not event_list: break
+                    
+                    for ev in event_list:
+                        title_parts = [ev.get("pybcUnifEvntNm1", ""), ev.get("pybcUnifEvntNm2", ""), ev.get("pybcUnifEvntNm3", "")]
+                        title = " ".join([p for p in title_parts if p]).strip()
+                        
+                        start_date = ev.get("evntBltnStrtDtm", "")
+                        end_date = ev.get("evntBltnEndDtm", "")
+                        if len(start_date) >= 8: start_date = f"{start_date[:4]}.{start_date[4:6]}.{start_date[6:8]}"
+                        if len(end_date) >= 8: end_date = f"{end_date[:4]}.{end_date[4:6]}.{end_date[6:8]}"
+                        period = f"{start_date} ~ {end_date}" if start_date and end_date else ""
+                        
+                        img_url = ev.get("evntBsImgUrlAddr", "")
+                        event_no = ev.get("pybcUnifEvntNo", "")
+                        link = f"{base_url}/web/evnt/evnt-dts?pybcUnifEvntNo={event_no}" if event_no else f"{base_url}/web/evnt/main"
+                        bg_color = ev.get("evntBsBgColrVal", "#ffffff")
+                        
+                        if title:
+                            all_events.append({
+                                "category": "BC카드",
+                                "eventName": title,
+                                "period": period,
+                                "link": link,
+                                "image": img_url,
+                                "bgColor": bg_color
+                            })
+                except Exception: break
+        
+        if all_events:
+            try:
+                with open("bc_data.json", "w", encoding="utf-8") as f:
+                    json.dump(all_events, f, ensure_ascii=False)
+                if r: r.setex(BC_CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
+                print(f"[{datetime.now()}] BC crawl finished. {len(all_events)} events.")
+            except Exception as fe: print(f"BC file save failed: {fe}")
+    except Exception as e:
+        print(f"[{datetime.now()}] BC crawl failed: {e}")
+
+
 # 삼성카드 크롤러 (Playwright DOM 기반 - 실제 데이터)
 async def crawl_samsung_bg():
     try:
