@@ -1146,6 +1146,7 @@ def card_events():
                 border-color: rgba(0,0,0,0.12);
             }
             
+            .event-image { width: 100%; height: 120px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem; background: #f5f5f7; }
             .event-category-row {
                 width: 100%;
                 display: flex;
@@ -1480,6 +1481,7 @@ def kb_card_events():
                 border-color: rgba(0,0,0,0.12);
             }
             
+            .event-image { width: 100%; height: 120px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem; background: #f5f5f7; }
             .event-category-row {
                 width: 100%;
                 display: flex;
@@ -1699,6 +1701,7 @@ def hana_card_events():
                 border-color: rgba(0,0,0,0.12);
             }
             
+            .event-image { width: 100%; height: 120px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem; background: #f5f5f7; }
             .event-category-row {
                 width: 100%;
                 display: flex;
@@ -1913,6 +1916,7 @@ def shinhan_card_events():
                 border-color: rgba(0,0,0,0.12);
             }
             
+            .event-image { width: 100%; height: 120px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem; background: #f5f5f7; }
             .event-category-row {
                 width: 100%;
                 display: flex;
@@ -2630,6 +2634,7 @@ def woori_card_events():
                 border-color: rgba(0,0,0,0.12);
             }
             
+            .event-image { width: 100%; height: 120px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem; background: #f5f5f7; }
             .event-category-row {
                 width: 100%;
                 display: flex;
@@ -2844,6 +2849,7 @@ def bc_card_events():
                 border-color: rgba(0,0,0,0.12);
             }
             
+            .event-image { width: 100%; height: 120px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem; background: #f5f5f7; }
             .event-category-row {
                 width: 100%;
                 display: flex;
@@ -3058,6 +3064,7 @@ def samsung_card_events():
                 border-color: rgba(0,0,0,0.12);
             }
             
+            .event-image { width: 100%; height: 120px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem; background: #f5f5f7; }
             .event-category-row {
                 width: 100%;
                 display: flex;
@@ -3272,6 +3279,7 @@ def card_events_search():
                 border-color: rgba(0,0,0,0.12);
             }
             
+            .event-image { width: 100%; height: 120px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem; background: #f5f5f7; }
             .event-category-row {
                 width: 100%;
                 display: flex;
