@@ -1150,14 +1150,9 @@ def card_events():
 
             <div class="search-box">
                 <span>🔍</span>
-                <input type="text" id="cardSearch" placeholder="카드사 이름을 검색해보세요..." onkeyup="filterCards()">
+                <input type="text" id="cardSearch" placeholder="모든 카드사의 이벤트를 검색해보세요... (예: 할인, 캐시백, 포인트)" onkeyup="filterCards()">
             </div>
-            
-            <div style="text-align: center; margin-bottom: 2rem;">
-                <a href="/card-events/search" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.8rem 2rem; border-radius: 12px; text-decoration: none; font-weight: 600; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); transition: all 0.3s;">
-                    🎯 모든 카드사 이벤트 통합 검색
-                </a>
-            </div>
+
 
             <div class="card-grid" id="cardGrid">
                 <a href="/card-events/shinhan" class="card-link" data-name="신한카드">
