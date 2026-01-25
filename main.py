@@ -1602,7 +1602,7 @@ def kb_card_events():
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card" referrerpolicy="no-referrer" rel="noreferrer noopener">
                         ${ev.image ? `<img src="${ev.image}" class="event-image" loading="lazy" onerror="this.style.display='none'">` : ""}
-                        ${ev.image ? `<img src="${ev.image}" class="event-image" loading="lazy" onerror="this.style.display=\'none\'">` : \'\'}
+                        
                         <div class="event-category-row">
                             <span style="background:#f5f5f7;padding:5px 10px;border-radius:8px;font-weight:600;font-size:0.75rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
                             <div style="width:10px;height:10px;border-radius:50%;background:${ev.bgColor}"></div>
@@ -1825,7 +1825,7 @@ def hana_card_events():
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card" referrerpolicy="no-referrer" rel="noreferrer noopener">
                         ${ev.image ? `<img src="${ev.image}" class="event-image" loading="lazy" onerror="this.style.display='none'">` : ""}
-                        ${ev.image ? `<img src="${ev.image}" class="event-image" loading="lazy" onerror="this.style.display=\'none\'">` : \'\'}
+                        
                         <div class="event-category-row">
                             <span style="background:#f5f5f7;padding:5px 10px;border-radius:8px;font-weight:600;font-size:0.75rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
                             <div style="width:10px;height:10px;border-radius:50%;background:${ev.bgColor}"></div>
@@ -2081,7 +2081,7 @@ def shinhan_card_events():
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card" referrerpolicy="no-referrer" rel="noreferrer noopener">
                         ${ev.image ? `<img src="${ev.image}" class="event-image" loading="lazy" onerror="this.style.display='none'">` : ""}
-                        ${ev.image ? `<img src="${ev.image}" class="event-image" loading="lazy" onerror="this.style.display=\'none\'">` : \'\'}
+                        
                         
                         <div class="event-category-row">
                             <span style="background:#f5f5f7;padding:5px 10px;border-radius:8px;font-weight:600;font-size:0.75rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
@@ -2745,7 +2745,7 @@ def woori_card_events():
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card" referrerpolicy="no-referrer" rel="noreferrer noopener">
                         ${ev.image ? `<img src="${ev.image}" class="event-image" loading="lazy" onerror="this.style.display='none'">` : ""}
-                        ${ev.image ? `<img src="${ev.image}" class="event-image" loading="lazy" onerror="this.style.display=\'none\'">` : \'\'}
+                        
                         
                         <div class="event-category-row">
                             <span style="background:#f5f5f7;padding:5px 10px;border-radius:8px;font-weight:600;font-size:0.75rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
@@ -2971,7 +2971,7 @@ def bc_card_events():
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card" referrerpolicy="no-referrer" rel="noreferrer noopener">
                         ${ev.image ? `<img src="${ev.image}" class="event-image" loading="lazy" onerror="this.style.display='none'">` : ""}
-                        ${ev.image ? `<img src="${ev.image}" class="event-image" loading="lazy" onerror="this.style.display=\'none\'">` : \'\'}
+                        
                         <div class="event-category-row">
                             <span style="background:#f5f5f7;padding:5px 10px;border-radius:8px;font-weight:600;font-size:0.75rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
                             <div style="width:10px;height:10px;border-radius:50%;background:${ev.bgColor}"></div>
@@ -3198,7 +3198,7 @@ def samsung_card_events():
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card" referrerpolicy="no-referrer" rel="noreferrer noopener">
                         ${ev.image ? `<img src="${ev.image}" class="event-image" loading="lazy" onerror="this.style.display='none'">` : ""}
-                        ${ev.image ? `<img src="${ev.image}" class="event-image" loading="lazy" onerror="this.style.display=\'none\'">` : \'\'}
+                        
                         <div class="event-category-row">
                             <span style="background:#f5f5f7;padding:5px 10px;border-radius:8px;font-weight:600;font-size:0.75rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
                             <div style="width:10px;height:10px;border-radius:50%;background:${ev.bgColor}"></div>
@@ -3446,7 +3446,7 @@ def card_events_search():
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card" referrerpolicy="no-referrer" rel="noreferrer noopener">
                         ${ev.image ? `<img src="${ev.image}" class="event-image" loading="lazy" onerror="this.style.display='none'">` : ""}
-                        ${ev.image ? `<img src="${ev.image}" class="event-image" loading="lazy" onerror="this.style.display=\'none\'">` : \'\'}
+                        
                         <div class="event-category-row">
                             <span style="background:#f5f5f7;padding:5px 10px;border-radius:8px;font-weight:600;font-size:0.75rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
                             <div style="width:10px;height:10px;border-radius:50%;background:${ev.bgColor}"></div>
