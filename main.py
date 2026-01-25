@@ -1266,6 +1266,14 @@ def card_events():
 
         <script>
             let allEvents = [];
+
+            async function updateData() {
+                const path = window.location.pathname.split("/").pop();
+                try {
+                    await fetch(`/api/${path}/update`, {method:"POST"});
+                    alert("데이터 갱신을 시작했습니다. 10초 후 새로고침 해주세요.");
+                } catch(e) {}
+            }
             
             async function fetchAllEvents() {
                 try {
@@ -1548,6 +1556,14 @@ def kb_card_events():
         <script>
             let allEvents = [];
 
+            async function updateData() {
+                const path = window.location.pathname.split("/").pop();
+                try {
+                    await fetch(`/api/${path}/update`, {method:"POST"});
+                    alert("데이터 갱신을 시작했습니다. 10초 후 새로고침 해주세요.");
+                } catch(e) {}
+            }
+
             async function fetchEvents() {
                 try {
                     const response = await fetch('/api/kb-cards');
@@ -1769,6 +1785,14 @@ def hana_card_events():
 
         <script>
             let allEvents = [];
+
+            async function updateData() {
+                const path = window.location.pathname.split("/").pop();
+                try {
+                    await fetch(`/api/${path}/update`, {method:"POST"});
+                    alert("데이터 갱신을 시작했습니다. 10초 후 새로고침 해주세요.");
+                } catch(e) {}
+            }
 
             async function fetchEvents() {
                 try {
@@ -2000,6 +2024,14 @@ def shinhan_card_events():
 
         <script>
             let allEvents = [];
+
+            async function updateData() {
+                const path = window.location.pathname.split("/").pop();
+                try {
+                    await fetch(`/api/${path}/update`, {method:"POST"});
+                    alert("데이터 갱신을 시작했습니다. 10초 후 새로고침 해주세요.");
+                } catch(e) {}
+            }
 
             async function fetchEvents() {
                 try {
@@ -2707,6 +2739,14 @@ def woori_card_events():
         <script>
             let allEvents = [];
 
+            async function updateData() {
+                const path = window.location.pathname.split("/").pop();
+                try {
+                    await fetch(`/api/${path}/update`, {method:"POST"});
+                    alert("데이터 갱신을 시작했습니다. 10초 후 새로고침 해주세요.");
+                } catch(e) {}
+            }
+
             async function fetchEvents() {
                 try {
                     const response = await fetch('/api/woori-cards');
@@ -2925,6 +2965,14 @@ def bc_card_events():
         <script>
             let allEvents = [];
 
+            async function updateData() {
+                const path = window.location.pathname.split("/").pop();
+                try {
+                    await fetch(`/api/${path}/update`, {method:"POST"});
+                    alert("데이터 갱신을 시작했습니다. 10초 후 새로고침 해주세요.");
+                } catch(e) {}
+            }
+
             async function fetchEvents() {
                 try {
                     const response = await fetch('/api/bc-cards');
@@ -3142,6 +3190,14 @@ def samsung_card_events():
         <script>
             let allEvents = [];
 
+            async function updateData() {
+                const path = window.location.pathname.split("/").pop();
+                try {
+                    await fetch(`/api/${path}/update`, {method:"POST"});
+                    alert("데이터 갱신을 시작했습니다. 10초 후 새로고침 해주세요.");
+                } catch(e) {}
+            }
+
             async function fetchEvents() {
                 try {
                     const response = await fetch('/api/samsung-cards');
@@ -3355,6 +3411,14 @@ def card_events_search():
 
         <script>
             let allEvents = [];
+
+            async function updateData() {
+                const path = window.location.pathname.split("/").pop();
+                try {
+                    await fetch(`/api/${path}/update`, {method:"POST"});
+                    alert("데이터 갱신을 시작했습니다. 10초 후 새로고침 해주세요.");
+                } catch(e) {}
+            }
 
             async function fetchEvents() {
                 try {
