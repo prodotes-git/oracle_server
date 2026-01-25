@@ -1990,7 +1990,7 @@ def shinhan_card_events():
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
-# 우리카드 크롤러 (Playwright 기반 - 실제 데이터)
+# 우리카드 크롤러 (Playwright API 가로채기 - 최적화)
 async def crawl_woori_bg():
     try:
         print(f"[{datetime.now()}] Starting Woori background crawl (Playwright)...")
@@ -2007,28 +2007,30 @@ async def crawl_woori_bg():
             )
             page = await context.new_page()
             
-            captured_data = []
+            captured_json = None
             
             async def handle_response(response):
+                nonlocal captured_json
                 if "getPrgEvntList.pwkjson" in response.url and response.status == 200:
                     try:
-                        json_data = await response.json()
-                        captured_data.append(json_data)
-                    except:
-                        pass
-
-            page.on("response", handle_response)
+                        captured_json = await response.json()
+                    except: pass
             
-            try:
-                await page.goto("https://m.wooricard.com/dcmw/yh1/bnf/bnf02/prgevnt/M1BNF202S00.do", timeout=60000)
-                await page.wait_for_timeout(5000)
-                
-                if not captured_data:
-                     # 데이터가 없으면 조금 더 대기
-                     await page.wait_for_timeout(3000)
+            page.on("response", handle_response)
 
-                for data in captured_data:
-                    events = data.get('prgEvntList', [])
+            try:
+                # API 호출을 기다림 (타임아웃 30초)
+                request_promise = page.wait_for_response(lambda res: "getPrgEvntList.pwkjson" in res.url and res.status == 200, timeout=30000)
+                
+                await page.goto("https://m.wooricard.com/dcmw/yh1/bnf/bnf02/prgevnt/M1BNF202S00.do")
+                
+                response = await request_promise
+                json_data = await response.json()
+                
+                if json_data:
+                    events = json_data.get('prgEvntList', [])
+                    print(f"Woori API captured with {len(events)} events")
+                    
                     for ev in events:
                         title = ev.get('cardEvntNm', '') or ev.get('mblDocTitlTxt', '')
                         start_date = ev.get('evntSdt', '')
@@ -2036,33 +2038,51 @@ async def crawl_woori_bg():
                         
                         if len(start_date) == 8: start_date = f"{start_date[:4]}.{start_date[4:6]}.{start_date[6:]}"
                         if len(end_date) == 8: end_date = f"{end_date[:4]}.{end_date[4:6]}.{end_date[6:]}"
-                        period = f"{start_date} ~ {end_date}"
+                        period = f"{start_date} ~ {end_date}" if start_date and end_date else ""
                         
                         img_path = ev.get('fileCoursWeb', '')
-                        if img_path and not img_path.startswith('http'): img_path = f"{base_url}{img_path}"
+                        if img_path and not img_path.startswith('http'): 
+                            img_path = f"{base_url}{img_path}"
+                        
+                        link = "https://m.wooricard.com/dcmw/yh1/bnf/bnf02/prgevnt/M1BNF202S00.do"
                         
                         if title:
                             all_events.append({
                                 "category": "우리카드",
                                 "eventName": title,
                                 "period": period,
-                                "link": "https://m.wooricard.com/dcmw/yh1/bnf/bnf02/prgevnt/M1BNF202S00.do",
+                                "link": link,
                                 "image": img_path,
                                 "bgColor": "#007bc3"
                             })
+                            
             except Exception as e:
-                print(f"Woori Playwright error: {e}")
+                print(f"Woori API wait failed, trying captured data: {e}")
+                if captured_json:
+                    events = captured_json.get('prgEvntList', [])
+                    for ev in events:
+                        title = ev.get('cardEvntNm', '')
+                        img_path = ev.get('fileCoursWeb', '')
+                        if img_path and not img_path.startswith('http'): img_path = f"{base_url}{img_path}"
+                        if title:
+                            all_events.append({
+                                "category": "우리카드",
+                                "eventName": title,
+                                "period": "",
+                                "link": base_url,
+                                "image": img_path,
+                                "bgColor": "#007bc3"
+                            })
             finally:
                 await browser.close()
-
+                
         if all_events:
             try:
                 with open("woori_data.json", "w", encoding="utf-8") as f:
                     json.dump(all_events, f, ensure_ascii=False)
                 if r: r.setex(WOORI_CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
                 print(f"[{datetime.now()}] Woori crawl finished. {len(all_events)} events.")
-            except Exception as e:
-                print(f"Woori save failed: {e}")
+            except Exception as fe: print(f"Woori save failed: {fe}")
         else:
             print(f"[{datetime.now()}] Woori crawl finished but no events found.")
             
