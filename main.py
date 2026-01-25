@@ -2304,6 +2304,67 @@ async def crawl_hyundai_bg():
 
 
 
+# 롯데카드 크롤러
+async def crawl_lotte_bg():
+    try:
+        print(f"[{datetime.now()}] Starting Lotte background crawl...")
+        from playwright.async_api import async_playwright
+        all_events = []
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            context = await browser.new_context(viewport={'width': 375, 'height': 812})
+            page = await context.new_page()
+            try:
+                await page.goto("https://m.lottecard.co.kr/app/LPBNFDA_V100.lc", timeout=60000)
+                await page.wait_for_timeout(10000)
+                events_data = await page.evaluate('''() => {
+                    const results = [];
+                    document.querySelectorAll('li').forEach(li => {
+                        const img = li.querySelector('img');
+                        let text = li.innerText.replace(/[\n\r]+/g, ' ').trim();
+                        // 날짜: YYYY.MM.DD ~ YYYY.MM.DD
+                        const dateMatch = text.match(/(\d{4}\.\d{2}\.\d{2})\s*~\s*(\d{4}\.\d{2}\.\d{2})/);
+                        if (dateMatch && img) {
+                            let period = dateMatch[0];
+                            let title = text.replace(period, '').trim();
+                            if(title.length > 100) title = title.substring(0, 100);
+                            const linkEl = li.querySelector('a');
+                            results.push({
+                                eventName: title,
+                                period: period,
+                                image: img.src,
+                                link: linkEl ? linkEl.href : ""
+                            });
+                        }
+                    });
+                    return results;
+                }''')
+                for ev in events_data:
+                    link = ev['link']
+                    if not link or "javascript" in link:
+                        link = "https://m.lottecard.co.kr/app/LPBNFDA_V100.lc"
+                    all_events.append({
+                        "category": "롯데카드",
+                        "eventName": ev['eventName'],
+                        "period": ev['period'],
+                        "link": link,
+                        "image": ev['image'],
+                        "bgColor": "#ed1c24"
+                    })
+            except Exception as e: print(f"Lotte Playwright error: {e}")
+            finally: await browser.close()
+        if all_events:
+            try:
+                unique = {v['eventName']:v for v in all_events}.values()
+                all_events = list(unique)
+                with open("lotte_data.json", "w", encoding="utf-8") as f:
+                    json.dump(all_events, f, ensure_ascii=False)
+                if r: r.setex("events:lotte", CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
+                print(f"[{datetime.now()}] Lotte crawl finished. {len(all_events)} events.")
+            except Exception as e: print(f"Lotte save failed: {e}")
+    except Exception as e: print(f"Lotte crawl failed: {e}")
+
+
 @app.get("/api/hyundai-cards")
 def get_hyundai_cards():
     return get_cached_data("events:hyundai", "hyundai_data.json")
@@ -2311,6 +2372,16 @@ def get_hyundai_cards():
 @app.post("/api/hyundai/update")
 async def update_hyundai(background_tasks: BackgroundTasks):
     background_tasks.add_task(crawl_hyundai_bg)
+    return {"status": "started"}
+
+
+@app.get("/api/lotte-cards")
+def get_lotte_cards():
+    return get_cached_data("events:lotte", "lotte_data.json")
+
+@app.post("/api/lotte/update")
+async def update_lotte(background_tasks: BackgroundTasks):
+    background_tasks.add_task(crawl_lotte_bg)
     return {"status": "started"}
 
 @app.get("/api/woori-cards")
