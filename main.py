@@ -1151,8 +1151,18 @@ def card_events():
                 display: flex;
                 justify-content: space-between;
                 align-items: flex-start;
-                margin-bottom: 1rem;
+                margin-bottom: 0.8rem;
             }
+
+            .event-image {
+                width: 100%;
+                height: 120px;
+                object-fit: cover;
+                border-radius: 12px;
+                margin-bottom: 1rem;
+                background: #f5f5f7;
+            }
+
             
             .tags-wrapper {
                 display: flex;
@@ -1377,12 +1387,12 @@ def card_events():
 
                 eventList.innerHTML = filtered.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card" referrerpolicy="no-referrer" rel="noreferrer noopener">
+                        ${ev.image ? `<img src="${ev.image}" class="event-image" loading="lazy" onerror="this.style.display='none'">` : ''}
                         <div class="event-category-row">
                             <div class="tags-wrapper">
                                 <span class="company-tag" style="background:${ev.tagBg}; color:${ev.tagColor}">${ev.companyName}</span>
                                 <span class="category-tag">${ev.category}</span>
                             </div>
-                            <div style="width:10px;height:10px;border-radius:50%;background:${ev.bgColor};flex-shrink:0;"></div>
                         </div>
                         <div class="event-title">${ev.eventName}</div>
                         <div class="event-date">${ev.period}</div>
@@ -1511,7 +1521,10 @@ def kb_card_events():
         <div class="nav-header">
             <div class="nav-content">
                 <a href="/card-events" class="back-btn">← 카드사 목록</a>
-                <div style="font-weight: 600;">KB국민카드 이벤트</div>
+                <div style="font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                    KB국민카드 이벤트
+                    <button onclick="updateData()" style="background:none; border:none; cursor:pointer; font-size:1.1rem; padding:0; display:flex;">🔄</button>
+                </div>
                 <div id="lastUpdated" style="font-size: 0.8rem; color: var(--text-secondary); min-width: 80px; text-align: right;"></div>
             </div>
         </div>
@@ -1563,6 +1576,13 @@ def kb_card_events():
                 }
                 return true;
             }
+            async function updateData() {
+                try {
+                    await fetch('/api/kb/update', {method:'POST'});
+                    alert('데이터 갱신을 시작했습니다. 10초 후 새로고침 해주세요.');
+                } catch(e) {}
+            }
+
             function filterEvents() {
                 const search = document.getElementById('searchInput').value.toLowerCase();
                 const terms = parseQuery(search);
@@ -1720,7 +1740,10 @@ def hana_card_events():
         <div class="nav-header">
             <div class="nav-content">
                 <a href="/card-events" class="back-btn">← 카드사 목록</a>
-                <div style="font-weight: 600;">하나카드 이벤트</div>
+                <div style="font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                    하나카드 이벤트
+                    <button onclick="updateData()" style="background:none; border:none; cursor:pointer; font-size:1.1rem; padding:0; display:flex;">🔄</button>
+                </div>
                 <div id="lastUpdated" style="font-size: 0.8rem; color: var(--text-secondary); min-width: 80px; text-align: right;"></div>
             </div>
         </div>
@@ -1895,8 +1918,18 @@ def shinhan_card_events():
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                margin-bottom: 1rem;
+                margin-bottom: 0.8rem;
             }
+
+            .event-image {
+                width: 100%;
+                height: 120px;
+                object-fit: cover;
+                border-radius: 12px;
+                margin-bottom: 1rem;
+                background: #f5f5f7;
+            }
+
             
             .event-title {
                 font-size: 1.05rem;
@@ -1931,7 +1964,10 @@ def shinhan_card_events():
         <div class="nav-header">
             <div class="nav-content">
                 <a href="/card-events" class="back-btn">← 카드사 목록</a>
-                <div style="font-weight: 600;">신한카드 이벤트</div>
+                <div style="font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                    신한카드 이벤트
+                    <button onclick="updateData()" style="background:none; border:none; cursor:pointer; font-size:1.1rem; padding:0; display:flex;">🔄</button>
+                </div>
                 <div id="lastUpdated" style="font-size: 0.8rem; color: var(--text-secondary); min-width: 80px; text-align: right;"></div>
             </div>
         </div>
@@ -2627,7 +2663,10 @@ def woori_card_events():
         <div class="nav-header">
             <div class="nav-content">
                 <a href="/card-events" class="back-btn">← 카드사 목록</a>
-                <div style="font-weight: 600;">우리카드 이벤트</div>
+                <div style="font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                    우리카드 이벤트
+                    <button onclick="updateData()" style="background:none; border:none; cursor:pointer; font-size:1.1rem; padding:0; display:flex;">🔄</button>
+                </div>
                 <div id="lastUpdated" style="font-size: 0.8rem; color: var(--text-secondary); min-width: 80px; text-align: right;"></div>
             </div>
         </div>
@@ -2838,7 +2877,10 @@ def bc_card_events():
         <div class="nav-header">
             <div class="nav-content">
                 <a href="/card-events" class="back-btn">← 카드사 목록</a>
-                <div style="font-weight: 600;">BC카드 이벤트</div>
+                <div style="font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                    BC카드 이벤트
+                    <button onclick="updateData()" style="background:none; border:none; cursor:pointer; font-size:1.1rem; padding:0; display:flex;">🔄</button>
+                </div>
                 <div id="lastUpdated" style="font-size: 0.8rem; color: var(--text-secondary); min-width: 80px; text-align: right;"></div>
             </div>
         </div>
@@ -3049,7 +3091,10 @@ def samsung_card_events():
         <div class="nav-header">
             <div class="nav-content">
                 <a href="/card-events" class="back-btn">← 카드사 목록</a>
-                <div style="font-weight: 600;">삼성카드 이벤트</div>
+                <div style="font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                    삼성카드 이벤트
+                    <button onclick="updateData()" style="background:none; border:none; cursor:pointer; font-size:1.1rem; padding:0; display:flex;">🔄</button>
+                </div>
                 <div id="lastUpdated" style="font-size: 0.8rem; color: var(--text-secondary); min-width: 80px; text-align: right;"></div>
             </div>
         </div>
