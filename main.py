@@ -1283,9 +1283,28 @@ def card_events():
                     const bcData = await bcRes.json();
                     const samsungData = await samsungRes.json();
 
+                    // 회사별 색상 매핑
+                    const companyColors = {
+                        "신한카드": { bg: "#0046ff", text: "white" },
+                        "KB국민카드": { bg: "#ffbc00", text: "#3d3d3d" }, // KB는 노란색이라 글자 검정
+                        "하나카드": { bg: "#009490", text: "white" },
+                        "우리카드": { bg: "#007bc3", text: "white" },
+                        "BC카드": { bg: "#ed1c24", text: "white" },
+                        "삼성카드": { bg: "#0056b3", text: "white" },
+                        "현대카드": { bg: "#000000", text: "white" },
+                        "롯데카드": { bg: "#ed1c24", text: "white" }
+                    };
+
                     const normalize = (data, company) => {
                         const list = Array.isArray(data) ? data : (data.data || []);
-                        return list.map(item => ({ ...item, companyName: company }));
+                        const colorInfo = companyColors[company] || { bg: "#1d1d1f", text: "white" };
+                        
+                        return list.map(item => ({ 
+                            ...item, 
+                            companyName: company,
+                            tagBg: colorInfo.bg,
+                            tagColor: colorInfo.text
+                        }));
                     };
 
                     const shinhan = normalize(shinhanData, "신한카드");
@@ -1344,7 +1363,10 @@ def card_events():
                     document.querySelector('.main-content').appendChild(eventList);
                 } else {
                     eventList.className = 'event-list';
-                    eventList.style = '';
+                    // 기존 인라인 스타일 제거 (중요)
+                    eventList.style.display = 'grid'; 
+                    eventList.style.cssText = ''; 
+                    eventList.style.display = 'grid';
                 }
                 eventList.style.display = 'grid';
                 
@@ -1357,7 +1379,7 @@ def card_events():
                     <a href="${ev.link}" target="_blank" class="event-card">
                         <div class="event-category-row">
                             <div class="tags-wrapper">
-                                <span class="company-tag">${ev.companyName}</span>
+                                <span class="company-tag" style="background:${ev.tagBg}; color:${ev.tagColor}">${ev.companyName}</span>
                                 <span class="category-tag">${ev.category}</span>
                             </div>
                             <div style="width:10px;height:10px;border-radius:50%;background:${ev.bgColor};flex-shrink:0;"></div>
