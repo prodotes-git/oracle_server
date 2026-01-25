@@ -2014,6 +2014,13 @@ def shinhan_card_events():
                 }
             }
 
+            async function updateData() {
+                try {
+                    await fetch('/api/shinhan/update', {method:'POST'});
+                    alert('데이터 갱신을 시작했습니다. 10초 후 새로고침 해주세요.');
+                } catch(e) {}
+            }
+
             function parseQuery(q) {
                 const terms = {and:[], or:[]};
                 const re = /"([^"]+)"/g;
@@ -2056,6 +2063,7 @@ def shinhan_card_events():
 
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card" referrerpolicy="no-referrer" rel="noreferrer noopener">
+                        ${ev.image ? `<img src="${ev.image}" class="event-image" loading="lazy" onerror="this.style.display='none'">` : ''}
                         <div class="event-category-row">
                             <span style="background:#f5f5f7;padding:5px 10px;border-radius:8px;font-weight:600;font-size:0.75rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
                             <div style="width:10px;height:10px;border-radius:50%;background:${ev.bgColor}"></div>
