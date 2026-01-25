@@ -292,75 +292,11 @@ async def crawl_kb_bg():
 
 @app.get("/api/shinhan-cards")
 async def get_shinhan_cards():
-    try:
-        import json
-        if r:
-            cached = r.get(SHINHAN_CACHE_KEY)
-            if cached: return json.loads(cached)
-
-        local_path = "shinhan_data.json"
-        if os.path.exists(local_path):
-            with open(local_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                
-            mtime = os.path.getmtime(local_path)
-            last_updated = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
-            
-            unique_data = []
-            seen = set()
-            for item in data:
-                name = item.get('eventName')
-                if name not in seen:
-                    seen.add(name)
-                    unique_data.append(item)
-            data = unique_data
-            
-            response = {"last_updated": last_updated, "data": data}
-            if r:
-                try:
-                    r.setex(SHINHAN_CACHE_KEY, CACHE_EXPIRE, json.dumps(response))
-                except Exception as re:
-                    print(f"Shinhan Redis save failed: {re}")
-            return response
-        
-        return {"last_updated": None, "data": []}
-    except Exception: return {"last_updated": None, "data": []}
+    return get_cached_data(SHINHAN_CACHE_KEY, 'shinhan_data.json')
 
 @app.get("/api/kb-cards")
 async def get_kb_cards():
-    try:
-        import json
-        if r:
-            cached = r.get(KB_CACHE_KEY)
-            if cached: return json.loads(cached)
-
-        local_path = "kb_data.json"
-        if os.path.exists(local_path):
-            with open(local_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                
-            mtime = os.path.getmtime(local_path)
-            last_updated = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
-            
-            unique_data = []
-            seen = set()
-            for item in data:
-                name = item.get('eventName')
-                if name not in seen:
-                    seen.add(name)
-                    unique_data.append(item)
-            data = unique_data
-
-            response = {"last_updated": last_updated, "data": data}
-            if r:
-                try:
-                    r.setex(KB_CACHE_KEY, CACHE_EXPIRE, json.dumps(response))
-                except Exception as re:
-                    print(f"KB Redis save failed: {re}")
-            return response
-        
-        return {"last_updated": None, "data": []}
-    except Exception: return {"last_updated": None, "data": []}
+    return get_cached_data(KB_CACHE_KEY, 'kb_data.json')
 
 @app.post("/api/shinhan/update")
 async def update_shinhan(bg_tasks: BackgroundTasks):
@@ -495,38 +431,7 @@ async def crawl_hana_bg():
 
 @app.get("/api/hana-cards")
 async def get_hana_cards():
-    try:
-        import json
-        if r:
-            cached = r.get(HANA_CACHE_KEY)
-            if cached: return json.loads(cached)
-
-        local_path = "hana_data.json"
-        if os.path.exists(local_path):
-            with open(local_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                
-            mtime = os.path.getmtime(local_path)
-            last_updated = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
-            
-            unique_data = []
-            seen = set()
-            for item in data:
-                name = item.get('eventName')
-                if name not in seen:
-                    seen.add(name)
-                    unique_data.append(item)
-            data = unique_data
-
-            response = {"last_updated": last_updated, "data": data}
-            if r:
-                try:
-                    r.setex(HANA_CACHE_KEY, CACHE_EXPIRE, json.dumps(response))
-                except Exception: pass
-            return response
-        
-        return {"last_updated": None, "data": []}
-    except Exception: return {"last_updated": None, "data": []}
+    return get_cached_data(HANA_CACHE_KEY, 'hana_data.json')
 
 @app.post("/api/hana/update")
 async def update_hana(bg_tasks: BackgroundTasks):
@@ -2604,22 +2509,7 @@ async def update_lotte(background_tasks: BackgroundTasks):
 
 @app.get("/api/woori-cards")
 async def get_woori_cards():
-    try:
-        import json
-        if r:
-            cached = r.get(WOORI_CACHE_KEY)
-            if cached: return json.loads(cached)
-
-        with open("woori_data.json", "r", encoding="utf-8") as f:
-            data = json.load(f)
-        response = {"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": data}
-        if r:
-            try:
-                r.setex(WOORI_CACHE_KEY, CACHE_EXPIRE, json.dumps(response))
-            except Exception: pass
-        return response
-    except Exception: 
-        return {"last_updated": None, "data": []}
+    return get_cached_data(WOORI_CACHE_KEY, 'woori_data.json')
 
 @app.post("/api/woori/update")
 async def update_woori(bg_tasks: BackgroundTasks):
@@ -2629,22 +2519,7 @@ async def update_woori(bg_tasks: BackgroundTasks):
 # BC카드 API 엔드포인트
 @app.get("/api/bc-cards")
 async def get_bc_cards():
-    try:
-        import json
-        if r:
-            cached = r.get(BC_CACHE_KEY)
-            if cached: return json.loads(cached)
-
-        with open("bc_data.json", "r", encoding="utf-8") as f:
-            data = json.load(f)
-        response = {"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": data}
-        if r:
-            try:
-                r.setex(BC_CACHE_KEY, CACHE_EXPIRE, json.dumps(response))
-            except Exception: pass
-        return response
-    except Exception: 
-        return {"last_updated": None, "data": []}
+    return get_cached_data(BC_CACHE_KEY, 'bc_data.json')
 
 @app.post("/api/bc/update")
 async def update_bc(bg_tasks: BackgroundTasks):
@@ -2654,22 +2529,7 @@ async def update_bc(bg_tasks: BackgroundTasks):
 # 삼성카드 API 엔드포인트
 @app.get("/api/samsung-cards")
 async def get_samsung_cards():
-    try:
-        import json
-        if r:
-            cached = r.get(SAMSUNG_CACHE_KEY)
-            if cached: return json.loads(cached)
-
-        with open("samsung_data.json", "r", encoding="utf-8") as f:
-            data = json.load(f)
-        response = {"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": data}
-        if r:
-            try:
-                r.setex(SAMSUNG_CACHE_KEY, CACHE_EXPIRE, json.dumps(response))
-            except Exception: pass
-        return response
-    except Exception: 
-        return {"last_updated": None, "data": []}
+    return get_cached_data(SAMSUNG_CACHE_KEY, 'samsung_data.json')
 
 @app.post("/api/samsung/update")
 async def update_samsung(bg_tasks: BackgroundTasks):
