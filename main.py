@@ -187,14 +187,16 @@ async def crawl_shinhan_bg():
         print(f"[{datetime.now()}] Shinhan crawl failed: {e}")
 
 # KB카드 데이터 갱신 (백그라운드)
+# KB카드 데이터 갱신 (백그라운드)
 async def crawl_kb_bg():
     try:
         print(f"[{datetime.now()}] Starting KB background crawl...")
         all_events = []
+        seen_ids = set()
         api_url = "https://m.kbcard.com/BON/API/MBBACXHIABNC0064"
         
         async with httpx.AsyncClient(timeout=30.0, verify=False) as client:
-            for page in range(1, 50): # 충분히 넉넉하게 잡음
+            for page in range(1, 50): 
                 payload = {
                     "evntStatus": "", "evntBonTag": "", "evntScp": "", 
                     "evntAi": "", "evntVip": "", "pageCount": page, "evtName": ""
@@ -205,29 +207,27 @@ async def crawl_kb_bg():
                     "Referer": "https://m.kbcard.com/BON/DVIEW/MBBMCXHIABNC0022",
                     "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"
                 }
-                
                 try:
                     response = await client.post(api_url, data=payload, headers=headers)
                     if response.status_code != 200: break
-                    
                     res_json = response.json()
                     events = res_json.get("evntList", [])
                     if not events: break
                     
                     for ev in events:
-                        # 카테고리 매핑
+                        evt_no = ev.get('evtNo', '')
+                        # 중복 제거 핵심 로직
+                        if not evt_no or evt_no in seen_ids: continue
+                        seen_ids.add(evt_no)
+                        
                         category_code = ev.get("evntBonContents", "")
                         category_map = {"01": "포인트/캐시백", "02": "할인/무이자", "03": "경품", "04": "기타"}
                         category = category_map.get(category_code, "이벤트")
                         
-                        # 이미지 경로 보정
                         img_path = ev.get('evtImgPath', '')
                         if img_path and not img_path.startswith('http'):
-                            # API 분석 결과 kbcard 이미지는 이 경로를 따름
                             img_path = f"https://img1.kbcard.com/ST/img/cxc{img_path}"
 
-                        # 상세 페이지 링크
-                        evt_no = ev.get('evtNo', '')
                         link = f"https://m.kbcard.com/BON/DVIEW/MBBMCXHIABNC0026?evntSerno={evt_no}&evntMain=Y"
 
                         all_events.append({
@@ -236,12 +236,10 @@ async def crawl_kb_bg():
                             "period": ev.get("evtYMD", ""),
                             "link": link,
                             "image": img_path,
-                            "bgColor": ev.get('bckgColrCtt', '#ffffff')
+                            "bgColor": "#ffffff"
                         })
                     
-                    total_pages = int(res_json.get("totalPageCount", 0))
-                    if page >= total_pages: break
-                    
+                    if page >= int(res_json.get("totalPageCount", 0)): break
                 except Exception as e:
                     print(f"Error parsing KB page {page}: {e}")
                     break
@@ -250,16 +248,9 @@ async def crawl_kb_bg():
             try:
                 with open("kb_data.json", "w", encoding="utf-8") as f:
                     json.dump(all_events, f, ensure_ascii=False)
-            except Exception as fe:
-                print(f"KB file save failed: {fe}")
-
-            if r:
-                try:
-                    r.setex(KB_CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
-                except Exception as re:
-                     print(f"KB Redis save failed: {re}")
-
-            print(f"[{datetime.now()}] KB crawl finished. {len(all_events)} events.")
+                if r: r.setex(KB_CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
+                print(f"[{datetime.now()}] KB crawl finished. {len(all_events)} events.")
+            except Exception as e: print(e)
             
     except Exception as e:
         print(f"[{datetime.now()}] KB crawl failed: {e}")
@@ -1202,7 +1193,7 @@ def card_events():
                 overflow: hidden;
                 word-break: keep-all;
                 flex: 1;
-            }
+             color: #1d1d1f !important;}
             
             .event-date {
                 font-size: 0.8rem;
@@ -1491,7 +1482,7 @@ def kb_card_events():
                 overflow: hidden;
                 word-break: keep-all;
                 flex: 1;
-            }
+             color: #1d1d1f !important;}
             
             .event-date {
                 font-size: 0.8rem;
@@ -1682,7 +1673,7 @@ def hana_card_events():
                 overflow: hidden;
                 word-break: keep-all;
                 flex: 1;
-            }
+             color: #1d1d1f !important;}
             
             .event-date {
                 font-size: 0.8rem;
@@ -1876,7 +1867,7 @@ def shinhan_card_events():
                 overflow: hidden;
                 word-break: keep-all;
                 flex: 1;
-            }
+             color: #1d1d1f !important;}
             
             .event-date {
                 font-size: 0.8rem;
@@ -2554,7 +2545,7 @@ def woori_card_events():
                 overflow: hidden;
                 word-break: keep-all;
                 flex: 1;
-            }
+             color: #1d1d1f !important;}
             
             .event-date {
                 font-size: 0.8rem;
@@ -2747,7 +2738,7 @@ def bc_card_events():
                 overflow: hidden;
                 word-break: keep-all;
                 flex: 1;
-            }
+             color: #1d1d1f !important;}
             
             .event-date {
                 font-size: 0.8rem;
@@ -2940,7 +2931,7 @@ def samsung_card_events():
                 overflow: hidden;
                 word-break: keep-all;
                 flex: 1;
-            }
+             color: #1d1d1f !important;}
             
             .event-date {
                 font-size: 0.8rem;
@@ -3133,7 +3124,7 @@ def card_events_search():
                 overflow: hidden;
                 word-break: keep-all;
                 flex: 1;
-            }
+             color: #1d1d1f !important;}
             
             .event-date {
                 font-size: 0.8rem;
