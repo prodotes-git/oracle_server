@@ -30,25 +30,6 @@ BC_CACHE_KEY = "bc_card_events_cache_v1"
 SAMSUNG_CACHE_KEY = "samsung_card_events_cache_v1"
 CACHE_EXPIRE = 3600  # 1시간 동안 캐시 유지
 
-@app.get("/api/shinhan-myshop")
-async def get_shinhan_myshop():
-    """
-    신한카드 마이샵 쿠폰 데이터를 가져와서 정제하여 반환합니다.
-    """
-    try:
-        import json
-        cached = r.get(SHINHAN_MYSHOP_CACHE_KEY)
-        if cached:
-            return json.loads(cached)
-
-        api_url = "https://www.shinhancard.com/mob/MOBFM501N/MOBFM501R21.ajax"
-        base_url = "https://www.shinhancard.com"
-        
-        headers = {
-            "Content-Type": "application/json",
-            "X-Requested-With": "XMLHttpRequest",
-            "Referer": f"{base_url}/mob/MOBFM501N/MOBFM501R31.shc",
-
 def get_cached_data(cache_key, file_path):
     try:
         if r:
@@ -71,6 +52,26 @@ def get_cached_data(cache_key, file_path):
             return res
     except Exception: pass
     return {'last_updated': None, 'data': []}
+
+
+@app.get("/api/shinhan-myshop")
+async def get_shinhan_myshop():
+    """
+    신한카드 마이샵 쿠폰 데이터를 가져와서 정제하여 반환합니다.
+    """
+    try:
+        import json
+        cached = r.get(SHINHAN_MYSHOP_CACHE_KEY)
+        if cached:
+            return json.loads(cached)
+
+        api_url = "https://www.shinhancard.com/mob/MOBFM501N/MOBFM501R21.ajax"
+        base_url = "https://www.shinhancard.com"
+        
+        headers = {
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+            "Referer": f"{base_url}/mob/MOBFM501N/MOBFM501R31.shc",
 
             "Origin": base_url,
             "Accept": "application/json, text/javascript, */*; q=0.01",
