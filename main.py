@@ -1517,7 +1517,7 @@ def kb_card_events():
         </div>
 
         <div class="main-content">
-            <h1>이벤트 전체 검색</h1>
+            <h1>신한카드 이벤트 검색</h1>
             
             <div class="search-section">
                 <input type="text" id="searchInput" class="search-input" placeholder="관심 있는 이벤트를 검색해보세요..." onkeyup="filterEvents()">
@@ -1747,7 +1747,7 @@ def hana_card_events():
         </div>
 
         <div class="main-content">
-            <h1>이벤트 전체 검색</h1>
+            <h1>KB국민카드 이벤트 검색</h1>
             
             <div class="search-section">
                 <input type="text" id="searchInput" class="search-input" placeholder="관심 있는 이벤트를 검색해보세요..." onkeyup="filterEvents()">
@@ -1982,7 +1982,7 @@ def shinhan_card_events():
         </div>
 
         <div class="main-content">
-            <h1>이벤트 전체 검색</h1>
+            <h1>하나카드 이벤트 검색</h1>
             <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                 <a href="https://www.shinhancard.com/mob/MOBFM829N/MOBFM829R03.shc?sourcePage=R01" target="_blank" class="official-link">공식 이벤트 목록 ↗</a>
                 <a href="https://www.shinhancard.com/mob/MOBFM501N/MOBFM501R31.shc" target="_blank" class="official-link" style="color: #e91e63;">공식 마이샵 쿠폰 ↗</a>
@@ -2667,7 +2667,7 @@ def woori_card_events():
         </div>
 
         <div class="main-content">
-            <h1>이벤트 전체 검색</h1>
+            <h1>우리카드 이벤트 검색</h1>
             
             <div class="search-section">
                 <input type="text" id="searchInput" class="search-input" placeholder="관심 있는 이벤트를 검색해보세요..." onkeyup="filterEvents()">
@@ -2893,7 +2893,7 @@ def bc_card_events():
         </div>
 
         <div class="main-content">
-            <h1>이벤트 전체 검색</h1>
+            <h1>BC카드 이벤트 검색</h1>
             
             <div class="search-section">
                 <input type="text" id="searchInput" class="search-input" placeholder="관심 있는 이벤트를 검색해보세요..." onkeyup="filterEvents()">
@@ -3118,7 +3118,7 @@ def samsung_card_events():
         </div>
 
         <div class="main-content">
-            <h1>이벤트 전체 검색</h1>
+            <h1>삼성카드 이벤트 검색</h1>
             
             <div class="search-section">
                 <input type="text" id="searchInput" class="search-input" placeholder="관심 있는 이벤트를 검색해보세요..." onkeyup="filterEvents()">
@@ -3143,9 +3143,7 @@ def samsung_card_events():
 
             async function fetchEvents() {
                 try {
-                    const response = await fetch('/api/samsung-cards'),
-                        fetch('/api/hyundai-cards'),
-                        fetch('/api/lotte-cards');
+                    const response = await fetch('/api/samsung-cards');
                     const json = await response.json();
                     if(json.last_updated) document.getElementById('lastUpdated').innerText = `Update: ${json.last_updated.substring(5,16)}`;
                     allEvents = Array.isArray(json) ? json : (json.data || []);
@@ -3521,7 +3519,7 @@ def hyundai_cards_page():
             </div>
         </div>
         <div class="main-content">
-            <h1>이벤트 전체 검색</h1>
+            <h1>현대카드 이벤트 검색</h1>
             <div class="search-section">
                 <input type="text" id="searchInput" class="search-input" placeholder="관심 있는 이벤트를 검색해보세요..." onkeyup="filterEvents()">
             </div>
@@ -3663,7 +3661,7 @@ def lotte_cards_page():
             </div>
         </div>
         <div class="main-content">
-            <h1>이벤트 전체 검색</h1>
+            <h1>롯데카드 이벤트 검색</h1>
             <div class="search-section">
                 <input type="text" id="searchInput" class="search-input" placeholder="관심 있는 이벤트를 검색해보세요..." onkeyup="filterEvents()">
             </div>
