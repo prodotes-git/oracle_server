@@ -2155,7 +2155,7 @@ async def crawl_bc_bg():
         print(f"[{datetime.now()}] BC crawl failed: {e}")
 
 
-# 삼성카드 크롤러 (Playwright 모바일 DOM 기반 - 최종 성공)
+# 삼성카드 크롤러 (Playwright - cms_id 기반 직접 링크 지원)
 async def crawl_samsung_bg():
     try:
         print(f"[{datetime.now()}] Starting Samsung background crawl (Playwright Mobile)...")
@@ -2169,27 +2169,38 @@ async def crawl_samsung_bg():
             page = await context.new_page()
             
             try:
+                # 목록 페이지 접속
                 await page.goto("https://m.samsungcard.com/personal/event/ing/UHPPBE1401M0.jsp", timeout=60000)
                 await page.wait_for_timeout(8000)
                 
+                # DOM 파싱
                 events_data = await page.evaluate('''() => {
                     const results = [];
                     document.querySelectorAll('li').forEach(li => {
                         const img = li.querySelector('img');
-                        if (!img) return;
+                        const a = li.querySelector('a');
+                        
+                        if (!img || !a) return;
                         
                         let text = li.innerText.replace(/[\n\r]+/g, ' ').trim();
                         const dateMatch = text.match(/(\d{4}\.\d{2}\.\d{2})\s*~\s*(\d{4}\.\d{2}\.\d{2})/);
                         
-                        if (dateMatch) {
+                        // onclick 속성에서 ID 추출
+                        const onclick = a.getAttribute('onclick') || "";
+                        const idMatch = onclick.match(/GoDtlBrws\(['"](\d+)['"]/);
+                        const cmsId = idMatch ? idMatch[1] : "";
+                        
+                        if (dateMatch && cmsId) {
                             let period = dateMatch[0];
+                            // 제목 정제
                             let title = text.replace(/좋아요\s*갯수\s*\d+/, '').replace(period, '').trim();
                             if(title.length > 100) title = title.substring(0, 100);
                             
                             results.push({
                                 eventName: title,
                                 period: period,
-                                image: img.src
+                                image: img.src,
+                                cmsId: cmsId
                             });
                         }
                     });
@@ -2198,11 +2209,15 @@ async def crawl_samsung_bg():
                 
                 if events_data:
                     for ev in events_data:
+                        cms_id = ev.get('cmsId')
+                        # 사용자가 요청한 상세 페이지 직접 링크
+                        link = f"https://www.samsungcard.com/personal/event/ing/UHPPBE1403M0.jsp?cms_id={cms_id}"
+                        
                         all_events.append({
                             "category": "삼성카드",
                             "eventName": ev['eventName'],
                             "period": ev['period'],
-                            "link": "https://m.samsungcard.com/personal/event/ing/UHPPBE1401M0.jsp",
+                            "link": link,
                             "image": ev['image'],
                             "bgColor": "#0056b3"
                         })
