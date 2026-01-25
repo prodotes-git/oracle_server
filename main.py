@@ -2044,8 +2044,12 @@ async def crawl_woori_bg():
                         if img_path and not img_path.startswith('http'): 
                             img_path = f"{base_url}{img_path}"
                         
-                        # 사용자가 요청한 모바일 목록 페이지 URL로 고정
-                        link = "https://m.wooricard.com/dcmw/yh1/bnf/bnf02/prgevnt/M1BNF202S00.do"
+                        # 사용자가 제공한 PC 상세 링크 패턴 적용
+                        evnt_srno = ev.get('evntSrno', '')
+                        if evnt_srno:
+                            link = f"https://pc.wooricard.com/dcpc/yh1/bnf/bnf02/prgevnt/H1BNF202S01.do?evntSrno={evnt_srno}"
+                        else:
+                            link = "https://m.wooricard.com/dcmw/yh1/bnf/bnf02/prgevnt/M1BNF202S00.do"
                         
                         if title:
                             all_events.append({
