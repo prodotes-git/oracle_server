@@ -1152,6 +1152,12 @@ def card_events():
                 <span>🔍</span>
                 <input type="text" id="cardSearch" placeholder="카드사 이름을 검색해보세요..." onkeyup="filterCards()">
             </div>
+            
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <a href="/card-events/search" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.8rem 2rem; border-radius: 12px; text-decoration: none; font-weight: 600; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); transition: all 0.3s;">
+                    🎯 모든 카드사 이벤트 통합 검색
+                </a>
+            </div>
 
             <div class="card-grid" id="cardGrid">
                 <a href="/card-events/shinhan" class="card-link" data-name="신한카드">
@@ -2457,6 +2463,186 @@ def samsung_card_events():
                     const response = await fetch('/api/samsung-cards');
                     const json = await response.json();
                     allEvents = Array.isArray(json) ? json : (json.data || []);
+                    renderEvents(allEvents);
+                } catch (error) {
+                    document.getElementById('eventList').innerHTML = '<div class="loading">정보를 불러오지 못했습니다.</div>';
+                }
+            }
+
+            function filterEvents() {
+                const search = document.getElementById('searchInput').value.toLowerCase();
+                const filtered = allEvents.filter(ev => 
+                    (ev.eventName || "").toLowerCase().includes(search) || 
+                    (ev.category || "").toLowerCase().includes(search)
+                );
+                renderEvents(filtered);
+            }
+
+            function renderEvents(events) {
+                const list = document.getElementById('eventList');
+                const stats = document.getElementById('stats');
+                
+                stats.innerText = `총 ${events.length}개의 이벤트 검색됨`;
+                
+                if (events.length === 0) {
+                    list.innerHTML = '<div class="loading">검색 결과가 없습니다.</div>';
+                    return;
+                }
+
+                list.innerHTML = events.map(ev => `
+                    <a href="${ev.link}" target="_blank" class="event-card">
+                        <div class="thumb-area" style="background-color: ${ev.bgColor}">
+                            <img src="${ev.image}" class="thumb-img" onerror="this.style.display='none'">
+                        </div>
+                        <div class="card-body">
+                            <span class="category-tag">${ev.category}</span>
+                            <div class="event-title">${ev.eventName}</div>
+                            <div class="event-period">${ev.period}</div>
+                        </div>
+                    </a>
+                `).join('');
+            }
+
+            fetchEvents();
+        </script>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
+
+@app.get("/card-events/search", response_class=HTMLResponse)
+def card_events_search():
+    html_content = """
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>통합 이벤트 검색</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;600&display=swap" rel="stylesheet">
+        <style>
+            :root {
+                --bg-color: #F5F5F7;
+                --accent-color: #1d1d1f;
+                --text-secondary: #6e6e73;
+                --blue-color: #0071e3;
+                --border-color: rgba(0,0,0,0.1);
+            }
+            
+            body { background-color: var(--bg-color); color: var(--accent-color); font-family: 'Inter', sans-serif; padding-bottom: 50px; margin: 0; }
+
+            .nav-header {
+                position: sticky; top: 0; background: rgba(255,255,255,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+                border-bottom: 1px solid var(--border-color); z-index: 100;
+            }
+            .nav-content {
+                max-width: 1200px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center;
+            }
+            .back-btn {
+                color: var(--blue-color); text-decoration: none; font-weight: 500; font-size: 0.95rem;
+            }
+
+            .main-content { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+            h1 { font-size: 2.5rem; font-weight: 600; margin-bottom: 1rem; }
+            
+            .search-section { margin: 2rem 0; }
+            .search-input {
+                width: 100%; padding: 1rem 1.5rem; border: 1px solid var(--border-color); border-radius: 12px;
+                font-size: 1rem; background: white; transition: all 0.3s;
+            }
+            .search-input:focus { outline: none; border-color: var(--blue-color); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
+
+            .event-list {
+                display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;
+            }
+            .event-card {
+                background: white; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;
+                border: 1px solid var(--border-color); text-decoration: none; color: inherit; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+                height: 100%;
+            }
+            .event-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+
+            .thumb-area {
+                width: 100%;
+                aspect-ratio: 16/9;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                overflow: hidden;
+            }
+            .thumb-img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: transform 0.5s ease;
+            }
+            .event-card:hover .thumb-img { transform: scale(1.05); }
+
+            .card-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
+            .category-tag {
+                background: #f2f2f7; color: var(--text-secondary); padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;
+                align-self: flex-start; margin-bottom: 0.8rem;
+            }
+            .event-title { font-size: 1rem; font-weight: 700; line-height: 1.4; margin-bottom: 0.8rem; flex: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+            .event-period { font-size: 0.75rem; color: var(--text-secondary); }
+
+            .loading { text-align: center; padding: 4rem; grid-column: 1 / -1; color: var(--text-secondary); }
+            .stats { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; }
+        </style>
+    </head>
+    <body>
+        <div class="nav-header">
+            <div class="nav-content">
+                <a href="/card-events" class="back-btn">← 카드사 목록</a>
+                <div style="font-weight: 600;">전체 이벤트 통합 검색</div>
+                <div style="width: 80px;"></div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <h1>모든 카드사 이벤트 검색</h1>
+            
+            <div class="search-section">
+                <input type="text" id="searchInput" class="search-input" placeholder="모든 카드사의 이벤트를 검색해보세요..." onkeyup="filterEvents()">
+            </div>
+
+            <div id="stats" class="stats"></div>
+            <div id="eventList" class="event-list">
+                <div class="loading">이벤트를 불러오는 중입니다...</div>
+            </div>
+        </div>
+
+        <script>
+            let allEvents = [];
+
+            async function fetchEvents() {
+                try {
+                    // 모든 카드사 API 호출
+                    const [shinhanRes, kbRes, hanaRes, wooriRes, bcRes, samsungRes] = await Promise.all([
+                        fetch('/api/shinhan-cards'),
+                        fetch('/api/kb-cards'),
+                        fetch('/api/hana-cards'),
+                        fetch('/api/woori-cards'),
+                        fetch('/api/bc-cards'),
+                        fetch('/api/samsung-cards')
+                    ]);
+                    
+                    const shinhanData = await shinhanRes.json();
+                    const kbData = await kbRes.json();
+                    const hanaData = await hanaRes.json();
+                    const wooriData = await wooriRes.json();
+                    const bcData = await bcRes.json();
+                    const samsungData = await samsungRes.json();
+
+                    const shinhan = Array.isArray(shinhanData) ? shinhanData : (shinhanData.data || []);
+                    const kb = Array.isArray(kbData) ? kbData : (kbData.data || []);
+                    const hana = Array.isArray(hanaData) ? hanaData : (hanaData.data || []);
+                    const woori = Array.isArray(wooriData) ? wooriData : (wooriData.data || []);
+                    const bc = Array.isArray(bcData) ? bcData : (bcData.data || []);
+                    const samsung = Array.isArray(samsungData) ? samsungData : (samsungData.data || []);
+
+                    allEvents = [...shinhan, ...kb, ...hana, ...woori, ...bc, ...samsung];
                     renderEvents(allEvents);
                 } catch (error) {
                     document.getElementById('eventList').innerHTML = '<div class="loading">정보를 불러오지 못했습니다.</div>';
