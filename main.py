@@ -1880,61 +1880,84 @@ async def crawl_woori_bg():
         print(f"[{datetime.now()}] Woori crawl failed: {e}")
 
 
-# BC카드 크롤러 (추가)
+# BC카드 크롤러 (실제 API 사용)
 async def crawl_bc_bg():
     try:
         print(f"[{datetime.now()}] Starting BC background crawl...")
         all_events = []
         base_url = "https://web.paybooc.co.kr"
-        target_url = f"{base_url}/web/evnt/main"
+        api_url = f"{base_url}/web/evnt/lst-evnt-data"
         
         async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
             headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                "Referer": f"{base_url}/web/evnt/main"
             }
             
-            response = await client.get(target_url, headers=headers)
-            
-            if response.status_code == 200:
-                from bs4 import BeautifulSoup
-                soup = BeautifulSoup(response.text, "lxml")
+            # 페이지별로 데이터 수집
+            for page in range(1, 10):  # 최대 10페이지
+                params = {
+                    "reqType": "init" if page == 1 else "more",
+                    "inqrDv": "ING",
+                    "pgeNo": str(page),
+                    "pgeCnt": "20",
+                    "ordering": "RECENT"
+                }
                 
-                # BC카드 이벤트 아이템 선택자 (실제 페이지 구조에 맞게 조정 필요)
-                items = soup.select(".event-list .event-item, .evnt-list .item, article.event")
-                
-                for item in items:
-                    try:
-                        # 제목
-                        title_elem = item.select_one(".title, .event-title, h3, h4")
-                        title = title_elem.text.strip() if title_elem else ""
+                try:
+                    response = await client.get(api_url, params=params, headers=headers)
+                    if response.status_code != 200:
+                        break
+                        
+                    data = response.json()
+                    event_list = data.get("data", {}).get("evntInqrList", [])
+                    
+                    if not event_list:
+                        break
+                        
+                    for ev in event_list:
+                        # 제목 조합
+                        title_parts = [
+                            ev.get("pybcUnifEvntNm1", ""),
+                            ev.get("pybcUnifEvntNm2", ""),
+                            ev.get("pybcUnifEvntNm3", "")
+                        ]
+                        title = " ".join([p for p in title_parts if p]).strip()
+                        
+                        # 날짜 포맷팅
+                        start_date = ev.get("evntBltnStrtDtm", "")
+                        end_date = ev.get("evntBltnEndDtm", "")
+                        
+                        if len(start_date) >= 8:
+                            start_date = f"{start_date[:4]}.{start_date[4:6]}.{start_date[6:8]}"
+                        if len(end_date) >= 8:
+                            end_date = f"{end_date[:4]}.{end_date[4:6]}.{end_date[6:8]}"
+                        
+                        period = f"{start_date} ~ {end_date}" if start_date and end_date else ""
                         
                         # 이미지
-                        img_elem = item.select_one("img")
-                        img_src = img_elem.get("src", "") if img_elem else ""
-                        if img_src and not img_src.startswith("http"):
-                            img_src = f"{base_url}{img_src}"
+                        img_url = ev.get("evntBsImgUrlAddr", "")
                         
                         # 링크
-                        link_elem = item.select_one("a")
-                        link = link_elem.get("href", "") if link_elem else ""
-                        if link and not link.startswith("http"):
-                            link = f"{base_url}{link}"
+                        event_no = ev.get("pybcUnifEvntNo", "")
+                        link = f"{base_url}/web/evnt/evnt-dts?pybcUnifEvntNo={event_no}" if event_no else f"{base_url}/web/evnt/main"
                         
-                        # 기간
-                        period_elem = item.select_one(".period, .date, .event-period")
-                        period = period_elem.text.strip() if period_elem else ""
+                        # 배경색
+                        bg_color = ev.get("evntBsBgColrVal", "#ffffff")
                         
-                        if title:  # 제목이 있는 경우만 추가
+                        if title:
                             all_events.append({
                                 "category": "BC카드",
                                 "eventName": title,
                                 "period": period,
-                                "link": link or target_url,
-                                "image": img_src,
-                                "bgColor": "#ffffff"
+                                "link": link,
+                                "image": img_url,
+                                "bgColor": bg_color
                             })
-                    except Exception:
-                        continue
+                            
+                except Exception as e:
+                    print(f"Error parsing BC page {page}: {e}")
+                    break
 
         if all_events:
             try:
@@ -1953,7 +1976,6 @@ async def crawl_bc_bg():
             
     except Exception as e:
         print(f"[{datetime.now()}] BC crawl failed: {e}")
-
 
 # 삼성카드 크롤러 (추가)
 async def crawl_samsung_bg():
