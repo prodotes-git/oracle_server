@@ -1159,7 +1159,7 @@ def card_events():
                     <div class="card-name">신한카드</div>
                     <div class="card-desc">이벤트 전체 검색하기</div>
                 </a>
-                <a href="https://www.samsungcard.com/personal/event/ing/list" target="_blank" class="card-link" data-name="삼성카드">
+                <a href="/card-events/samsung" class="card-link" data-name="삼성카드">
                     <div class="card-logo" style="background: #0056b3; color: white;">S</div>
                     <div class="card-name">삼성카드</div>
                     <div class="card-desc">진행중인 이벤트 보기</div>
@@ -1179,17 +1179,17 @@ def card_events():
                     <div class="card-name">롯데카드</div>
                     <div class="card-desc">진행중인 이벤트 보기</div>
                 </a>
-                <a href="https://www.wooricard.com/wccd/CHC/CHCM0101_01.hc" target="_blank" class="card-link" data-name="우리카드">
+                <a href="/card-events/woori" class="card-link" data-name="우리카드">
                     <div class="card-logo" style="background: #007bc3; color: white;">W</div>
                     <div class="card-name">우리카드</div>
                     <div class="card-desc">진행중인 이벤트 보기</div>
                 </a>
-                <a href="https://www.hanacard.co.kr/OPN00000000N.web?schID=pcd&mID=OPN00000000N" target="_blank" class="card-link" data-name="하나카드">
+                <a href="/card-events/hana" class="card-link" data-name="하나카드">
                     <div class="card-logo" style="background: #008485; color: white;">H</div>
                     <div class="card-name">하나카드</div>
                     <div class="card-desc">진행중인 이벤트 보기</div>
                 </a>
-                <a href="https://m.bccard.com/app/mobileweb/EvntList.do" target="_blank" class="card-link" data-name="BC카드">
+                <a href="/card-events/bc" class="card-link" data-name="BC카드">
                     <div class="card-logo" style="background: #ed1c24; color: white;">B</div>
                     <div class="card-name">BC카드</div>
                     <div class="card-desc">진행중인 이벤트 보기</div>
@@ -2031,3 +2031,475 @@ async def get_samsung_cards():
 async def update_samsung(bg_tasks: BackgroundTasks):
     bg_tasks.add_task(crawl_samsung_bg)
     return {"status": "started"}
+
+@app.get("/card-events/woori", response_class=HTMLResponse)
+def woori_card_events():
+    html_content = """
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>우리카드 이벤트 검색</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;600&display=swap" rel="stylesheet">
+        <style>
+            :root {
+                --bg-color: #F5F5F7;
+                --accent-color: #1d1d1f;
+                --text-secondary: #6e6e73;
+                --blue-color: #0071e3;
+                --border-color: rgba(0,0,0,0.1);
+            }
+            
+            body { background-color: var(--bg-color); color: var(--accent-color); font-family: 'Inter', sans-serif; padding-bottom: 50px; margin: 0; }
+
+            .nav-header {
+                position: sticky; top: 0; background: rgba(255,255,255,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+                border-bottom: 1px solid var(--border-color); z-index: 100;
+            }
+            .nav-content {
+                max-width: 1200px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center;
+            }
+            .back-btn {
+                color: var(--blue-color); text-decoration: none; font-weight: 500; font-size: 0.95rem;
+            }
+
+            .main-content { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+            h1 { font-size: 2.5rem; font-weight: 600; margin-bottom: 1rem; }
+            
+            .search-section { margin: 2rem 0; }
+            .search-input {
+                width: 100%; padding: 1rem 1.5rem; border: 1px solid var(--border-color); border-radius: 12px;
+                font-size: 1rem; background: white; transition: all 0.3s;
+            }
+            .search-input:focus { outline: none; border-color: var(--blue-color); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
+
+            .event-list {
+                display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;
+            }
+            .event-card {
+                background: white; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;
+                border: 1px solid var(--border-color); text-decoration: none; color: inherit; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+                height: 100%;
+            }
+            .event-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+
+            .thumb-area {
+                width: 100%;
+                aspect-ratio: 16/9;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                overflow: hidden;
+            }
+            .thumb-img {
+                width: 80%;
+                height: 80%;
+                object-fit: contain;
+                z-index: 2;
+            }
+            .card-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
+            .category-tag {
+                background: #f2f2f7; color: var(--text-secondary); padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;
+                align-self: flex-start; margin-bottom: 0.8rem;
+            }
+            .event-title { font-size: 1rem; font-weight: 700; line-height: 1.4; margin-bottom: 0.8rem; flex: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+            .event-period { font-size: 0.75rem; color: var(--text-secondary); }
+
+            .loading { text-align: center; padding: 4rem; grid-column: 1 / -1; color: var(--text-secondary); }
+            .stats { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; }
+        </style>
+    </head>
+    <body>
+        <div class="nav-header">
+            <div class="nav-content">
+                <a href="/card-events" class="back-btn">← 카드사 목록</a>
+                <div style="font-weight: 600;">우리카드 이벤트</div>
+                <div style="width: 80px;"></div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <h1>이벤트 전체 검색</h1>
+            
+            <div class="search-section">
+                <input type="text" id="searchInput" class="search-input" placeholder="관심 있는 이벤트를 검색해보세요..." onkeyup="filterEvents()">
+            </div>
+
+            <div id="stats" class="stats"></div>
+            <div id="eventList" class="event-list">
+                <div class="loading">이벤트를 불러오는 중입니다...</div>
+            </div>
+        </div>
+
+        <script>
+            let allEvents = [];
+
+            async function fetchEvents() {
+                try {
+                    const response = await fetch('/api/woori-cards');
+                    const json = await response.json();
+                    allEvents = Array.isArray(json) ? json : (json.data || []);
+                    renderEvents(allEvents);
+                } catch (error) {
+                    document.getElementById('eventList').innerHTML = '<div class="loading">정보를 불러오지 못했습니다.</div>';
+                }
+            }
+
+            function filterEvents() {
+                const search = document.getElementById('searchInput').value.toLowerCase();
+                const filtered = allEvents.filter(ev => 
+                    (ev.eventName || "").toLowerCase().includes(search) || 
+                    (ev.category || "").toLowerCase().includes(search)
+                );
+                renderEvents(filtered);
+            }
+
+            function renderEvents(events) {
+                const list = document.getElementById('eventList');
+                const stats = document.getElementById('stats');
+                
+                stats.innerText = `총 ${events.length}개의 이벤트 검색됨`;
+                
+                if (events.length === 0) {
+                    list.innerHTML = '<div class="loading">검색 결과가 없습니다.</div>';
+                    return;
+                }
+
+                list.innerHTML = events.map(ev => `
+                    <a href="${ev.link}" target="_blank" class="event-card">
+                        <div class="thumb-area" style="background-color: ${ev.bgColor}">
+                            <img src="${ev.image}" class="thumb-img" onerror="this.style.display='none'">
+                        </div>
+                        <div class="card-body">
+                            <span class="category-tag">${ev.category}</span>
+                            <div class="event-title">${ev.eventName}</div>
+                            <div class="event-period">${ev.period}</div>
+                        </div>
+                    </a>
+                `).join('');
+            }
+
+            fetchEvents();
+        </script>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
+
+@app.get("/card-events/bc", response_class=HTMLResponse)
+def bc_card_events():
+    html_content = """
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>BC카드 이벤트 검색</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;600&display=swap" rel="stylesheet">
+        <style>
+            :root {
+                --bg-color: #F5F5F7;
+                --accent-color: #1d1d1f;
+                --text-secondary: #6e6e73;
+                --blue-color: #0071e3;
+                --border-color: rgba(0,0,0,0.1);
+            }
+            
+            body { background-color: var(--bg-color); color: var(--accent-color); font-family: 'Inter', sans-serif; padding-bottom: 50px; margin: 0; }
+
+            .nav-header {
+                position: sticky; top: 0; background: rgba(255,255,255,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+                border-bottom: 1px solid var(--border-color); z-index: 100;
+            }
+            .nav-content {
+                max-width: 1200px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center;
+            }
+            .back-btn {
+                color: var(--blue-color); text-decoration: none; font-weight: 500; font-size: 0.95rem;
+            }
+
+            .main-content { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+            h1 { font-size: 2.5rem; font-weight: 600; margin-bottom: 1rem; }
+            
+            .search-section { margin: 2rem 0; }
+            .search-input {
+                width: 100%; padding: 1rem 1.5rem; border: 1px solid var(--border-color); border-radius: 12px;
+                font-size: 1rem; background: white; transition: all 0.3s;
+            }
+            .search-input:focus { outline: none; border-color: var(--blue-color); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
+
+            .event-list {
+                display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;
+            }
+            .event-card {
+                background: white; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;
+                border: 1px solid var(--border-color); text-decoration: none; color: inherit; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+                height: 100%;
+            }
+            .event-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+
+            .thumb-area {
+                width: 100%;
+                aspect-ratio: 16/9;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                overflow: hidden;
+            }
+            .thumb-img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: transform 0.5s ease;
+            }
+            .event-card:hover .thumb-img { transform: scale(1.05); }
+
+            .card-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
+            .category-tag {
+                background: #f2f2f7; color: var(--text-secondary); padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;
+                align-self: flex-start; margin-bottom: 0.8rem;
+            }
+            .event-title { font-size: 1rem; font-weight: 700; line-height: 1.4; margin-bottom: 0.8rem; flex: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+            .event-period { font-size: 0.75rem; color: var(--text-secondary); }
+
+            .loading { text-align: center; padding: 4rem; grid-column: 1 / -1; color: var(--text-secondary); }
+            .stats { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; }
+        </style>
+    </head>
+    <body>
+        <div class="nav-header">
+            <div class="nav-content">
+                <a href="/card-events" class="back-btn">← 카드사 목록</a>
+                <div style="font-weight: 600;">BC카드 이벤트</div>
+                <div style="width: 80px;"></div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <h1>이벤트 전체 검색</h1>
+            
+            <div class="search-section">
+                <input type="text" id="searchInput" class="search-input" placeholder="관심 있는 이벤트를 검색해보세요..." onkeyup="filterEvents()">
+            </div>
+
+            <div id="stats" class="stats"></div>
+            <div id="eventList" class="event-list">
+                <div class="loading">이벤트를 불러오는 중입니다...</div>
+            </div>
+        </div>
+
+        <script>
+            let allEvents = [];
+
+            async function fetchEvents() {
+                try {
+                    const response = await fetch('/api/bc-cards');
+                    const json = await response.json();
+                    allEvents = Array.isArray(json) ? json : (json.data || []);
+                    renderEvents(allEvents);
+                } catch (error) {
+                    document.getElementById('eventList').innerHTML = '<div class="loading">정보를 불러오지 못했습니다.</div>';
+                }
+            }
+
+            function filterEvents() {
+                const search = document.getElementById('searchInput').value.toLowerCase();
+                const filtered = allEvents.filter(ev => 
+                    (ev.eventName || "").toLowerCase().includes(search) || 
+                    (ev.category || "").toLowerCase().includes(search)
+                );
+                renderEvents(filtered);
+            }
+
+            function renderEvents(events) {
+                const list = document.getElementById('eventList');
+                const stats = document.getElementById('stats');
+                
+                stats.innerText = `총 ${events.length}개의 이벤트 검색됨`;
+                
+                if (events.length === 0) {
+                    list.innerHTML = '<div class="loading">검색 결과가 없습니다.</div>';
+                    return;
+                }
+
+                list.innerHTML = events.map(ev => `
+                    <a href="${ev.link}" target="_blank" class="event-card">
+                        <div class="thumb-area" style="background-color: ${ev.bgColor}">
+                            <img src="${ev.image}" class="thumb-img" onerror="this.style.display='none'">
+                        </div>
+                        <div class="card-body">
+                            <span class="category-tag">${ev.category}</span>
+                            <div class="event-title">${ev.eventName}</div>
+                            <div class="event-period">${ev.period}</div>
+                        </div>
+                    </a>
+                `).join('');
+            }
+
+            fetchEvents();
+        </script>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
+
+@app.get("/card-events/samsung", response_class=HTMLResponse)
+def samsung_card_events():
+    html_content = """
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>삼성카드 이벤트 검색</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;600&display=swap" rel="stylesheet">
+        <style>
+            :root {
+                --bg-color: #F5F5F7;
+                --accent-color: #1d1d1f;
+                --text-secondary: #6e6e73;
+                --blue-color: #0071e3;
+                --border-color: rgba(0,0,0,0.1);
+            }
+            
+            body { background-color: var(--bg-color); color: var(--accent-color); font-family: 'Inter', sans-serif; padding-bottom: 50px; margin: 0; }
+
+            .nav-header {
+                position: sticky; top: 0; background: rgba(255,255,255,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+                border-bottom: 1px solid var(--border-color); z-index: 100;
+            }
+            .nav-content {
+                max-width: 1200px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center;
+            }
+            .back-btn {
+                color: var(--blue-color); text-decoration: none; font-weight: 500; font-size: 0.95rem;
+            }
+
+            .main-content { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+            h1 { font-size: 2.5rem; font-weight: 600; margin-bottom: 1rem; }
+            
+            .search-section { margin: 2rem 0; }
+            .search-input {
+                width: 100%; padding: 1rem 1.5rem; border: 1px solid var(--border-color); border-radius: 12px;
+                font-size: 1rem; background: white; transition: all 0.3s;
+            }
+            .search-input:focus { outline: none; border-color: var(--blue-color); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
+
+            .event-list {
+                display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;
+            }
+            .event-card {
+                background: white; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;
+                border: 1px solid var(--border-color); text-decoration: none; color: inherit; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+                height: 100%;
+            }
+            .event-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+
+            .thumb-area {
+                width: 100%;
+                aspect-ratio: 16/9;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                overflow: hidden;
+            }
+            .thumb-img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: transform 0.5s ease;
+            }
+            .event-card:hover .thumb-img { transform: scale(1.05); }
+
+            .card-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
+            .category-tag {
+                background: #f2f2f7; color: var(--text-secondary); padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;
+                align-self: flex-start; margin-bottom: 0.8rem;
+            }
+            .event-title { font-size: 1rem; font-weight: 700; line-height: 1.4; margin-bottom: 0.8rem; flex: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+            .event-period { font-size: 0.75rem; color: var(--text-secondary); }
+
+            .loading { text-align: center; padding: 4rem; grid-column: 1 / -1; color: var(--text-secondary); }
+            .stats { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; }
+        </style>
+    </head>
+    <body>
+        <div class="nav-header">
+            <div class="nav-content">
+                <a href="/card-events" class="back-btn">← 카드사 목록</a>
+                <div style="font-weight: 600;">삼성카드 이벤트</div>
+                <div style="width: 80px;"></div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <h1>이벤트 전체 검색</h1>
+            
+            <div class="search-section">
+                <input type="text" id="searchInput" class="search-input" placeholder="관심 있는 이벤트를 검색해보세요..." onkeyup="filterEvents()">
+            </div>
+
+            <div id="stats" class="stats"></div>
+            <div id="eventList" class="event-list">
+                <div class="loading">이벤트를 불러오는 중입니다...</div>
+            </div>
+        </div>
+
+        <script>
+            let allEvents = [];
+
+            async function fetchEvents() {
+                try {
+                    const response = await fetch('/api/samsung-cards');
+                    const json = await response.json();
+                    allEvents = Array.isArray(json) ? json : (json.data || []);
+                    renderEvents(allEvents);
+                } catch (error) {
+                    document.getElementById('eventList').innerHTML = '<div class="loading">정보를 불러오지 못했습니다.</div>';
+                }
+            }
+
+            function filterEvents() {
+                const search = document.getElementById('searchInput').value.toLowerCase();
+                const filtered = allEvents.filter(ev => 
+                    (ev.eventName || "").toLowerCase().includes(search) || 
+                    (ev.category || "").toLowerCase().includes(search)
+                );
+                renderEvents(filtered);
+            }
+
+            function renderEvents(events) {
+                const list = document.getElementById('eventList');
+                const stats = document.getElementById('stats');
+                
+                stats.innerText = `총 ${events.length}개의 이벤트 검색됨`;
+                
+                if (events.length === 0) {
+                    list.innerHTML = '<div class="loading">검색 결과가 없습니다.</div>';
+                    return;
+                }
+
+                list.innerHTML = events.map(ev => `
+                    <a href="${ev.link}" target="_blank" class="event-card">
+                        <div class="thumb-area" style="background-color: ${ev.bgColor}">
+                            <img src="${ev.image}" class="thumb-img" onerror="this.style.display='none'">
+                        </div>
+                        <div class="card-body">
+                            <span class="category-tag">${ev.category}</span>
+                            <div class="event-title">${ev.eventName}</div>
+                            <div class="event-period">${ev.period}</div>
+                        </div>
+                    </a>
+                `).join('');
+            }
+
+            fetchEvents();
+        </script>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
