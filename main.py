@@ -888,42 +888,191 @@ async def start_scheduler():
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
-    html_content = """<!DOCTYPE html>
+    uptime = get_uptime()
+    html_content = f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oracle Crawler</title>
-    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>Oracle Server</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-color: #ffffff; --text-color: #1d1d1f; }
-        body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; }
-        .container { max-width: 980px; margin: 0 auto; padding: 100px 20px; text-align: center; }
-        h1 { font-size: 56px; font-weight: 700; letter-spacing: -0.005em; margin: 0 0 20px; }
-        .time-display { font-size: 24px; color: #86868b; margin-bottom: 60px; font-weight: 400; }
-        .nav-card { background: #fbfbfd; border-radius: 24px; padding: 50px; text-decoration: none; color: inherit; transition: all 0.3s cubic-bezier(0.25,0.1,0.25,1); display: inline-flex; flex-direction: column; align-items: center; width: 300px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.05); }
-        .nav-card:hover { transform: scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.08); background: #fff; }
-        .icon { font-size: 48px; margin-bottom: 16px; }
-        .nav-title { font-size: 22px; font-weight: 600; margin-bottom: 8px; }
-        .nav-desc { color: #86868b; font-size: 16px; }
+        :root {{
+            --bg-color: #000000;
+            --card-bg: #1c1c1e;
+            --text-primary: #f5f5f7;
+            --text-secondary: #86868b;
+            --accent-color: #0a84ff;
+            --hover-bg: #2c2c2e;
+        }}
+        body {{
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }}
+        .container {{
+            width: 100%;
+            max-width: 1200px;
+            padding: 40px;
+            box-sizing: border-box;
+            text-align: center;
+        }}
+        header {{
+            margin-bottom: 80px;
+            animation: fadeInDown 0.8s ease-out;
+        }}
+        h1 {{
+            font-size: 64px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin: 0;
+            background: linear-gradient(135deg, #fff 0%, #a5a5a5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }}
+        .status-badge {{
+            display: inline-block;
+            margin-top: 16px;
+            padding: 6px 14px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }}
+        .grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            justify-content: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }}
+        .card {{
+            background: var(--card-bg);
+            border-radius: 30px;
+            padding: 40px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out forwards;
+            opacity: 0;
+        }}
+        .card:nth-child(1) {{ animation-delay: 0.2s; }}
+        .card:nth-child(2) {{ animation-delay: 0.4s; }}
+        
+        .card:hover {{
+            transform: translateY(-8px) scale(1.02);
+            background: var(--hover-bg);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+            border-color: rgba(255, 255, 255, 0.15);
+        }}
+        .card-icon {{
+            font-size: 48px;
+            margin-bottom: 24px;
+            background: rgba(255,255,255,0.1);
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 24px;
+        }}
+        .card-title {{
+            font-size: 28px;
+            font-weight: 600;
+            margin: 0 0 10px 0;
+        }}
+        .card-desc {{
+            font-size: 17px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            flex-grow: 1;
+        }}
+        .card-arrow {{
+            margin-top: 30px;
+            font-size: 24px;
+            color: var(--accent-color);
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+        }}
+        .card:hover .card-arrow {{
+            opacity: 1;
+            transform: translateX(0);
+        }}
+        
+        .time-display {{
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            font-size: 16px;
+            color: var(--text-secondary);
+            font-feature-settings: "tnum";
+            font-variant-numeric: tabular-nums;
+        }}
+
+        @keyframes fadeInDown {{
+            from {{ opacity: 0; transform: translateY(-20px); }}
+            to {{ opacity: 1; transform: translateY(0); }}
+        }}
+        @keyframes fadeInUp {{
+            from {{ opacity: 0; transform: translateY(30px); }}
+            to {{ opacity: 1; transform: translateY(0); }}
+        }}
+        
+        @media (max-width: 768px) {{
+            .grid {{ grid-template-columns: 1fr; }}
+            h1 {{ font-size: 48px; }}
+            .time-display {{ display: none; }}
+        }}
     </style>
 </head>
 <body>
+    <div class="time-display" id="clock"></div>
     <div class="container">
-        <h1>Oracle Crawler</h1>
-        <div id="clock" class="time-display">Loading...</div>
-        <a href="/card-events" class="nav-card">
-            <span class="icon">💳</span>
-            <span class="nav-title">카드사 이벤트</span>
-            <span class="nav-desc">전체 카드사의 최신 혜택 모음</span>
-        </a>
+        <header>
+            <h1>Oracle Server</h1>
+            <div class="status-badge">System Operational • Uptime: {uptime}</div>
+        </header>
+        
+        <div class="grid">
+            <a href="/card-events" class="card">
+                <div class="card-icon">💳</div>
+                <h2 class="card-title">Card Events</h2>
+                <p class="card-desc">Crawl and analyze benefits from 7 major credit card companies in real-time.</p>
+                <div class="card-arrow">➝</div>
+            </a>
+            
+            <a href="/kfcc" class="card">
+                <div class="card-icon">🏦</div>
+                <h2 class="card-title">KFCC Rates</h2>
+                <p class="card-desc">Search and compare interest rates from MG Community Credit Cooperatives.</p>
+                <div class="card-arrow">➝</div>
+            </a>
+        </div>
     </div>
+    
     <script>
-        function updateTime() {
+        function updateTime() {{
             const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long', hour: '2-digit', minute: '2-digit', second: '2-digit' };
-            document.getElementById('clock').innerText = now.toLocaleDateString('ko-KR', options);
-        }
+            const options = {{ hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }};
+            document.getElementById('clock').innerText = now.toLocaleTimeString('en-US', options);
+        }}
         setInterval(updateTime, 1000);
         updateTime();
     </script>
