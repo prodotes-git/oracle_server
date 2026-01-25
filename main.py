@@ -2245,6 +2245,74 @@ async def crawl_samsung_bg():
         print(f"Samsung crawl failed: {e}")
 
 
+# 현대카드 크롤러
+async def crawl_hyundai_bg():
+    try:
+        print(f"[{datetime.now()}] Starting Hyundai background crawl...")
+        from playwright.async_api import async_playwright
+        all_events = []
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            page = await browser.new_page()
+            try:
+                await page.goto("https://www.hyundaicard.com/cpb/ev/CPBEV0101_01.hc", timeout=60000)
+                await page.wait_for_timeout(8000)
+                events_data = await page.evaluate('''() => {
+                    const results = [];
+                    document.querySelectorAll('li').forEach(li => {
+                        const img = li.querySelector('img');
+                        let text = li.innerText.replace(/[\n\r]+/g, ' ').trim();
+                        // 날짜 패턴 (공백 유연하게)
+                        const dateMatch = text.match(/(\d{4}\.\s*\d{1,2}\.\s*\d{1,2})\s*~\s*(\d{4}\.\s*\d{1,2}\.\s*\d{1,2})/);
+                        if (dateMatch && img) {
+                            let period = dateMatch[0];
+                            let title = text.replace(period, '').trim();
+                            if(title.length > 100) title = title.substring(0, 100);
+                            const linkEl = li.querySelector('a');
+                            results.push({
+                                eventName: title,
+                                period: period,
+                                image: img.src,
+                                link: linkEl ? linkEl.href : ""
+                            });
+                        }
+                    });
+                    return results;
+                }''')
+                for ev in events_data:
+                    link = ev['link']
+                    if not link or "javascript" in link:
+                        link = "https://www.hyundaicard.com/cpb/ev/CPBEV0101_01.hc"
+                    all_events.append({
+                        "category": "현대카드",
+                        "eventName": ev['eventName'],
+                        "period": ev['period'],
+                        "link": link,
+                        "image": ev['image'],
+                        "bgColor": "#000000"
+                    })
+            except Exception as e: print(f"Hyundai Playwright error: {e}")
+            finally: await browser.close()
+        if all_events:
+            try:
+                with open("hyundai_data.json", "w", encoding="utf-8") as f:
+                    json.dump(all_events, f, ensure_ascii=False)
+                if r: r.setex("events:hyundai", CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
+                print(f"[{datetime.now()}] Hyundai crawl finished. {len(all_events)} events.")
+            except Exception as e: print(f"Hyundai save failed: {e}")
+    except Exception as e: print(f"Hyundai crawl failed: {e}")
+
+
+
+@app.get("/api/hyundai-cards")
+def get_hyundai_cards():
+    return get_cached_data("events:hyundai", "hyundai_data.json")
+
+@app.post("/api/hyundai/update")
+async def update_hyundai(background_tasks: BackgroundTasks):
+    background_tasks.add_task(crawl_hyundai_bg)
+    return {"status": "started"}
+
 @app.get("/api/woori-cards")
 async def get_woori_cards():
     try:
