@@ -1204,19 +1204,88 @@ def card_events():
         </div>
 
         <script>
+            let allEvents = [];
+
+            async function fetchAllEvents() {
+                try {
+                    const [shinhanRes, kbRes, hanaRes] = await Promise.all([
+                        fetch('/api/shinhan-cards'),
+                        fetch('/api/kb-cards'),
+                        fetch('/api/hana-cards')
+                    ]);
+                    
+                    const shinhanData = await shinhanRes.json();
+                    const kbData = await kbRes.json();
+                    const hanaData = await hanaRes.json();
+
+                    const shinhan = Array.isArray(shinhanData) ? shinhanData : (shinhanData.data || []);
+                    const kb = Array.isArray(kbData) ? kbData : (kbData.data || []);
+                    const hana = Array.isArray(hanaData) ? hanaData : (hanaData.data || []);
+
+                    allEvents = [...shinhan, ...kb, ...hana];
+                } catch (error) {
+                    console.error('Failed to fetch events:', error);
+                }
+            }
+
             function filterCards() {
                 const search = document.getElementById('cardSearch').value.toLowerCase();
-                const cards = document.querySelectorAll('.card-link');
                 
-                cards.forEach(card => {
-                    const name = card.getAttribute('data-name').toLowerCase();
-                    if (name.includes(search)) {
-                        card.style.display = 'flex';
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
+                if (search.length === 0) {
+                    showCards();
+                    return;
+                }
+                
+                if (allEvents.length === 0) {
+                    fetchAllEvents().then(() => searchEvents(search));
+                } else {
+                    searchEvents(search);
+                }
             }
+
+            function showCards() {
+                document.getElementById('cardGrid').style.display = 'grid';
+                const eventList = document.getElementById('eventList');
+                if (eventList) eventList.style.display = 'none';
+            }
+
+            function searchEvents(search) {
+                const filtered = allEvents.filter(ev => 
+                    (ev.eventName || "").toLowerCase().includes(search) || 
+                    (ev.category || "").toLowerCase().includes(search)
+                );
+                
+                document.getElementById('cardGrid').style.display = 'none';
+                
+                let eventList = document.getElementById('eventList');
+                if (!eventList) {
+                    eventList = document.createElement('div');
+                    eventList.id = 'eventList';
+                    eventList.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.5rem;margin-top:2rem';
+                    document.querySelector('.main-content').appendChild(eventList);
+                }
+                eventList.style.display = 'grid';
+                
+                if (filtered.length === 0) {
+                    eventList.innerHTML = '<div style="text-align:center;padding:4rem;grid-column:1/-1;color:#6e6e73">검색 결과가 없습니다.</div>';
+                    return;
+                }
+
+                eventList.innerHTML = filtered.map(ev => `
+                    <a href="${ev.link}" target="_blank" style="background:white;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;border:1px solid rgba(0,0,0,0.1);text-decoration:none;color:inherit;transition:all 0.3s">
+                        <div style="width:100%;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;overflow:hidden;background-color:${ev.bgColor}">
+                            <img src="${ev.image}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">
+                        </div>
+                        <div style="padding:1.5rem;flex:1;display:flex;flex-direction:column">
+                            <span style="background:#f2f2f7;color:#6e6e73;padding:4px 10px;border-radius:8px;font-size:0.7rem;font-weight:700;align-self:flex-start;margin-bottom:0.8rem">${ev.category}</span>
+                            <div style="font-size:1rem;font-weight:700;line-height:1.4;margin-bottom:0.8rem;flex:1">${ev.eventName}</div>
+                            <div style="font-size:0.75rem;color:#6e6e73">${ev.period}</div>
+                        </div>
+                    </a>
+                `).join('');
+            }
+
+            fetchAllEvents();
         </script>
     </body>
     </html>
