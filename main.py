@@ -1873,75 +1873,75 @@ def shinhan_card_events():
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
-# 우리카드 크롤러 (추가)
+# 우리카드 크롤러 (Playwright 기반 실제 데이터 수집)
 async def crawl_woori_bg():
     try:
-        print(f"[{datetime.now()}] Starting Woori background crawl...")
+        print(f"[{datetime.now()}] Starting Woori background crawl (Playwright)...")
+        from playwright.async_api import async_playwright
+        
         all_events = []
         base_url = "https://m.wooricard.com"
-        api_url = f"{base_url}/dcmw/yh1/bnf/bnf02/prgevnt/getPrgEvntList.pwkjson"
         
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            headers = {
-                "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
-                "Content-Type": "application/json"
-            }
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            context = await browser.new_context(
+                user_agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
+                viewport={'width': 375, 'height': 812}
+            )
+            page = await context.new_page()
             
-            # 페이지별로 데이터 수집
-            for page_idx in range(1, 20):  # 최대 20페이지
-                payload = {
-                    "bnf02PrgEvntVo": {
-                        "evntCtgrNo": "",
-                        "searchKwrd": "",
-                        "sortOrd": "orderNew",
-                        "pageIndex": str(page_idx),
-                        "pageSize": "20",
-                        "evntItgCfcd": ""
-                    }
-                }
+            captured_data = []
+            
+            async def handle_response(response):
+                if "getPrgEvntList.pwkjson" in response.url and response.status == 200:
+                    try:
+                        json_data = await response.json()
+                        captured_data.append(json_data)
+                    except:
+                        pass
+
+            page.on("response", handle_response)
+            
+            try:
+                await page.goto("https://m.wooricard.com/dcmw/yh1/bnf/bnf02/prgevnt/M1BNF202S00.do", timeout=60000)
                 
-                try:
-                    response = await client.post(api_url, json=payload, headers=headers)
-                    if response.status_code != 200:
+                for _ in range(10):
+                    if captured_data:
                         break
+                    await page.wait_for_timeout(1000)
+                
+                for data in captured_data:
+                    events = data.get('prgEvntList', [])
+                    for ev in events:
+                        title = ev.get('cardEvntNm', '') or ev.get('mblDocTitlTxt', '')
                         
-                    res_json = response.json()
-                    event_list = res_json.get("prgEvntList", [])
-                    
-                    if not event_list:
-                        break
-                        
-                    for ev in event_list:
-                        title = ev.get("cardEvntNm", "") or ev.get("mblDocTitlTxt", "")
-                        start_date = ev.get("evntSdt", "")
-                        end_date = ev.get("evntEdt", "")
-                        
-                        # 날짜 포맷팅 (YYYYMMDD -> YYYY.MM.DD)
+                        start_date = ev.get('evntSdt', '')
+                        end_date = ev.get('evntEdt', '')
                         if len(start_date) == 8:
                             start_date = f"{start_date[:4]}.{start_date[4:6]}.{start_date[6:]}"
                         if len(end_date) == 8:
                             end_date = f"{end_date[:4]}.{end_date[4:6]}.{end_date[6:]}"
                         
-                        img_path = ev.get("fileCoursWeb", "")
-                        if img_path and not img_path.startswith("http"):
+                        period = f"{start_date} ~ {end_date}"
+                        
+                        img_path = ev.get('fileCoursWeb', '')
+                        if img_path and not img_path.startswith('http'):
                             img_path = f"{base_url}{img_path}"
+                        
+                        if title:
+                            all_events.append({
+                                "category": "우리카드",
+                                "eventName": title,
+                                "period": period,
+                                "link": "https://m.wooricard.com/dcmw/yh1/bnf/bnf02/prgevnt/M1BNF202S00.do",
+                                "image": img_path,
+                                "bgColor": "#007bc3"
+                            })
                             
-                        # 우리카드는 sessionStorage 사용으로 직접 링크 어려움
-                        # 목록 페이지로 링크
-                        link = f"{base_url}/dcmw/yh1/bnf/bnf02/prgevnt/M1BNF202S00.do"
-                        
-                        all_events.append({
-                            "category": "우리카드",
-                            "eventName": title,
-                            "period": f"{start_date} ~ {end_date}",
-                            "link": link,
-                            "image": img_path,
-                            "bgColor": "#ffffff"
-                        })
-                        
-                except Exception as e:
-                    print(f"Error parsing Woori page {page_idx}: {e}")
-                    break
+            except Exception as e:
+                print(f"Playwright navigation error: {e}")
+            finally:
+                await browser.close()
 
         if all_events:
             try:
@@ -1957,10 +1957,13 @@ async def crawl_woori_bg():
                      print(f"Woori Redis save failed: {re}")
             
             print(f"[{datetime.now()}] Woori crawl finished. {len(all_events)} events.")
+        else:
+            print(f"[{datetime.now()}] Woori crawl finished but no events found.")
             
+    except ImportError:
+        print("Playwright not installed. Skipping Woori crawl.")
     except Exception as e:
         print(f"[{datetime.now()}] Woori crawl failed: {e}")
-
 
 # BC카드 크롤러 (실제 API 사용)
 async def crawl_bc_bg():
