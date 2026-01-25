@@ -1315,6 +1315,7 @@ def kb_card_events():
 
             
             
+            
             .search-section {
                 display: flex; gap: 1rem; margin-bottom: 2rem;
             }
@@ -1326,32 +1327,65 @@ def kb_card_events():
 
             .event-list { 
                 display: grid; 
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
-                gap: 0.8rem; 
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+                gap: 1.25rem; 
                 margin-top: 1rem; 
             }
             .event-card {
                 background: white; 
-                border-radius: 16px; 
-                padding: 1.25rem; 
+                border-radius: 18px; 
+                padding: 1.5rem; 
                 display: flex; 
                 flex-direction: column; 
-                border: 1px solid rgba(0,0,0,0.06); 
+                justify-content: space-between;
+                border: 1px solid rgba(0,0,0,0.08); 
                 text-decoration: none; 
                 color: inherit; 
                 transition: all 0.2s ease;
                 height: 100%;
-                min-height: 140px;
+                min-height: 180px;
                 position: relative;
+                box-sizing: border-box;
             }
             .event-card:hover { 
                 transform: translateY(-4px);
-                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-                border-color: rgba(0,0,0,0.1);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+                border-color: rgba(0,0,0,0.12);
+            }
+            
+            .event-category-row {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1rem;
+            }
+            
+            .event-title {
+                font-size: 1.05rem;
+                font-weight: 700;
+                color: #1d1d1f;
+                margin-bottom: 1rem;
+                line-height: 1.45;
+                letter-spacing: -0.01em;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                word-break: keep-all;
+                flex: 1;
+            }
+            
+            .event-date {
+                font-size: 0.8rem;
+                color: #86868b;
+                letter-spacing: -0.01em;
+                margin-top: auto;
             }
             
             .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; grid-column: 1 / -1; }
             .stats { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.8rem; text-align: right; }
+
 
 
         </style>
@@ -1403,6 +1437,7 @@ def kb_card_events():
 
             
             
+            
             function renderEvents(events) {
                 const list = document.getElementById('eventList');
                 const stats = document.getElementById('stats');
@@ -1416,15 +1451,16 @@ def kb_card_events():
 
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
-                        <div style="width:100%;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem">
-                            <span style="background:#f5f5f7;padding:3px 8px;border-radius:6px;font-weight:600;font-size:0.65rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
-                            <div style="width:6px;height:6px;border-radius:50%;background:${ev.bgColor}"></div>
+                        <div class="event-category-row">
+                            <span style="background:#f5f5f7;padding:5px 10px;border-radius:8px;font-weight:600;font-size:0.75rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
+                            <div style="width:10px;height:10px;border-radius:50%;background:${ev.bgColor}"></div>
                         </div>
-                        <div style="font-size:0.9rem;font-weight:700;color:#1d1d1f;margin-bottom:0.5rem;line-height:1.35;letter-spacing:-0.02em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1;word-break:keep-all">${ev.eventName}</div>
-                        <div style="font-size:0.7rem;color:#86868b;margin-top:auto;letter-spacing:-0.01em">${ev.period}</div>
+                        <div class="event-title">${ev.eventName}</div>
+                        <div class="event-date">${ev.period}</div>
                     </a>
                 `).join('');
             }
+
 
 
 
@@ -1470,6 +1506,7 @@ def hana_card_events():
 
             
             
+            
             .search-section {
                 display: flex; gap: 1rem; margin-bottom: 2rem;
             }
@@ -1481,32 +1518,65 @@ def hana_card_events():
 
             .event-list { 
                 display: grid; 
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
-                gap: 0.8rem; 
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+                gap: 1.25rem; 
                 margin-top: 1rem; 
             }
             .event-card {
                 background: white; 
-                border-radius: 16px; 
-                padding: 1.25rem; 
+                border-radius: 18px; 
+                padding: 1.5rem; 
                 display: flex; 
                 flex-direction: column; 
-                border: 1px solid rgba(0,0,0,0.06); 
+                justify-content: space-between;
+                border: 1px solid rgba(0,0,0,0.08); 
                 text-decoration: none; 
                 color: inherit; 
                 transition: all 0.2s ease;
                 height: 100%;
-                min-height: 140px;
+                min-height: 180px;
                 position: relative;
+                box-sizing: border-box;
             }
             .event-card:hover { 
                 transform: translateY(-4px);
-                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-                border-color: rgba(0,0,0,0.1);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+                border-color: rgba(0,0,0,0.12);
+            }
+            
+            .event-category-row {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1rem;
+            }
+            
+            .event-title {
+                font-size: 1.05rem;
+                font-weight: 700;
+                color: #1d1d1f;
+                margin-bottom: 1rem;
+                line-height: 1.45;
+                letter-spacing: -0.01em;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                word-break: keep-all;
+                flex: 1;
+            }
+            
+            .event-date {
+                font-size: 0.8rem;
+                color: #86868b;
+                letter-spacing: -0.01em;
+                margin-top: auto;
             }
             
             .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; grid-column: 1 / -1; }
             .stats { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.8rem; text-align: right; }
+
 
 
         </style>
@@ -1559,6 +1629,7 @@ def hana_card_events():
 
             
             
+            
             function renderEvents(events) {
                 const list = document.getElementById('eventList');
                 const stats = document.getElementById('stats');
@@ -1572,15 +1643,16 @@ def hana_card_events():
 
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
-                        <div style="width:100%;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem">
-                            <span style="background:#f5f5f7;padding:3px 8px;border-radius:6px;font-weight:600;font-size:0.65rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
-                            <div style="width:6px;height:6px;border-radius:50%;background:${ev.bgColor}"></div>
+                        <div class="event-category-row">
+                            <span style="background:#f5f5f7;padding:5px 10px;border-radius:8px;font-weight:600;font-size:0.75rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
+                            <div style="width:10px;height:10px;border-radius:50%;background:${ev.bgColor}"></div>
                         </div>
-                        <div style="font-size:0.9rem;font-weight:700;color:#1d1d1f;margin-bottom:0.5rem;line-height:1.35;letter-spacing:-0.02em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1;word-break:keep-all">${ev.eventName}</div>
-                        <div style="font-size:0.7rem;color:#86868b;margin-top:auto;letter-spacing:-0.01em">${ev.period}</div>
+                        <div class="event-title">${ev.eventName}</div>
+                        <div class="event-date">${ev.period}</div>
                     </a>
                 `).join('');
             }
+
 
 
 
@@ -1628,6 +1700,7 @@ def shinhan_card_events():
 
             
             
+            
             .search-section {
                 display: flex; gap: 1rem; margin-bottom: 2rem;
             }
@@ -1639,32 +1712,65 @@ def shinhan_card_events():
 
             .event-list { 
                 display: grid; 
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
-                gap: 0.8rem; 
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+                gap: 1.25rem; 
                 margin-top: 1rem; 
             }
             .event-card {
                 background: white; 
-                border-radius: 16px; 
-                padding: 1.25rem; 
+                border-radius: 18px; 
+                padding: 1.5rem; 
                 display: flex; 
                 flex-direction: column; 
-                border: 1px solid rgba(0,0,0,0.06); 
+                justify-content: space-between;
+                border: 1px solid rgba(0,0,0,0.08); 
                 text-decoration: none; 
                 color: inherit; 
                 transition: all 0.2s ease;
                 height: 100%;
-                min-height: 140px;
+                min-height: 180px;
                 position: relative;
+                box-sizing: border-box;
             }
             .event-card:hover { 
                 transform: translateY(-4px);
-                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-                border-color: rgba(0,0,0,0.1);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+                border-color: rgba(0,0,0,0.12);
+            }
+            
+            .event-category-row {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1rem;
+            }
+            
+            .event-title {
+                font-size: 1.05rem;
+                font-weight: 700;
+                color: #1d1d1f;
+                margin-bottom: 1rem;
+                line-height: 1.45;
+                letter-spacing: -0.01em;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                word-break: keep-all;
+                flex: 1;
+            }
+            
+            .event-date {
+                font-size: 0.8rem;
+                color: #86868b;
+                letter-spacing: -0.01em;
+                margin-top: auto;
             }
             
             .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; grid-column: 1 / -1; }
             .stats { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.8rem; text-align: right; }
+
 
 
         </style>
@@ -1730,6 +1836,7 @@ def shinhan_card_events():
 
             
             
+            
             function renderEvents(events) {
                 const list = document.getElementById('eventList');
                 const stats = document.getElementById('stats');
@@ -1743,15 +1850,16 @@ def shinhan_card_events():
 
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
-                        <div style="width:100%;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem">
-                            <span style="background:#f5f5f7;padding:3px 8px;border-radius:6px;font-weight:600;font-size:0.65rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
-                            <div style="width:6px;height:6px;border-radius:50%;background:${ev.bgColor}"></div>
+                        <div class="event-category-row">
+                            <span style="background:#f5f5f7;padding:5px 10px;border-radius:8px;font-weight:600;font-size:0.75rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
+                            <div style="width:10px;height:10px;border-radius:50%;background:${ev.bgColor}"></div>
                         </div>
-                        <div style="font-size:0.9rem;font-weight:700;color:#1d1d1f;margin-bottom:0.5rem;line-height:1.35;letter-spacing:-0.02em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1;word-break:keep-all">${ev.eventName}</div>
-                        <div style="font-size:0.7rem;color:#86868b;margin-top:auto;letter-spacing:-0.01em">${ev.period}</div>
+                        <div class="event-title">${ev.eventName}</div>
+                        <div class="event-date">${ev.period}</div>
                     </a>
                 `).join('');
             }
+
 
 
 
@@ -2140,6 +2248,7 @@ def woori_card_events():
             
             
             
+            
             .search-section {
                 display: flex; gap: 1rem; margin-bottom: 2rem;
             }
@@ -2151,32 +2260,65 @@ def woori_card_events():
 
             .event-list { 
                 display: grid; 
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
-                gap: 0.8rem; 
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+                gap: 1.25rem; 
                 margin-top: 1rem; 
             }
             .event-card {
                 background: white; 
-                border-radius: 16px; 
-                padding: 1.25rem; 
+                border-radius: 18px; 
+                padding: 1.5rem; 
                 display: flex; 
                 flex-direction: column; 
-                border: 1px solid rgba(0,0,0,0.06); 
+                justify-content: space-between;
+                border: 1px solid rgba(0,0,0,0.08); 
                 text-decoration: none; 
                 color: inherit; 
                 transition: all 0.2s ease;
                 height: 100%;
-                min-height: 140px;
+                min-height: 180px;
                 position: relative;
+                box-sizing: border-box;
             }
             .event-card:hover { 
                 transform: translateY(-4px);
-                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-                border-color: rgba(0,0,0,0.1);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+                border-color: rgba(0,0,0,0.12);
+            }
+            
+            .event-category-row {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1rem;
+            }
+            
+            .event-title {
+                font-size: 1.05rem;
+                font-weight: 700;
+                color: #1d1d1f;
+                margin-bottom: 1rem;
+                line-height: 1.45;
+                letter-spacing: -0.01em;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                word-break: keep-all;
+                flex: 1;
+            }
+            
+            .event-date {
+                font-size: 0.8rem;
+                color: #86868b;
+                letter-spacing: -0.01em;
+                margin-top: auto;
             }
             
             .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; grid-column: 1 / -1; }
             .stats { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.8rem; text-align: right; }
+
 
 
         </style>
@@ -2228,6 +2370,7 @@ def woori_card_events():
 
             
             
+            
             function renderEvents(events) {
                 const list = document.getElementById('eventList');
                 const stats = document.getElementById('stats');
@@ -2241,15 +2384,16 @@ def woori_card_events():
 
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
-                        <div style="width:100%;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem">
-                            <span style="background:#f5f5f7;padding:3px 8px;border-radius:6px;font-weight:600;font-size:0.65rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
-                            <div style="width:6px;height:6px;border-radius:50%;background:${ev.bgColor}"></div>
+                        <div class="event-category-row">
+                            <span style="background:#f5f5f7;padding:5px 10px;border-radius:8px;font-weight:600;font-size:0.75rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
+                            <div style="width:10px;height:10px;border-radius:50%;background:${ev.bgColor}"></div>
                         </div>
-                        <div style="font-size:0.9rem;font-weight:700;color:#1d1d1f;margin-bottom:0.5rem;line-height:1.35;letter-spacing:-0.02em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1;word-break:keep-all">${ev.eventName}</div>
-                        <div style="font-size:0.7rem;color:#86868b;margin-top:auto;letter-spacing:-0.01em">${ev.period}</div>
+                        <div class="event-title">${ev.eventName}</div>
+                        <div class="event-date">${ev.period}</div>
                     </a>
                 `).join('');
             }
+
 
 
 
@@ -2297,6 +2441,7 @@ def bc_card_events():
             
             
             
+            
             .search-section {
                 display: flex; gap: 1rem; margin-bottom: 2rem;
             }
@@ -2308,32 +2453,65 @@ def bc_card_events():
 
             .event-list { 
                 display: grid; 
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
-                gap: 0.8rem; 
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+                gap: 1.25rem; 
                 margin-top: 1rem; 
             }
             .event-card {
                 background: white; 
-                border-radius: 16px; 
-                padding: 1.25rem; 
+                border-radius: 18px; 
+                padding: 1.5rem; 
                 display: flex; 
                 flex-direction: column; 
-                border: 1px solid rgba(0,0,0,0.06); 
+                justify-content: space-between;
+                border: 1px solid rgba(0,0,0,0.08); 
                 text-decoration: none; 
                 color: inherit; 
                 transition: all 0.2s ease;
                 height: 100%;
-                min-height: 140px;
+                min-height: 180px;
                 position: relative;
+                box-sizing: border-box;
             }
             .event-card:hover { 
                 transform: translateY(-4px);
-                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-                border-color: rgba(0,0,0,0.1);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+                border-color: rgba(0,0,0,0.12);
+            }
+            
+            .event-category-row {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1rem;
+            }
+            
+            .event-title {
+                font-size: 1.05rem;
+                font-weight: 700;
+                color: #1d1d1f;
+                margin-bottom: 1rem;
+                line-height: 1.45;
+                letter-spacing: -0.01em;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                word-break: keep-all;
+                flex: 1;
+            }
+            
+            .event-date {
+                font-size: 0.8rem;
+                color: #86868b;
+                letter-spacing: -0.01em;
+                margin-top: auto;
             }
             
             .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; grid-column: 1 / -1; }
             .stats { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.8rem; text-align: right; }
+
 
 
         </style>
@@ -2385,6 +2563,7 @@ def bc_card_events():
 
             
             
+            
             function renderEvents(events) {
                 const list = document.getElementById('eventList');
                 const stats = document.getElementById('stats');
@@ -2398,15 +2577,16 @@ def bc_card_events():
 
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
-                        <div style="width:100%;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem">
-                            <span style="background:#f5f5f7;padding:3px 8px;border-radius:6px;font-weight:600;font-size:0.65rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
-                            <div style="width:6px;height:6px;border-radius:50%;background:${ev.bgColor}"></div>
+                        <div class="event-category-row">
+                            <span style="background:#f5f5f7;padding:5px 10px;border-radius:8px;font-weight:600;font-size:0.75rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
+                            <div style="width:10px;height:10px;border-radius:50%;background:${ev.bgColor}"></div>
                         </div>
-                        <div style="font-size:0.9rem;font-weight:700;color:#1d1d1f;margin-bottom:0.5rem;line-height:1.35;letter-spacing:-0.02em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1;word-break:keep-all">${ev.eventName}</div>
-                        <div style="font-size:0.7rem;color:#86868b;margin-top:auto;letter-spacing:-0.01em">${ev.period}</div>
+                        <div class="event-title">${ev.eventName}</div>
+                        <div class="event-date">${ev.period}</div>
                     </a>
                 `).join('');
             }
+
 
 
 
@@ -2454,6 +2634,7 @@ def samsung_card_events():
             
             
             
+            
             .search-section {
                 display: flex; gap: 1rem; margin-bottom: 2rem;
             }
@@ -2465,32 +2646,65 @@ def samsung_card_events():
 
             .event-list { 
                 display: grid; 
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
-                gap: 0.8rem; 
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+                gap: 1.25rem; 
                 margin-top: 1rem; 
             }
             .event-card {
                 background: white; 
-                border-radius: 16px; 
-                padding: 1.25rem; 
+                border-radius: 18px; 
+                padding: 1.5rem; 
                 display: flex; 
                 flex-direction: column; 
-                border: 1px solid rgba(0,0,0,0.06); 
+                justify-content: space-between;
+                border: 1px solid rgba(0,0,0,0.08); 
                 text-decoration: none; 
                 color: inherit; 
                 transition: all 0.2s ease;
                 height: 100%;
-                min-height: 140px;
+                min-height: 180px;
                 position: relative;
+                box-sizing: border-box;
             }
             .event-card:hover { 
                 transform: translateY(-4px);
-                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-                border-color: rgba(0,0,0,0.1);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+                border-color: rgba(0,0,0,0.12);
+            }
+            
+            .event-category-row {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1rem;
+            }
+            
+            .event-title {
+                font-size: 1.05rem;
+                font-weight: 700;
+                color: #1d1d1f;
+                margin-bottom: 1rem;
+                line-height: 1.45;
+                letter-spacing: -0.01em;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                word-break: keep-all;
+                flex: 1;
+            }
+            
+            .event-date {
+                font-size: 0.8rem;
+                color: #86868b;
+                letter-spacing: -0.01em;
+                margin-top: auto;
             }
             
             .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; grid-column: 1 / -1; }
             .stats { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.8rem; text-align: right; }
+
 
 
         </style>
@@ -2542,6 +2756,7 @@ def samsung_card_events():
 
             
             
+            
             function renderEvents(events) {
                 const list = document.getElementById('eventList');
                 const stats = document.getElementById('stats');
@@ -2555,15 +2770,16 @@ def samsung_card_events():
 
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
-                        <div style="width:100%;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem">
-                            <span style="background:#f5f5f7;padding:3px 8px;border-radius:6px;font-weight:600;font-size:0.65rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
-                            <div style="width:6px;height:6px;border-radius:50%;background:${ev.bgColor}"></div>
+                        <div class="event-category-row">
+                            <span style="background:#f5f5f7;padding:5px 10px;border-radius:8px;font-weight:600;font-size:0.75rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
+                            <div style="width:10px;height:10px;border-radius:50%;background:${ev.bgColor}"></div>
                         </div>
-                        <div style="font-size:0.9rem;font-weight:700;color:#1d1d1f;margin-bottom:0.5rem;line-height:1.35;letter-spacing:-0.02em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1;word-break:keep-all">${ev.eventName}</div>
-                        <div style="font-size:0.7rem;color:#86868b;margin-top:auto;letter-spacing:-0.01em">${ev.period}</div>
+                        <div class="event-title">${ev.eventName}</div>
+                        <div class="event-date">${ev.period}</div>
                     </a>
                 `).join('');
             }
+
 
 
 
@@ -2611,6 +2827,7 @@ def card_events_search():
             
             
             
+            
             .search-section {
                 display: flex; gap: 1rem; margin-bottom: 2rem;
             }
@@ -2622,32 +2839,65 @@ def card_events_search():
 
             .event-list { 
                 display: grid; 
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
-                gap: 0.8rem; 
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+                gap: 1.25rem; 
                 margin-top: 1rem; 
             }
             .event-card {
                 background: white; 
-                border-radius: 16px; 
-                padding: 1.25rem; 
+                border-radius: 18px; 
+                padding: 1.5rem; 
                 display: flex; 
                 flex-direction: column; 
-                border: 1px solid rgba(0,0,0,0.06); 
+                justify-content: space-between;
+                border: 1px solid rgba(0,0,0,0.08); 
                 text-decoration: none; 
                 color: inherit; 
                 transition: all 0.2s ease;
                 height: 100%;
-                min-height: 140px;
+                min-height: 180px;
                 position: relative;
+                box-sizing: border-box;
             }
             .event-card:hover { 
                 transform: translateY(-4px);
-                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-                border-color: rgba(0,0,0,0.1);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+                border-color: rgba(0,0,0,0.12);
+            }
+            
+            .event-category-row {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1rem;
+            }
+            
+            .event-title {
+                font-size: 1.05rem;
+                font-weight: 700;
+                color: #1d1d1f;
+                margin-bottom: 1rem;
+                line-height: 1.45;
+                letter-spacing: -0.01em;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                word-break: keep-all;
+                flex: 1;
+            }
+            
+            .event-date {
+                font-size: 0.8rem;
+                color: #86868b;
+                letter-spacing: -0.01em;
+                margin-top: auto;
             }
             
             .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; grid-column: 1 / -1; }
             .stats { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.8rem; text-align: right; }
+
 
 
         </style>
@@ -2721,6 +2971,7 @@ def card_events_search():
 
             
             
+            
             function renderEvents(events) {
                 const list = document.getElementById('eventList');
                 const stats = document.getElementById('stats');
@@ -2734,15 +2985,16 @@ def card_events_search():
 
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
-                        <div style="width:100%;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem">
-                            <span style="background:#f5f5f7;padding:3px 8px;border-radius:6px;font-weight:600;font-size:0.65rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
-                            <div style="width:6px;height:6px;border-radius:50%;background:${ev.bgColor}"></div>
+                        <div class="event-category-row">
+                            <span style="background:#f5f5f7;padding:5px 10px;border-radius:8px;font-weight:600;font-size:0.75rem;color:#6e6e73;letter-spacing:-0.01em">${ev.category}</span>
+                            <div style="width:10px;height:10px;border-radius:50%;background:${ev.bgColor}"></div>
                         </div>
-                        <div style="font-size:0.9rem;font-weight:700;color:#1d1d1f;margin-bottom:0.5rem;line-height:1.35;letter-spacing:-0.02em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1;word-break:keep-all">${ev.eventName}</div>
-                        <div style="font-size:0.7rem;color:#86868b;margin-top:auto;letter-spacing:-0.01em">${ev.period}</div>
+                        <div class="event-title">${ev.eventName}</div>
+                        <div class="event-date">${ev.period}</div>
                     </a>
                 `).join('');
             }
+
 
 
 
