@@ -1083,7 +1083,7 @@ def card_events():
                 background: white;
                 border: 1px solid var(--border-color);
                 border-radius: 16px;
-                padding: 1.25rem 1rem;
+                padding: 1rem;
                 text-decoration: none;
                 color: inherit;
                 transition: all 0.2s ease;
@@ -1099,21 +1099,7 @@ def card_events():
                 border-color: var(--blue-color);
             }
 
-            .card-logo {
-                width: 40px;
-                height: 40px;
-                border-radius: 10px;
-                margin-bottom: 0.8rem;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.2rem;
-                background: #f2f2f7;
-                font-weight: 600;
-            }
-
-            .card-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.3rem; color: #1d1d1f; }
-            .card-desc { font-size: 0.8rem; color: var(--text-secondary); }
+            .card-name { font-weight: 600; font-size: 1rem; color: #1d1d1f; text-align: center; }
 
             .search-box {
                 background: white;
@@ -1157,44 +1143,28 @@ def card_events():
 
             <div class="card-grid" id="cardGrid">
                 <a href="/card-events/shinhan" class="card-link" data-name="신한카드">
-                    <div class="card-logo" style="background: #0046ff; color: white;">S</div>
                     <div class="card-name">신한카드</div>
-                    <div class="card-desc">이벤트 전체 검색하기</div>
                 </a>
                 <a href="/card-events/samsung" class="card-link" data-name="삼성카드">
-                    <div class="card-logo" style="background: #0056b3; color: white;">S</div>
                     <div class="card-name">삼성카드</div>
-                    <div class="card-desc">진행중인 이벤트 보기</div>
                 </a>
                 <a href="https://m.hyundaicard.com/mp/ev/MPEV0101_01.hc" target="_blank" class="card-link" data-name="현대카드">
-                    <div class="card-logo" style="background: #000; color: white;">H</div>
                     <div class="card-name">현대카드</div>
-                    <div class="card-desc">진행중인 이벤트 보기</div>
                 </a>
                 <a href="/card-events/kb" class="card-link" data-name="KB국민카드">
-                    <div class="card-logo" style="background: #ffbc00; color: #1d1d1f;">K</div>
                     <div class="card-name">KB국민카드</div>
-                    <div class="card-desc">이벤트 전체 검색하기</div>
                 </a>
                 <a href="https://www.lottecard.co.kr/app/LPBNNEA_V100.lc" target="_blank" class="card-link" data-name="롯데카드">
-                    <div class="card-logo" style="background: #ed1c24; color: white;">L</div>
                     <div class="card-name">롯데카드</div>
-                    <div class="card-desc">진행중인 이벤트 보기</div>
                 </a>
                 <a href="/card-events/woori" class="card-link" data-name="우리카드">
-                    <div class="card-logo" style="background: #007bc3; color: white;">W</div>
                     <div class="card-name">우리카드</div>
-                    <div class="card-desc">진행중인 이벤트 보기</div>
                 </a>
                 <a href="/card-events/hana" class="card-link" data-name="하나카드">
-                    <div class="card-logo" style="background: #008485; color: white;">H</div>
                     <div class="card-name">하나카드</div>
-                    <div class="card-desc">진행중인 이벤트 보기</div>
                 </a>
                 <a href="/card-events/bc" class="card-link" data-name="BC카드">
-                    <div class="card-logo" style="background: #ed1c24; color: white;">B</div>
                     <div class="card-name">BC카드</div>
-                    <div class="card-desc">진행중인 이벤트 보기</div>
                 </a>
             </div>
         </div>
