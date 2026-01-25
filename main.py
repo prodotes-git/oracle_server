@@ -2120,7 +2120,7 @@ async def crawl_samsung_bg():
                     return results;
                 }''')
                 
-                if (events_data) {
+                if events_data:
                     for ev in events_data:
                         all_events.append({
                             "category": "삼성카드",
