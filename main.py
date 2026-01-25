@@ -1990,7 +1990,7 @@ def shinhan_card_events():
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
-# 우리카드 크롤러 (Playwright 기반 실제 데이터 수집)
+# 우리카드 크롤러 (Playwright 기반 - 실제 데이터)
 async def crawl_woori_bg():
     try:
         print(f"[{datetime.now()}] Starting Woori background crawl (Playwright)...")
@@ -2021,29 +2021,25 @@ async def crawl_woori_bg():
             
             try:
                 await page.goto("https://m.wooricard.com/dcmw/yh1/bnf/bnf02/prgevnt/M1BNF202S00.do", timeout=60000)
+                await page.wait_for_timeout(5000)
                 
-                for _ in range(10):
-                    if captured_data:
-                        break
-                    await page.wait_for_timeout(1000)
-                
+                if not captured_data:
+                     # 데이터가 없으면 조금 더 대기
+                     await page.wait_for_timeout(3000)
+
                 for data in captured_data:
                     events = data.get('prgEvntList', [])
                     for ev in events:
                         title = ev.get('cardEvntNm', '') or ev.get('mblDocTitlTxt', '')
-                        
                         start_date = ev.get('evntSdt', '')
                         end_date = ev.get('evntEdt', '')
-                        if len(start_date) == 8:
-                            start_date = f"{start_date[:4]}.{start_date[4:6]}.{start_date[6:]}"
-                        if len(end_date) == 8:
-                            end_date = f"{end_date[:4]}.{end_date[4:6]}.{end_date[6:]}"
                         
+                        if len(start_date) == 8: start_date = f"{start_date[:4]}.{start_date[4:6]}.{start_date[6:]}"
+                        if len(end_date) == 8: end_date = f"{end_date[:4]}.{end_date[4:6]}.{end_date[6:]}"
                         period = f"{start_date} ~ {end_date}"
                         
                         img_path = ev.get('fileCoursWeb', '')
-                        if img_path and not img_path.startswith('http'):
-                            img_path = f"{base_url}{img_path}"
+                        if img_path and not img_path.startswith('http'): img_path = f"{base_url}{img_path}"
                         
                         if title:
                             all_events.append({
@@ -2054,9 +2050,8 @@ async def crawl_woori_bg():
                                 "image": img_path,
                                 "bgColor": "#007bc3"
                             })
-                            
             except Exception as e:
-                print(f"Playwright navigation error: {e}")
+                print(f"Woori Playwright error: {e}")
             finally:
                 await browser.close()
 
@@ -2064,199 +2059,98 @@ async def crawl_woori_bg():
             try:
                 with open("woori_data.json", "w", encoding="utf-8") as f:
                     json.dump(all_events, f, ensure_ascii=False)
-            except Exception as fe:
-                print(f"Woori file save failed: {fe}")
-
-            if r:
-                try:
-                    r.setex(WOORI_CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
-                except Exception as re:
-                     print(f"Woori Redis save failed: {re}")
-            
-            print(f"[{datetime.now()}] Woori crawl finished. {len(all_events)} events.")
+                if r: r.setex(WOORI_CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
+                print(f"[{datetime.now()}] Woori crawl finished. {len(all_events)} events.")
+            except Exception as e:
+                print(f"Woori save failed: {e}")
         else:
             print(f"[{datetime.now()}] Woori crawl finished but no events found.")
             
-    except ImportError:
-        print("Playwright not installed. Skipping Woori crawl.")
     except Exception as e:
-        print(f"[{datetime.now()}] Woori crawl failed: {e}")
+        print(f"Woori crawl failed: {e}")
 
-# BC카드 크롤러 (실제 API 사용)
-async def crawl_bc_bg():
-    try:
-        print(f"[{datetime.now()}] Starting BC background crawl...")
-        all_events = []
-        base_url = "https://web.paybooc.co.kr"
-        api_url = f"{base_url}/web/evnt/lst-evnt-data"
-        
-        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-                "Referer": f"{base_url}/web/evnt/main"
-            }
-            
-            # 페이지별로 데이터 수집
-            for page in range(1, 10):  # 최대 10페이지
-                params = {
-                    "reqType": "init" if page == 1 else "more",
-                    "inqrDv": "ING",
-                    "pgeNo": str(page),
-                    "pgeCnt": "20",
-                    "ordering": "RECENT"
-                }
-                
-                try:
-                    response = await client.get(api_url, params=params, headers=headers)
-                    if response.status_code != 200:
-                        break
-                        
-                    data = response.json()
-                    event_list = data.get("data", {}).get("evntInqrList", [])
-                    
-                    if not event_list:
-                        break
-                        
-                    for ev in event_list:
-                        # 제목 조합
-                        title_parts = [
-                            ev.get("pybcUnifEvntNm1", ""),
-                            ev.get("pybcUnifEvntNm2", ""),
-                            ev.get("pybcUnifEvntNm3", "")
-                        ]
-                        title = " ".join([p for p in title_parts if p]).strip()
-                        
-                        # 날짜 포맷팅
-                        start_date = ev.get("evntBltnStrtDtm", "")
-                        end_date = ev.get("evntBltnEndDtm", "")
-                        
-                        if len(start_date) >= 8:
-                            start_date = f"{start_date[:4]}.{start_date[4:6]}.{start_date[6:8]}"
-                        if len(end_date) >= 8:
-                            end_date = f"{end_date[:4]}.{end_date[4:6]}.{end_date[6:8]}"
-                        
-                        period = f"{start_date} ~ {end_date}" if start_date and end_date else ""
-                        
-                        # 이미지
-                        img_url = ev.get("evntBsImgUrlAddr", "")
-                        
-                        # 링크
-                        event_no = ev.get("pybcUnifEvntNo", "")
-                        link = f"{base_url}/web/evnt/evnt-dts?pybcUnifEvntNo={event_no}" if event_no else f"{base_url}/web/evnt/main"
-                        
-                        # 배경색
-                        bg_color = ev.get("evntBsBgColrVal", "#ffffff")
-                        
-                        if title:
-                            all_events.append({
-                                "category": "BC카드",
-                                "eventName": title,
-                                "period": period,
-                                "link": link,
-                                "image": img_url,
-                                "bgColor": bg_color
-                            })
-                            
-                except Exception as e:
-                    print(f"Error parsing BC page {page}: {e}")
-                    break
 
-        if all_events:
-            try:
-                with open("bc_data.json", "w", encoding="utf-8") as f:
-                    json.dump(all_events, f, ensure_ascii=False)
-            except Exception as fe:
-                print(f"BC file save failed: {fe}")
-
-            if r:
-                try:
-                    r.setex(BC_CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
-                except Exception as re:
-                     print(f"BC Redis save failed: {re}")
-            
-            print(f"[{datetime.now()}] BC crawl finished. {len(all_events)} events.")
-            
-    except Exception as e:
-        print(f"[{datetime.now()}] BC crawl failed: {e}")
-
-# 삼성카드 크롤러 (추가)
+# 삼성카드 크롤러 (Playwright DOM 기반 - 실제 데이터)
 async def crawl_samsung_bg():
     try:
-        print(f"[{datetime.now()}] Starting Samsung background crawl...")
-        all_events = []
-        base_url = "https://www.samsungcard.com"
-        target_url = f"{base_url}/personal/event/ing/UHPPBE1401M0.jsp"
+        print(f"[{datetime.now()}] Starting Samsung background crawl (Playwright)...")
+        from playwright.async_api import async_playwright
         
-        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-            }
+        all_events = []
+        
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            page = await browser.new_page()
             
-            response = await client.get(target_url, headers=headers)
-            
-            if response.status_code == 200:
-                from bs4 import BeautifulSoup
-                soup = BeautifulSoup(response.text, "lxml")
+            try:
+                await page.goto("https://www.samsungcard.com/personal/event/ing/UHPPBE1401M0.jsp", timeout=60000)
+                await page.wait_for_timeout(5000)
                 
-                # 삼성카드 이벤트 아이템 선택자 (실제 페이지 구조에 맞게 조정 필요)
-                items = soup.select(".event-list li, .list-event .item, .evt-list .evt-item")
+                # DOM 파싱
+                events_data = await page.evaluate('''() => {
+                    const results = [];
+                    // 삼성카드 PC 웹 구조에 최적화된 선택자
+                    // .tab_cont > ul.list-noline > li
+                    const items = document.querySelectorAll('.list-noline li');
+                    
+                    items.forEach(el => {
+                        const titleEl = el.querySelector('div.tit');
+                        const dateEl = el.querySelector('p.date');
+                        const linkEl = el.querySelector('a');
+                        const imgEl = el.querySelector('img');
+                        
+                        if (!titleEl) return;
+                        
+                        let link = linkEl ? linkEl.getAttribute('onclick') : "";
+                        // onclick="goDetail('20240101')" 형태일 수 있음
+                        // 또는 href 일 수 있음
+                        let realLink = "https://www.samsungcard.com/personal/event/ing/UHPPBE1401M0.jsp";
+                        
+                        if (linkEl && linkEl.href && !linkEl.href.includes('javascript')) {
+                            realLink = linkEl.href;
+                        }
+
+                        results.push({
+                            eventName: titleEl.innerText.trim(),
+                            period: dateEl ? dateEl.innerText.trim() : "",
+                            link: realLink,
+                            image: imgEl ? imgEl.src : ""
+                        });
+                    });
+                    return results;
+                }''')
                 
-                for item in items:
-                    try:
-                        # 제목
-                        title_elem = item.select_one(".title, .evt-title, strong, .tit")
-                        title = title_elem.text.strip() if title_elem else ""
-                        
-                        # 이미지
-                        img_elem = item.select_one("img")
-                        img_src = img_elem.get("src", "") if img_elem else ""
-                        if img_src and not img_src.startswith("http"):
-                            if img_src.startswith("//"):
-                                img_src = f"https:{img_src}"
-                            else:
-                                img_src = f"{base_url}{img_src}"
-                        
-                        # 링크
-                        link_elem = item.select_one("a")
-                        link = link_elem.get("href", "") if link_elem else ""
-                        if link and not link.startswith("http"):
-                            link = f"{base_url}{link}"
-                        
-                        # 기간
-                        period_elem = item.select_one(".period, .date, .evt-period")
-                        period = period_elem.text.strip() if period_elem else ""
-                        
-                        if title:  # 제목이 있는 경우만 추가
-                            all_events.append({
-                                "category": "삼성카드",
-                                "eventName": title,
-                                "period": period,
-                                "link": link or target_url,
-                                "image": img_src,
-                                "bgColor": "#ffffff"
-                            })
-                    except Exception:
-                        continue
+                if (events_data) {
+                    for ev in events_data:
+                        all_events.append({
+                            "category": "삼성카드",
+                            "eventName": ev['eventName'],
+                            "period": ev['period'],
+                            "link": ev['link'],
+                            "image": ev['image'],
+                            "bgColor": "#0056b3"
+                        })
+
+            except Exception as e:
+                print(f"Samsung Playwright error: {e}")
+            finally:
+                await browser.close()
 
         if all_events:
             try:
                 with open("samsung_data.json", "w", encoding="utf-8") as f:
                     json.dump(all_events, f, ensure_ascii=False)
-            except Exception as fe:
-                print(f"Samsung file save failed: {fe}")
+                if r: r.setex(SAMSUNG_CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
+                print(f"[{datetime.now()}] Samsung crawl finished. {len(all_events)} events.")
+            except Exception as e:
+                print(f"Samsung save failed: {e}")
+        else:
+            print(f"[{datetime.now()}] Samsung crawl finished but no events found.")
 
-            if r:
-                try:
-                    r.setex(SAMSUNG_CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
-                except Exception as re:
-                     print(f"Samsung Redis save failed: {re}")
-            
-            print(f"[{datetime.now()}] Samsung crawl finished. {len(all_events)} events.")
-            
     except Exception as e:
-        print(f"[{datetime.now()}] Samsung crawl failed: {e}")
+        print(f"Samsung crawl failed: {e}")
 
-# 우리카드 API 엔드포인트
+
 @app.get("/api/woori-cards")
 async def get_woori_cards():
     try:
