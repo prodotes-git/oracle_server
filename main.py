@@ -1318,17 +1318,9 @@ def card_events():
 
             function filterCards() {
                 const search = document.getElementById('cardSearch').value.toLowerCase();
-                
-                if (search.length === 0) {
-                    showCards();
-                    return;
-                }
-                
-                if (allEvents.length === 0) {
-                    fetchAllEvents().then(() => searchEvents(search));
-                } else {
-                    searchEvents(search);
-                }
+                if (search.length === 0) { showCards(); return; }
+                if (allEvents.length === 0) { fetchAllEvents().then(() => searchEvents(search)); }
+                else { searchEvents(search); }
             }
 
             function showCards() {
@@ -1337,12 +1329,29 @@ def card_events():
                 if (eventList) eventList.style.display = 'none';
             }
 
+            function parseQuery(q) {
+                const terms = {and:[], or:[]};
+                const re = /"([^"]+)"/g;
+                let m, left=q;
+                while((m=re.exec(q))!==null){ terms.and.push(m[1]); left=left.replace(m[0],''); }
+                const split = left.trim().split(/\s+/).filter(x=>x);
+                if(split.length>0) terms.or = split;
+                return terms;
+            }
+            function match(ev, terms) {
+                const txt = ((ev.eventName||"")+" "+(ev.category||"")+" "+(ev.companyName||"")).toLowerCase();
+                for(const t of terms.and) if(!txt.includes(t)) return false;
+                if(terms.or && terms.or.length > 0) {
+                    let hit = false;
+                    for(const t of terms.or) if(txt.includes(t)) { hit=true; break; }
+                    if(!hit) return false;
+                }
+                return true;
+            }
+
             function searchEvents(search) {
-                const filtered = allEvents.filter(ev => 
-                    (ev.eventName || "").toLowerCase().includes(search) || 
-                    (ev.category || "").toLowerCase().includes(search) ||
-                    (ev.companyName || "").toLowerCase().includes(search)
-                );
+                const terms = parseQuery(search);
+                const filtered = allEvents.filter(ev => match(ev, terms));
                 
                 document.getElementById('cardGrid').style.display = 'none';
                 
@@ -1503,7 +1512,7 @@ def kb_card_events():
             <div class="nav-content">
                 <a href="/card-events" class="back-btn">← 카드사 목록</a>
                 <div style="font-weight: 600;">KB국민카드 이벤트</div>
-                <div style="width: 80px;"></div>
+                <div id="lastUpdated" style="font-size: 0.8rem; color: var(--text-secondary); min-width: 80px; text-align: right;"></div>
             </div>
         </div>
 
@@ -1527,6 +1536,7 @@ def kb_card_events():
                 try {
                     const response = await fetch('/api/kb-cards');
                     const json = await response.json();
+                    if(json.last_updated) document.getElementById('lastUpdated').innerText = `Update: ${json.last_updated.substring(5,16)}`;
                     allEvents = Array.isArray(json) ? json : (json.data || []);
                     renderEvents(allEvents);
                 } catch (error) {
@@ -1534,12 +1544,29 @@ def kb_card_events():
                 }
             }
 
+            function parseQuery(q) {
+                const terms = {and:[], or:[]};
+                const re = /"([^"]+)"/g;
+                let m, left=q;
+                while((m=re.exec(q))!==null){ terms.and.push(m[1]); left=left.replace(m[0],''); }
+                const split = left.trim().split(/\s+/).filter(x=>x);
+                if(split.length>0) terms.or = split;
+                return terms;
+            }
+            function match(ev, terms) {
+                const txt = ((ev.eventName||"")+" "+(ev.category||"")).toLowerCase();
+                for(const t of terms.and) if(!txt.includes(t)) return false;
+                if(terms.or && terms.or.length > 0) {
+                    let hit = false;
+                    for(const t of terms.or) if(txt.includes(t)) { hit=true; break; }
+                    if(!hit) return false;
+                }
+                return true;
+            }
             function filterEvents() {
                 const search = document.getElementById('searchInput').value.toLowerCase();
-                const filtered = allEvents.filter(ev => 
-                    (ev.eventName || "").toLowerCase().includes(search) || 
-                    (ev.category || "").toLowerCase().includes(search)
-                );
+                const terms = parseQuery(search);
+                const filtered = allEvents.filter(ev => match(ev, terms));
                 renderEvents(filtered);
             }
 
@@ -1694,7 +1721,7 @@ def hana_card_events():
             <div class="nav-content">
                 <a href="/card-events" class="back-btn">← 카드사 목록</a>
                 <div style="font-weight: 600;">하나카드 이벤트</div>
-                <div style="width: 80px;"></div>
+                <div id="lastUpdated" style="font-size: 0.8rem; color: var(--text-secondary); min-width: 80px; text-align: right;"></div>
             </div>
         </div>
 
@@ -1718,7 +1745,7 @@ def hana_card_events():
                 try {
                     const response = await fetch('/api/hana-cards');
                     const json = await response.json();
-                    // API 응답 구조가 {last_updated: "...", data: [...]} 인지 확인
+                    if(json.last_updated) document.getElementById('lastUpdated').innerText = `Update: ${json.last_updated.substring(5,16)}`;
                     allEvents = Array.isArray(json) ? json : (json.data || []);
                     renderEvents(allEvents);
                 } catch (error) {
@@ -1726,12 +1753,29 @@ def hana_card_events():
                 }
             }
 
+            function parseQuery(q) {
+                const terms = {and:[], or:[]};
+                const re = /"([^"]+)"/g;
+                let m, left=q;
+                while((m=re.exec(q))!==null){ terms.and.push(m[1]); left=left.replace(m[0],''); }
+                const split = left.trim().split(/\s+/).filter(x=>x);
+                if(split.length>0) terms.or = split;
+                return terms;
+            }
+            function match(ev, terms) {
+                const txt = ((ev.eventName||"")+" "+(ev.category||"")).toLowerCase();
+                for(const t of terms.and) if(!txt.includes(t)) return false;
+                if(terms.or && terms.or.length > 0) {
+                    let hit = false;
+                    for(const t of terms.or) if(txt.includes(t)) { hit=true; break; }
+                    if(!hit) return false;
+                }
+                return true;
+            }
             function filterEvents() {
                 const search = document.getElementById('searchInput').value.toLowerCase();
-                const filtered = allEvents.filter(ev => 
-                    (ev.eventName || "").toLowerCase().includes(search) || 
-                    (ev.category || "").toLowerCase().includes(search)
-                );
+                const terms = parseQuery(search);
+                const filtered = allEvents.filter(ev => match(ev, terms));
                 renderEvents(filtered);
             }
 
@@ -1888,7 +1932,7 @@ def shinhan_card_events():
             <div class="nav-content">
                 <a href="/card-events" class="back-btn">← 카드사 목록</a>
                 <div style="font-weight: 600;">신한카드 이벤트</div>
-                <div style="width: 80px;"></div>
+                <div id="lastUpdated" style="font-size: 0.8rem; color: var(--text-secondary); min-width: 80px; text-align: right;"></div>
             </div>
         </div>
 
@@ -1922,6 +1966,8 @@ def shinhan_card_events():
                     const eventsData = await eventsRes.json();
                     const myshopData = await myshopRes.json();
                     
+                    if(eventsData.last_updated) document.getElementById('lastUpdated').innerText = `Update: ${eventsData.last_updated.substring(5,16)}`;
+                    
                     const events = Array.isArray(eventsData) ? eventsData : (eventsData.data || []);
                     const myshop = Array.isArray(myshopData) ? myshopData : (myshopData.data || []);
                     
@@ -1932,13 +1978,29 @@ def shinhan_card_events():
                 }
             }
 
+            function parseQuery(q) {
+                const terms = {and:[], or:[]};
+                const re = /"([^"]+)"/g;
+                let m, left=q;
+                while((m=re.exec(q))!==null){ terms.and.push(m[1]); left=left.replace(m[0],''); }
+                const split = left.trim().split(/\s+/).filter(x=>x);
+                if(split.length>0) terms.or = split;
+                return terms;
+            }
+            function match(ev, terms) {
+                const txt = ((ev.eventName||"")+" "+(ev.category||"")).toLowerCase();
+                for(const t of terms.and) if(!txt.includes(t)) return false;
+                if(terms.or && terms.or.length > 0) {
+                    let hit = false;
+                    for(const t of terms.or) if(txt.includes(t)) { hit=true; break; }
+                    if(!hit) return false;
+                }
+                return true;
+            }
             function filterEvents() {
                 const search = document.getElementById('searchInput').value.toLowerCase();
-                const filtered = allEvents.filter(ev => {
-                    const name = (ev.eventName || "").toLowerCase();
-                    const cat = (ev.category || "").toLowerCase();
-                    return name.includes(search) || cat.includes(search);
-                });
+                const terms = parseQuery(search);
+                const filtered = allEvents.filter(ev => match(ev, terms));
                 renderEvents(filtered);
             }
 
@@ -2566,7 +2628,7 @@ def woori_card_events():
             <div class="nav-content">
                 <a href="/card-events" class="back-btn">← 카드사 목록</a>
                 <div style="font-weight: 600;">우리카드 이벤트</div>
-                <div style="width: 80px;"></div>
+                <div id="lastUpdated" style="font-size: 0.8rem; color: var(--text-secondary); min-width: 80px; text-align: right;"></div>
             </div>
         </div>
 
@@ -2590,6 +2652,7 @@ def woori_card_events():
                 try {
                     const response = await fetch('/api/woori-cards');
                     const json = await response.json();
+                    if(json.last_updated) document.getElementById('lastUpdated').innerText = `Update: ${json.last_updated.substring(5,16)}`;
                     allEvents = Array.isArray(json) ? json : (json.data || []);
                     renderEvents(allEvents);
                 } catch (error) {
@@ -2597,12 +2660,29 @@ def woori_card_events():
                 }
             }
 
+            function parseQuery(q) {
+                const terms = {and:[], or:[]};
+                const re = /"([^"]+)"/g;
+                let m, left=q;
+                while((m=re.exec(q))!==null){ terms.and.push(m[1]); left=left.replace(m[0],''); }
+                const split = left.trim().split(/\s+/).filter(x=>x);
+                if(split.length>0) terms.or = split;
+                return terms;
+            }
+            function match(ev, terms) {
+                const txt = ((ev.eventName||"")+" "+(ev.category||"")).toLowerCase();
+                for(const t of terms.and) if(!txt.includes(t)) return false;
+                if(terms.or && terms.or.length > 0) {
+                    let hit = false;
+                    for(const t of terms.or) if(txt.includes(t)) { hit=true; break; }
+                    if(!hit) return false;
+                }
+                return true;
+            }
             function filterEvents() {
                 const search = document.getElementById('searchInput').value.toLowerCase();
-                const filtered = allEvents.filter(ev => 
-                    (ev.eventName || "").toLowerCase().includes(search) || 
-                    (ev.category || "").toLowerCase().includes(search)
-                );
+                const terms = parseQuery(search);
+                const filtered = allEvents.filter(ev => match(ev, terms));
                 renderEvents(filtered);
             }
 
@@ -2759,7 +2839,7 @@ def bc_card_events():
             <div class="nav-content">
                 <a href="/card-events" class="back-btn">← 카드사 목록</a>
                 <div style="font-weight: 600;">BC카드 이벤트</div>
-                <div style="width: 80px;"></div>
+                <div id="lastUpdated" style="font-size: 0.8rem; color: var(--text-secondary); min-width: 80px; text-align: right;"></div>
             </div>
         </div>
 
@@ -2783,6 +2863,7 @@ def bc_card_events():
                 try {
                     const response = await fetch('/api/bc-cards');
                     const json = await response.json();
+                    if(json.last_updated) document.getElementById('lastUpdated').innerText = `Update: ${json.last_updated.substring(5,16)}`;
                     allEvents = Array.isArray(json) ? json : (json.data || []);
                     renderEvents(allEvents);
                 } catch (error) {
@@ -2790,12 +2871,29 @@ def bc_card_events():
                 }
             }
 
+            function parseQuery(q) {
+                const terms = {and:[], or:[]};
+                const re = /"([^"]+)"/g;
+                let m, left=q;
+                while((m=re.exec(q))!==null){ terms.and.push(m[1]); left=left.replace(m[0],''); }
+                const split = left.trim().split(/\s+/).filter(x=>x);
+                if(split.length>0) terms.or = split;
+                return terms;
+            }
+            function match(ev, terms) {
+                const txt = ((ev.eventName||"")+" "+(ev.category||"")).toLowerCase();
+                for(const t of terms.and) if(!txt.includes(t)) return false;
+                if(terms.or && terms.or.length > 0) {
+                    let hit = false;
+                    for(const t of terms.or) if(txt.includes(t)) { hit=true; break; }
+                    if(!hit) return false;
+                }
+                return true;
+            }
             function filterEvents() {
                 const search = document.getElementById('searchInput').value.toLowerCase();
-                const filtered = allEvents.filter(ev => 
-                    (ev.eventName || "").toLowerCase().includes(search) || 
-                    (ev.category || "").toLowerCase().includes(search)
-                );
+                const terms = parseQuery(search);
+                const filtered = allEvents.filter(ev => match(ev, terms));
                 renderEvents(filtered);
             }
 
@@ -2952,7 +3050,7 @@ def samsung_card_events():
             <div class="nav-content">
                 <a href="/card-events" class="back-btn">← 카드사 목록</a>
                 <div style="font-weight: 600;">삼성카드 이벤트</div>
-                <div style="width: 80px;"></div>
+                <div id="lastUpdated" style="font-size: 0.8rem; color: var(--text-secondary); min-width: 80px; text-align: right;"></div>
             </div>
         </div>
 
@@ -2976,6 +3074,7 @@ def samsung_card_events():
                 try {
                     const response = await fetch('/api/samsung-cards');
                     const json = await response.json();
+                    if(json.last_updated) document.getElementById('lastUpdated').innerText = `Update: ${json.last_updated.substring(5,16)}`;
                     allEvents = Array.isArray(json) ? json : (json.data || []);
                     renderEvents(allEvents);
                 } catch (error) {
@@ -2983,12 +3082,29 @@ def samsung_card_events():
                 }
             }
 
+            function parseQuery(q) {
+                const terms = {and:[], or:[]};
+                const re = /"([^"]+)"/g;
+                let m, left=q;
+                while((m=re.exec(q))!==null){ terms.and.push(m[1]); left=left.replace(m[0],''); }
+                const split = left.trim().split(/\s+/).filter(x=>x);
+                if(split.length>0) terms.or = split;
+                return terms;
+            }
+            function match(ev, terms) {
+                const txt = ((ev.eventName||"")+" "+(ev.category||"")).toLowerCase();
+                for(const t of terms.and) if(!txt.includes(t)) return false;
+                if(terms.or && terms.or.length > 0) {
+                    let hit = false;
+                    for(const t of terms.or) if(txt.includes(t)) { hit=true; break; }
+                    if(!hit) return false;
+                }
+                return true;
+            }
             function filterEvents() {
                 const search = document.getElementById('searchInput').value.toLowerCase();
-                const filtered = allEvents.filter(ev => 
-                    (ev.eventName || "").toLowerCase().includes(search) || 
-                    (ev.category || "").toLowerCase().includes(search)
-                );
+                const terms = parseQuery(search);
+                const filtered = allEvents.filter(ev => match(ev, terms));
                 renderEvents(filtered);
             }
 
@@ -3198,12 +3314,30 @@ def card_events_search():
                 }
             }
 
+            function parseQuery(q) {
+                const terms = {and:[], or:[]};
+                const re = /"([^"]+)"/g;
+                let m, left=q;
+                while((m=re.exec(q))!==null){ terms.and.push(m[1]); left=left.replace(m[0],''); }
+                const split = left.trim().split(/\s+/).filter(x=>x);
+                if(split.length>0) terms.or = split;
+                return terms;
+            }
+            function match(ev, terms) {
+                const txt = ((ev.eventName||"")+" "+(ev.category||"")).toLowerCase();
+                for(const t of terms.and) if(!txt.includes(t)) return false;
+                if(terms.or && terms.or.length > 0) {
+                    let hit = false;
+                    for(const t of terms.or) if(txt.includes(t)) { hit=true; break; }
+                    if(!hit) return false;
+                }
+                return true;
+            }
             function filterEvents() {
                 const search = document.getElementById('searchInput').value.toLowerCase();
-                const filtered = allEvents.filter(ev => 
-                    (ev.eventName || "").toLowerCase().includes(search) || 
-                    (ev.category || "").toLowerCase().includes(search)
-                );
+                const terms = parseQuery(search);
+                
+                const filtered = allEvents.filter(ev => match(ev, terms));
                 renderEvents(filtered);
             }
 
