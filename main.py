@@ -2155,52 +2155,43 @@ async def crawl_bc_bg():
         print(f"[{datetime.now()}] BC crawl failed: {e}")
 
 
-# 삼성카드 크롤러 (Playwright DOM 기반 - 실제 데이터)
+# 삼성카드 크롤러 (Playwright 모바일 DOM 기반 - 최종 성공)
 async def crawl_samsung_bg():
     try:
-        print(f"[{datetime.now()}] Starting Samsung background crawl (Playwright)...")
+        print(f"[{datetime.now()}] Starting Samsung background crawl (Playwright Mobile)...")
         from playwright.async_api import async_playwright
         
         all_events = []
         
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
-            page = await browser.new_page()
+            context = await browser.new_context(viewport={'width': 375, 'height': 812})
+            page = await context.new_page()
             
             try:
-                await page.goto("https://www.samsungcard.com/personal/event/ing/UHPPBE1401M0.jsp", timeout=60000)
-                await page.wait_for_timeout(5000)
+                await page.goto("https://m.samsungcard.com/personal/event/ing/UHPPBE1401M0.jsp", timeout=60000)
+                await page.wait_for_timeout(8000)
                 
-                # DOM 파싱
                 events_data = await page.evaluate('''() => {
                     const results = [];
-                    // 삼성카드 PC 웹 구조에 최적화된 선택자
-                    // .tab_cont > ul.list-noline > li
-                    const items = document.querySelectorAll('.list-noline li');
-                    
-                    items.forEach(el => {
-                        const titleEl = el.querySelector('div.tit');
-                        const dateEl = el.querySelector('p.date');
-                        const linkEl = el.querySelector('a');
-                        const imgEl = el.querySelector('img');
+                    document.querySelectorAll('li').forEach(li => {
+                        const img = li.querySelector('img');
+                        if (!img) return;
                         
-                        if (!titleEl) return;
+                        let text = li.innerText.replace(/[\n\r]+/g, ' ').trim();
+                        const dateMatch = text.match(/(\d{4}\.\d{2}\.\d{2})\s*~\s*(\d{4}\.\d{2}\.\d{2})/);
                         
-                        let link = linkEl ? linkEl.getAttribute('onclick') : "";
-                        // onclick="goDetail('20240101')" 형태일 수 있음
-                        // 또는 href 일 수 있음
-                        let realLink = "https://www.samsungcard.com/personal/event/ing/UHPPBE1401M0.jsp";
-                        
-                        if (linkEl && linkEl.href && !linkEl.href.includes('javascript')) {
-                            realLink = linkEl.href;
+                        if (dateMatch) {
+                            let period = dateMatch[0];
+                            let title = text.replace(/좋아요\s*갯수\s*\d+/, '').replace(period, '').trim();
+                            if(title.length > 100) title = title.substring(0, 100);
+                            
+                            results.push({
+                                eventName: title,
+                                period: period,
+                                image: img.src
+                            });
                         }
-
-                        results.push({
-                            eventName: titleEl.innerText.trim(),
-                            period: dateEl ? dateEl.innerText.trim() : "",
-                            link: realLink,
-                            image: imgEl ? imgEl.src : ""
-                        });
                     });
                     return results;
                 }''')
@@ -2211,7 +2202,7 @@ async def crawl_samsung_bg():
                             "category": "삼성카드",
                             "eventName": ev['eventName'],
                             "period": ev['period'],
-                            "link": ev['link'],
+                            "link": "https://m.samsungcard.com/personal/event/ing/UHPPBE1401M0.jsp",
                             "image": ev['image'],
                             "bgColor": "#0056b3"
                         })
@@ -2223,6 +2214,9 @@ async def crawl_samsung_bg():
 
         if all_events:
             try:
+                unique_events = {v['eventName']:v for v in all_events}.values()
+                all_events = list(unique_events)
+                
                 with open("samsung_data.json", "w", encoding="utf-8") as f:
                     json.dump(all_events, f, ensure_ascii=False)
                 if r: r.setex(SAMSUNG_CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
