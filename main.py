@@ -1308,53 +1308,43 @@ def kb_card_events():
             .main-content { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; }
             h1 { font-family: 'Outfit', sans-serif; font-size: 2rem; margin-bottom: 1.5rem; }
 
+            
             .search-section {
                 display: flex; gap: 1rem; margin-bottom: 2rem;
             }
-
             .search-input {
-                flex: 1; padding: 16px 20px; border-radius: 16px; border: 1px solid var(--border-color);
-                box-shadow: 0 4px 6px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 1rem;
+                flex: 1; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 1rem;
             }
-            .search-input:focus { border-color: var(--kb-color); box-shadow: 0 4px 12px rgba(255,188,0,0.15); }
+            .search-input:focus { border-color: var(--blue-color); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
 
             .event-list { 
-                display: grid; 
-                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
-                gap: 1.5rem; 
+                display: flex; 
+                flex-direction: column; 
+                gap: 0.5rem; 
+                margin-top: 1rem; 
             }
             .event-card {
-                background: white; border-radius: 24px; overflow: hidden; display: flex; flex-direction: column;
-                border: 1px solid var(--border-color); text-decoration: none; color: inherit; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-                height: 100%;
+                background: white; 
+                border-radius: 12px; 
+                padding: 1rem 1.25rem; 
+                display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                border: 1px solid rgba(0,0,0,0.06); 
+                text-decoration: none; 
+                color: inherit; 
+                transition: all 0.2s ease;
+                min-height: 60px;
             }
-            .event-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
-
-            .thumb-area {
-                width: 100%;
-                aspect-ratio: 16/9;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                position: relative;
-                overflow: hidden;
+            .event-card:hover { 
+                background-color: #f9f9f9;
+                transform: translateX(4px);
             }
-            .thumb-img {
-                width: 80%;
-                height: 80%;
-                object-fit: contain;
-                z-index: 2;
-            }
-            .card-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
-            .category-tag {
-                background: #f2f2f7; color: var(--text-secondary); padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;
-                align-self: flex-start; margin-bottom: 0.8rem;
-            }
-            .event-title { font-size: 1rem; font-weight: 700; line-height: 1.4; margin-bottom: 0.8rem; flex: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-            .event-period { font-size: 0.75rem; color: var(--text-secondary); }
-
-            .loading { text-align: center; padding: 4rem; grid-column: 1 / -1; color: var(--text-secondary); }
+            
+            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; }
             .stats { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; }
+
         </style>
     </head>
     <body>
@@ -1402,30 +1392,37 @@ def kb_card_events():
                 renderEvents(filtered);
             }
 
+            
             function renderEvents(events) {
                 const list = document.getElementById('eventList');
                 const stats = document.getElementById('stats');
                 
-                stats.innerText = `총 ${events.length}개의 이벤트 검색됨`;
+                stats.innerText = `총 ${events.length}개의 이벤트가 있습니다`;
                 
                 if (events.length === 0) {
-                    list.innerHTML = '<div class="loading">검색 결과가 없습니다.</div>';
+                    list.innerHTML = '<div class="loading">이벤트가 없습니다.</div>';
                     return;
                 }
 
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
-                        <div class="thumb-area" style="background-color: ${ev.bgColor}">
-                            <img src="${ev.image}" class="thumb-img" onerror="this.style.display='none'">
+                        <div style="flex:1;display:flex;align-items:center;gap:1rem;min-width:0">
+                            <div style="width:8px;height:8px;border-radius:50%;background:${ev.bgColor};flex-shrink:0"></div>
+                            <div style="flex:1;min-width:0">
+                                <div style="font-size:0.95rem;font-weight:600;color:#1d1d1f;margin-bottom:0.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.eventName}</div>
+                                <div style="font-size:0.8rem;color:#6e6e73;display:flex;align-items:center;gap:0.75rem">
+                                    <span style="background:#f5f5f7;padding:2px 8px;border-radius:6px;font-weight:500;font-size:0.75rem">${ev.category}</span>
+                                    <span>${ev.period}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <span class="category-tag">${ev.category}</span>
-                            <div class="event-title">${ev.eventName}</div>
-                            <div class="event-period">${ev.period}</div>
-                        </div>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;margin-left:1rem">
+                            <path d="M7.5 15L12.5 10L7.5 5" stroke="#6e6e73" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
                     </a>
                 `).join('');
             }
+
 
             fetchEvents();
         </script>
@@ -1467,53 +1464,43 @@ def hana_card_events():
             .main-content { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; }
             h1 { font-family: 'Outfit', sans-serif; font-size: 2rem; margin-bottom: 1.5rem; }
 
+            
             .search-section {
                 display: flex; gap: 1rem; margin-bottom: 2rem;
             }
-
             .search-input {
-                flex: 1; padding: 16px 20px; border-radius: 16px; border: 1px solid var(--border-color);
-                box-shadow: 0 4px 6px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 1rem;
+                flex: 1; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 1rem;
             }
-            .search-input:focus { border-color: var(--kb-color); box-shadow: 0 4px 12px rgba(0,132,133,0.15); }
+            .search-input:focus { border-color: var(--blue-color); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
 
             .event-list { 
-                display: grid; 
-                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
-                gap: 1.5rem; 
+                display: flex; 
+                flex-direction: column; 
+                gap: 0.5rem; 
+                margin-top: 1rem; 
             }
             .event-card {
-                background: white; border-radius: 24px; overflow: hidden; display: flex; flex-direction: column;
-                border: 1px solid var(--border-color); text-decoration: none; color: inherit; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-                height: 100%;
+                background: white; 
+                border-radius: 12px; 
+                padding: 1rem 1.25rem; 
+                display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                border: 1px solid rgba(0,0,0,0.06); 
+                text-decoration: none; 
+                color: inherit; 
+                transition: all 0.2s ease;
+                min-height: 60px;
             }
-            .event-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
-
-            .thumb-area {
-                width: 100%;
-                aspect-ratio: 16/9;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                position: relative;
-                overflow: hidden;
+            .event-card:hover { 
+                background-color: #f9f9f9;
+                transform: translateX(4px);
             }
-            .thumb-img {
-                width: 80%;
-                height: 80%;
-                object-fit: contain;
-                z-index: 2;
-            }
-            .card-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
-            .category-tag {
-                background: #f2f2f7; color: var(--text-secondary); padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;
-                align-self: flex-start; margin-bottom: 0.8rem;
-            }
-            .event-title { font-size: 1rem; font-weight: 700; line-height: 1.4; margin-bottom: 0.8rem; flex: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-            .event-period { font-size: 0.75rem; color: var(--text-secondary); }
-
-            .loading { text-align: center; padding: 4rem; grid-column: 1 / -1; color: var(--text-secondary); }
+            
+            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; }
             .stats { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; }
+
         </style>
     </head>
     <body>
@@ -1562,30 +1549,37 @@ def hana_card_events():
                 renderEvents(filtered);
             }
 
+            
             function renderEvents(events) {
                 const list = document.getElementById('eventList');
                 const stats = document.getElementById('stats');
                 
-                stats.innerText = `총 ${events.length}개의 이벤트 검색됨`;
+                stats.innerText = `총 ${events.length}개의 이벤트가 있습니다`;
                 
                 if (events.length === 0) {
-                    list.innerHTML = '<div class="loading">검색 결과가 없습니다.</div>';
+                    list.innerHTML = '<div class="loading">이벤트가 없습니다.</div>';
                     return;
                 }
 
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
-                        <div class="thumb-area" style="background-color: #ffffff">
-                            <img src="${ev.image}" class="thumb-img" onerror="this.src='https://m.hanacard.co.kr/ATTACH/MKA/images/event/mobile_event_list_hanacard.png'">
+                        <div style="flex:1;display:flex;align-items:center;gap:1rem;min-width:0">
+                            <div style="width:8px;height:8px;border-radius:50%;background:${ev.bgColor};flex-shrink:0"></div>
+                            <div style="flex:1;min-width:0">
+                                <div style="font-size:0.95rem;font-weight:600;color:#1d1d1f;margin-bottom:0.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.eventName}</div>
+                                <div style="font-size:0.8rem;color:#6e6e73;display:flex;align-items:center;gap:0.75rem">
+                                    <span style="background:#f5f5f7;padding:2px 8px;border-radius:6px;font-weight:500;font-size:0.75rem">${ev.category}</span>
+                                    <span>${ev.period}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <span class="category-tag">${ev.category}</span>
-                            <div class="event-title">${ev.eventName}</div>
-                            <div class="event-period">${ev.period}</div>
-                        </div>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;margin-left:1rem">
+                            <path d="M7.5 15L12.5 10L7.5 5" stroke="#6e6e73" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
                     </a>
                 `).join('');
             }
+
 
             fetchEvents();
         </script>
@@ -1629,55 +1623,43 @@ def shinhan_card_events():
             .official-link { display: inline-block; margin-bottom: 1.5rem; color: var(--sh-color); text-decoration: none; font-size: 0.9rem; font-weight: 500; }
             .official-link:hover { text-decoration: underline; }
 
+            
             .search-section {
                 display: flex; gap: 1rem; margin-bottom: 2rem;
             }
-
             .search-input {
-                flex: 1; padding: 16px 20px; border-radius: 16px; border: 1px solid var(--border-color);
-                box-shadow: 0 4px 6px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 1rem;
+                flex: 1; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 1rem;
             }
-            .search-input:focus { border-color: var(--sh-color); box-shadow: 0 4px 12px rgba(0,70,255,0.15); }
+            .search-input:focus { border-color: var(--blue-color); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
 
             .event-list { 
-                display: grid; 
-                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
-                gap: 1.5rem; 
+                display: flex; 
+                flex-direction: column; 
+                gap: 0.5rem; 
+                margin-top: 1rem; 
             }
             .event-card {
-                background: white; border-radius: 24px; overflow: hidden; display: flex; flex-direction: column;
-                border: 1px solid var(--border-color); text-decoration: none; color: inherit; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-                height: 100%;
+                background: white; 
+                border-radius: 12px; 
+                padding: 1rem 1.25rem; 
+                display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                border: 1px solid rgba(0,0,0,0.06); 
+                text-decoration: none; 
+                color: inherit; 
+                transition: all 0.2s ease;
+                min-height: 60px;
             }
-            .event-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
-
-            .thumb-area {
-                width: 100%;
-                aspect-ratio: 16/9;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                position: relative;
-                overflow: hidden;
+            .event-card:hover { 
+                background-color: #f9f9f9;
+                transform: translateX(4px);
             }
-            .thumb-img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                transition: transform 0.5s ease;
-            }
-            .event-card:hover .thumb-img { transform: scale(1.05); }
-
-            .card-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
-            .category-tag {
-                background: #f2f2f7; color: var(--text-secondary); padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;
-                align-self: flex-start; margin-bottom: 0.8rem;
-            }
-            .event-title { font-size: 1rem; font-weight: 700; line-height: 1.4; margin-bottom: 0.8rem; flex: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-            .event-period { font-size: 0.75rem; color: var(--text-secondary); }
-
-            .loading { text-align: center; padding: 4rem; grid-column: 1 / -1; color: var(--text-secondary); }
+            
+            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; }
             .stats { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; }
+
         </style>
     </head>
     <body>
@@ -1739,30 +1721,37 @@ def shinhan_card_events():
                 renderEvents(filtered);
             }
 
+            
             function renderEvents(events) {
                 const list = document.getElementById('eventList');
                 const stats = document.getElementById('stats');
                 
-                stats.innerText = `총 ${events.length}개의 혜택 검색됨`;
+                stats.innerText = `총 ${events.length}개의 이벤트가 있습니다`;
                 
                 if (events.length === 0) {
-                    list.innerHTML = '<div class="loading">검색 결과가 없습니다.</div>';
+                    list.innerHTML = '<div class="loading">이벤트가 없습니다.</div>';
                     return;
                 }
 
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
-                        <div class="thumb-area">
-                            <img src="${ev.image}" class="thumb-img" style="object-fit: contain; width: 85%; height: 85%;" onerror="this.src='https://www.shinhancard.com/pconts/images/dx/common/no_image.png'">
+                        <div style="flex:1;display:flex;align-items:center;gap:1rem;min-width:0">
+                            <div style="width:8px;height:8px;border-radius:50%;background:${ev.bgColor};flex-shrink:0"></div>
+                            <div style="flex:1;min-width:0">
+                                <div style="font-size:0.95rem;font-weight:600;color:#1d1d1f;margin-bottom:0.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.eventName}</div>
+                                <div style="font-size:0.8rem;color:#6e6e73;display:flex;align-items:center;gap:0.75rem">
+                                    <span style="background:#f5f5f7;padding:2px 8px;border-radius:6px;font-weight:500;font-size:0.75rem">${ev.category}</span>
+                                    <span>${ev.period}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <span class="category-tag" style="${ev.category === '마이샵 쿠폰' ? 'background: #ffe1ed; color: #e91e63;' : ''}">${ev.category}</span>
-                            <div class="event-title">${ev.eventName}</div>
-                            <div class="event-period">${ev.period}</div>
-                        </div>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;margin-left:1rem">
+                            <path d="M7.5 15L12.5 10L7.5 5" stroke="#6e6e73" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
                     </a>
                 `).join('');
             }
+
 
             fetchEvents();
         </script>
@@ -2147,48 +2136,43 @@ def woori_card_events():
             .main-content { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
             h1 { font-size: 2.5rem; font-weight: 600; margin-bottom: 1rem; }
             
-            .search-section { margin: 2rem 0; }
-            .search-input {
-                width: 100%; padding: 1rem 1.5rem; border: 1px solid var(--border-color); border-radius: 12px;
-                font-size: 1rem; background: white; transition: all 0.3s;
+            
+            .search-section {
+                display: flex; gap: 1rem; margin-bottom: 2rem;
             }
-            .search-input:focus { outline: none; border-color: var(--blue-color); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
+            .search-input {
+                flex: 1; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 1rem;
+            }
+            .search-input:focus { border-color: var(--blue-color); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
 
-            .event-list {
-                display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;
+            .event-list { 
+                display: flex; 
+                flex-direction: column; 
+                gap: 0.5rem; 
+                margin-top: 1rem; 
             }
             .event-card {
-                background: white; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;
-                border: 1px solid var(--border-color); text-decoration: none; color: inherit; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-                height: 100%;
+                background: white; 
+                border-radius: 12px; 
+                padding: 1rem 1.25rem; 
+                display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                border: 1px solid rgba(0,0,0,0.06); 
+                text-decoration: none; 
+                color: inherit; 
+                transition: all 0.2s ease;
+                min-height: 60px;
             }
-            .event-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
-
-            .thumb-area {
-                width: 100%;
-                aspect-ratio: 16/9;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                position: relative;
-                overflow: hidden;
+            .event-card:hover { 
+                background-color: #f9f9f9;
+                transform: translateX(4px);
             }
-            .thumb-img {
-                width: 80%;
-                height: 80%;
-                object-fit: contain;
-                z-index: 2;
-            }
-            .card-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
-            .category-tag {
-                background: #f2f2f7; color: var(--text-secondary); padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;
-                align-self: flex-start; margin-bottom: 0.8rem;
-            }
-            .event-title { font-size: 1rem; font-weight: 700; line-height: 1.4; margin-bottom: 0.8rem; flex: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-            .event-period { font-size: 0.75rem; color: var(--text-secondary); }
-
-            .loading { text-align: center; padding: 4rem; grid-column: 1 / -1; color: var(--text-secondary); }
+            
+            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; }
             .stats { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; }
+
         </style>
     </head>
     <body>
@@ -2236,30 +2220,37 @@ def woori_card_events():
                 renderEvents(filtered);
             }
 
+            
             function renderEvents(events) {
                 const list = document.getElementById('eventList');
                 const stats = document.getElementById('stats');
                 
-                stats.innerText = `총 ${events.length}개의 이벤트 검색됨`;
+                stats.innerText = `총 ${events.length}개의 이벤트가 있습니다`;
                 
                 if (events.length === 0) {
-                    list.innerHTML = '<div class="loading">검색 결과가 없습니다.</div>';
+                    list.innerHTML = '<div class="loading">이벤트가 없습니다.</div>';
                     return;
                 }
 
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
-                        <div class="thumb-area" style="background-color: ${ev.bgColor}">
-                            <img src="${ev.image}" class="thumb-img" onerror="this.style.display='none'">
+                        <div style="flex:1;display:flex;align-items:center;gap:1rem;min-width:0">
+                            <div style="width:8px;height:8px;border-radius:50%;background:${ev.bgColor};flex-shrink:0"></div>
+                            <div style="flex:1;min-width:0">
+                                <div style="font-size:0.95rem;font-weight:600;color:#1d1d1f;margin-bottom:0.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.eventName}</div>
+                                <div style="font-size:0.8rem;color:#6e6e73;display:flex;align-items:center;gap:0.75rem">
+                                    <span style="background:#f5f5f7;padding:2px 8px;border-radius:6px;font-weight:500;font-size:0.75rem">${ev.category}</span>
+                                    <span>${ev.period}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <span class="category-tag">${ev.category}</span>
-                            <div class="event-title">${ev.eventName}</div>
-                            <div class="event-period">${ev.period}</div>
-                        </div>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;margin-left:1rem">
+                            <path d="M7.5 15L12.5 10L7.5 5" stroke="#6e6e73" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
                     </a>
                 `).join('');
             }
+
 
             fetchEvents();
         </script>
@@ -2303,50 +2294,43 @@ def bc_card_events():
             .main-content { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
             h1 { font-size: 2.5rem; font-weight: 600; margin-bottom: 1rem; }
             
-            .search-section { margin: 2rem 0; }
-            .search-input {
-                width: 100%; padding: 1rem 1.5rem; border: 1px solid var(--border-color); border-radius: 12px;
-                font-size: 1rem; background: white; transition: all 0.3s;
+            
+            .search-section {
+                display: flex; gap: 1rem; margin-bottom: 2rem;
             }
-            .search-input:focus { outline: none; border-color: var(--blue-color); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
+            .search-input {
+                flex: 1; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 1rem;
+            }
+            .search-input:focus { border-color: var(--blue-color); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
 
-            .event-list {
-                display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;
+            .event-list { 
+                display: flex; 
+                flex-direction: column; 
+                gap: 0.5rem; 
+                margin-top: 1rem; 
             }
             .event-card {
-                background: white; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;
-                border: 1px solid var(--border-color); text-decoration: none; color: inherit; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-                height: 100%;
+                background: white; 
+                border-radius: 12px; 
+                padding: 1rem 1.25rem; 
+                display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                border: 1px solid rgba(0,0,0,0.06); 
+                text-decoration: none; 
+                color: inherit; 
+                transition: all 0.2s ease;
+                min-height: 60px;
             }
-            .event-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
-
-            .thumb-area {
-                width: 100%;
-                aspect-ratio: 16/9;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                position: relative;
-                overflow: hidden;
+            .event-card:hover { 
+                background-color: #f9f9f9;
+                transform: translateX(4px);
             }
-            .thumb-img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                transition: transform 0.5s ease;
-            }
-            .event-card:hover .thumb-img { transform: scale(1.05); }
-
-            .card-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
-            .category-tag {
-                background: #f2f2f7; color: var(--text-secondary); padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;
-                align-self: flex-start; margin-bottom: 0.8rem;
-            }
-            .event-title { font-size: 1rem; font-weight: 700; line-height: 1.4; margin-bottom: 0.8rem; flex: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-            .event-period { font-size: 0.75rem; color: var(--text-secondary); }
-
-            .loading { text-align: center; padding: 4rem; grid-column: 1 / -1; color: var(--text-secondary); }
+            
+            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; }
             .stats { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; }
+
         </style>
     </head>
     <body>
@@ -2394,30 +2378,37 @@ def bc_card_events():
                 renderEvents(filtered);
             }
 
+            
             function renderEvents(events) {
                 const list = document.getElementById('eventList');
                 const stats = document.getElementById('stats');
                 
-                stats.innerText = `총 ${events.length}개의 이벤트 검색됨`;
+                stats.innerText = `총 ${events.length}개의 이벤트가 있습니다`;
                 
                 if (events.length === 0) {
-                    list.innerHTML = '<div class="loading">검색 결과가 없습니다.</div>';
+                    list.innerHTML = '<div class="loading">이벤트가 없습니다.</div>';
                     return;
                 }
 
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
-                        <div class="thumb-area" style="background-color: ${ev.bgColor}">
-                            <img src="${ev.image}" class="thumb-img" onerror="this.style.display='none'">
+                        <div style="flex:1;display:flex;align-items:center;gap:1rem;min-width:0">
+                            <div style="width:8px;height:8px;border-radius:50%;background:${ev.bgColor};flex-shrink:0"></div>
+                            <div style="flex:1;min-width:0">
+                                <div style="font-size:0.95rem;font-weight:600;color:#1d1d1f;margin-bottom:0.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.eventName}</div>
+                                <div style="font-size:0.8rem;color:#6e6e73;display:flex;align-items:center;gap:0.75rem">
+                                    <span style="background:#f5f5f7;padding:2px 8px;border-radius:6px;font-weight:500;font-size:0.75rem">${ev.category}</span>
+                                    <span>${ev.period}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <span class="category-tag">${ev.category}</span>
-                            <div class="event-title">${ev.eventName}</div>
-                            <div class="event-period">${ev.period}</div>
-                        </div>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;margin-left:1rem">
+                            <path d="M7.5 15L12.5 10L7.5 5" stroke="#6e6e73" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
                     </a>
                 `).join('');
             }
+
 
             fetchEvents();
         </script>
@@ -2461,50 +2452,43 @@ def samsung_card_events():
             .main-content { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
             h1 { font-size: 2.5rem; font-weight: 600; margin-bottom: 1rem; }
             
-            .search-section { margin: 2rem 0; }
-            .search-input {
-                width: 100%; padding: 1rem 1.5rem; border: 1px solid var(--border-color); border-radius: 12px;
-                font-size: 1rem; background: white; transition: all 0.3s;
+            
+            .search-section {
+                display: flex; gap: 1rem; margin-bottom: 2rem;
             }
-            .search-input:focus { outline: none; border-color: var(--blue-color); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
+            .search-input {
+                flex: 1; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 1rem;
+            }
+            .search-input:focus { border-color: var(--blue-color); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
 
-            .event-list {
-                display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;
+            .event-list { 
+                display: flex; 
+                flex-direction: column; 
+                gap: 0.5rem; 
+                margin-top: 1rem; 
             }
             .event-card {
-                background: white; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;
-                border: 1px solid var(--border-color); text-decoration: none; color: inherit; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-                height: 100%;
+                background: white; 
+                border-radius: 12px; 
+                padding: 1rem 1.25rem; 
+                display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                border: 1px solid rgba(0,0,0,0.06); 
+                text-decoration: none; 
+                color: inherit; 
+                transition: all 0.2s ease;
+                min-height: 60px;
             }
-            .event-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
-
-            .thumb-area {
-                width: 100%;
-                aspect-ratio: 16/9;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                position: relative;
-                overflow: hidden;
+            .event-card:hover { 
+                background-color: #f9f9f9;
+                transform: translateX(4px);
             }
-            .thumb-img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                transition: transform 0.5s ease;
-            }
-            .event-card:hover .thumb-img { transform: scale(1.05); }
-
-            .card-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
-            .category-tag {
-                background: #f2f2f7; color: var(--text-secondary); padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;
-                align-self: flex-start; margin-bottom: 0.8rem;
-            }
-            .event-title { font-size: 1rem; font-weight: 700; line-height: 1.4; margin-bottom: 0.8rem; flex: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-            .event-period { font-size: 0.75rem; color: var(--text-secondary); }
-
-            .loading { text-align: center; padding: 4rem; grid-column: 1 / -1; color: var(--text-secondary); }
+            
+            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; }
             .stats { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; }
+
         </style>
     </head>
     <body>
@@ -2552,30 +2536,37 @@ def samsung_card_events():
                 renderEvents(filtered);
             }
 
+            
             function renderEvents(events) {
                 const list = document.getElementById('eventList');
                 const stats = document.getElementById('stats');
                 
-                stats.innerText = `총 ${events.length}개의 이벤트 검색됨`;
+                stats.innerText = `총 ${events.length}개의 이벤트가 있습니다`;
                 
                 if (events.length === 0) {
-                    list.innerHTML = '<div class="loading">검색 결과가 없습니다.</div>';
+                    list.innerHTML = '<div class="loading">이벤트가 없습니다.</div>';
                     return;
                 }
 
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
-                        <div class="thumb-area" style="background-color: ${ev.bgColor}">
-                            <img src="${ev.image}" class="thumb-img" onerror="this.style.display='none'">
+                        <div style="flex:1;display:flex;align-items:center;gap:1rem;min-width:0">
+                            <div style="width:8px;height:8px;border-radius:50%;background:${ev.bgColor};flex-shrink:0"></div>
+                            <div style="flex:1;min-width:0">
+                                <div style="font-size:0.95rem;font-weight:600;color:#1d1d1f;margin-bottom:0.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.eventName}</div>
+                                <div style="font-size:0.8rem;color:#6e6e73;display:flex;align-items:center;gap:0.75rem">
+                                    <span style="background:#f5f5f7;padding:2px 8px;border-radius:6px;font-weight:500;font-size:0.75rem">${ev.category}</span>
+                                    <span>${ev.period}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <span class="category-tag">${ev.category}</span>
-                            <div class="event-title">${ev.eventName}</div>
-                            <div class="event-period">${ev.period}</div>
-                        </div>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;margin-left:1rem">
+                            <path d="M7.5 15L12.5 10L7.5 5" stroke="#6e6e73" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
                     </a>
                 `).join('');
             }
+
 
             fetchEvents();
         </script>
@@ -2619,50 +2610,43 @@ def card_events_search():
             .main-content { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
             h1 { font-size: 2.5rem; font-weight: 600; margin-bottom: 1rem; }
             
-            .search-section { margin: 2rem 0; }
-            .search-input {
-                width: 100%; padding: 1rem 1.5rem; border: 1px solid var(--border-color); border-radius: 12px;
-                font-size: 1rem; background: white; transition: all 0.3s;
+            
+            .search-section {
+                display: flex; gap: 1rem; margin-bottom: 2rem;
             }
-            .search-input:focus { outline: none; border-color: var(--blue-color); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
+            .search-input {
+                flex: 1; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; transition: all 0.2s; font-size: 1rem;
+            }
+            .search-input:focus { border-color: var(--blue-color); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
 
-            .event-list {
-                display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;
+            .event-list { 
+                display: flex; 
+                flex-direction: column; 
+                gap: 0.5rem; 
+                margin-top: 1rem; 
             }
             .event-card {
-                background: white; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;
-                border: 1px solid var(--border-color); text-decoration: none; color: inherit; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-                height: 100%;
+                background: white; 
+                border-radius: 12px; 
+                padding: 1rem 1.25rem; 
+                display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                border: 1px solid rgba(0,0,0,0.06); 
+                text-decoration: none; 
+                color: inherit; 
+                transition: all 0.2s ease;
+                min-height: 60px;
             }
-            .event-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
-
-            .thumb-area {
-                width: 100%;
-                aspect-ratio: 16/9;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                position: relative;
-                overflow: hidden;
+            .event-card:hover { 
+                background-color: #f9f9f9;
+                transform: translateX(4px);
             }
-            .thumb-img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                transition: transform 0.5s ease;
-            }
-            .event-card:hover .thumb-img { transform: scale(1.05); }
-
-            .card-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
-            .category-tag {
-                background: #f2f2f7; color: var(--text-secondary); padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;
-                align-self: flex-start; margin-bottom: 0.8rem;
-            }
-            .event-title { font-size: 1rem; font-weight: 700; line-height: 1.4; margin-bottom: 0.8rem; flex: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-            .event-period { font-size: 0.75rem; color: var(--text-secondary); }
-
-            .loading { text-align: center; padding: 4rem; grid-column: 1 / -1; color: var(--text-secondary); }
+            
+            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; }
             .stats { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; }
+
         </style>
     </head>
     <body>
@@ -2732,30 +2716,37 @@ def card_events_search():
                 renderEvents(filtered);
             }
 
+            
             function renderEvents(events) {
                 const list = document.getElementById('eventList');
                 const stats = document.getElementById('stats');
                 
-                stats.innerText = `총 ${events.length}개의 이벤트 검색됨`;
+                stats.innerText = `총 ${events.length}개의 이벤트가 있습니다`;
                 
                 if (events.length === 0) {
-                    list.innerHTML = '<div class="loading">검색 결과가 없습니다.</div>';
+                    list.innerHTML = '<div class="loading">이벤트가 없습니다.</div>';
                     return;
                 }
 
                 list.innerHTML = events.map(ev => `
                     <a href="${ev.link}" target="_blank" class="event-card">
-                        <div class="thumb-area" style="background-color: ${ev.bgColor}">
-                            <img src="${ev.image}" class="thumb-img" onerror="this.style.display='none'">
+                        <div style="flex:1;display:flex;align-items:center;gap:1rem;min-width:0">
+                            <div style="width:8px;height:8px;border-radius:50%;background:${ev.bgColor};flex-shrink:0"></div>
+                            <div style="flex:1;min-width:0">
+                                <div style="font-size:0.95rem;font-weight:600;color:#1d1d1f;margin-bottom:0.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.eventName}</div>
+                                <div style="font-size:0.8rem;color:#6e6e73;display:flex;align-items:center;gap:0.75rem">
+                                    <span style="background:#f5f5f7;padding:2px 8px;border-radius:6px;font-weight:500;font-size:0.75rem">${ev.category}</span>
+                                    <span>${ev.period}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <span class="category-tag">${ev.category}</span>
-                            <div class="event-title">${ev.eventName}</div>
-                            <div class="event-period">${ev.period}</div>
-                        </div>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;margin-left:1rem">
+                            <path d="M7.5 15L12.5 10L7.5 5" stroke="#6e6e73" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
                     </a>
                 `).join('');
             }
+
 
             fetchEvents();
         </script>
