@@ -2044,8 +2044,8 @@ async def crawl_woori_bg():
                         if img_path and not img_path.startswith('http'): 
                             img_path = f"{base_url}{img_path}"
                         
-                        # 외부에서 상세 페이지 직접 접근이 제한되므로 PC 목록 페이지로 연결
-                        link = "https://pc.wooricard.com/dcpc/yh1/bnf/bnf02/prgevnt/H1BNF202S01.do"
+                        # 사용자가 요청한 모바일 목록 페이지 URL로 고정
+                        link = "https://m.wooricard.com/dcmw/yh1/bnf/bnf02/prgevnt/M1BNF202S00.do"
                         
                         if title:
                             all_events.append({
