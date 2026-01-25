@@ -132,18 +132,10 @@ async def get_shinhan_myshop():
                 else:
                     print(f"Shinhan MyShop API returned message: {msg}")
 
-        if all_coupons:
-            try:
-                r.setex(SHINHAN_MYSHOP_CACHE_KEY, CACHE_EXPIRE, json.dumps(all_coupons))
-            except Exception: pass
-            
-        return all_coupons
+        return {"data": all_coupons}
     except Exception as e:
         print(f"Shinhan MyShop API Error: {e}")
-        return []
-    except Exception as e:
-        print(f"Shinhan MyShop API Error: {e}")
-        return []
+        return {"data": []}
 
 # 신한카드 데이터 갱신 (백그라운드)
 async def crawl_shinhan_bg():
@@ -1535,10 +1527,9 @@ def kb_card_events():
             let allEvents = [];
 
             async function updateData() {
-                const path = window.location.pathname.split("/").pop();
                 try {
-                    await fetch(`/api/${path}/update`, {method:"POST"});
-                    alert("데이터 갱신을 시작했습니다. 10초 후 새로고침 해주세요.");
+                    await fetch('/api/kb/update', {method:'POST'});
+                    alert('데이터 갱신을 시작했습니다. 10초 후 새로고침 해주세요.');
                 } catch(e) {}
             }
 
@@ -1573,12 +1564,7 @@ def kb_card_events():
                 }
                 return true;
             }
-            async function updateData() {
-                try {
-                    await fetch('/api/kb/update', {method:'POST'});
-                    alert('데이터 갱신을 시작했습니다. 10초 후 새로고침 해주세요.');
-                } catch(e) {}
-            }
+
 
             function filterEvents() {
                 const search = document.getElementById('searchInput').value.toLowerCase();
@@ -2033,12 +2019,7 @@ def shinhan_card_events():
                 }
             }
 
-            async function updateData() {
-                try {
-                    await fetch('/api/shinhan/update', {method:'POST'});
-                    alert('데이터 갱신을 시작했습니다. 10초 후 새로고침 해주세요.');
-                } catch(e) {}
-            }
+
 
             function parseQuery(q) {
                 const terms = {and:[], or:[]};
