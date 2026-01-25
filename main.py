@@ -1117,6 +1117,7 @@ def card_events():
                 box-shadow: 0 2px 8px rgba(0,0,0,0.02);
             }
             
+            
             .search-box input {
                 border: none;
                 outline: none;
@@ -1125,6 +1126,93 @@ def card_events():
                 font-family: inherit;
                 margin-left: 10px;
             }
+
+            .event-list { 
+                display: grid; 
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+                gap: 1.25rem; 
+                margin-top: 2rem; 
+            }
+            .event-card {
+                background: white; 
+                border-radius: 18px; 
+                padding: 1.5rem; 
+                display: flex; 
+                flex-direction: column; 
+                justify-content: space-between;
+                border: 1px solid rgba(0,0,0,0.08); 
+                text-decoration: none; 
+                color: inherit; 
+                transition: all 0.2s ease;
+                height: 100%;
+                min-height: 180px;
+                position: relative;
+                box-sizing: border-box;
+            }
+            .event-card:hover { 
+                transform: translateY(-4px);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+                border-color: rgba(0,0,0,0.12);
+            }
+            
+            .event-category-row {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 1rem;
+            }
+            
+            .tags-wrapper {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                align-items: center;
+            }
+
+            .company-tag {
+                background: #1d1d1f; 
+                color: white; 
+                padding: 4px 8px; 
+                border-radius: 6px; 
+                font-weight: 600; 
+                font-size: 0.7rem;
+                letter-spacing: -0.01em;
+            }
+            .category-tag {
+                background: #f5f5f7; 
+                color: #6e6e73; 
+                padding: 4px 8px; 
+                border-radius: 6px; 
+                font-weight: 600; 
+                font-size: 0.7rem;
+                letter-spacing: -0.01em;
+            }
+            
+            .event-title {
+                font-size: 1.05rem;
+                font-weight: 700;
+                color: #1d1d1f;
+                margin-bottom: 1rem;
+                line-height: 1.45;
+                letter-spacing: -0.01em;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                word-break: keep-all;
+                flex: 1;
+            }
+            
+            .event-date {
+                font-size: 0.8rem;
+                color: #86868b;
+                letter-spacing: -0.01em;
+                margin-top: auto;
+            }
+            
+            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; grid-column: 1 / -1; }
+
         </style>
     </head>
     <body>
@@ -1176,24 +1264,43 @@ def card_events():
 
         <script>
             let allEvents = [];
-
+            
             async function fetchAllEvents() {
                 try {
-                    const [shinhanRes, kbRes, hanaRes] = await Promise.all([
+                    const [shinhanRes, kbRes, hanaRes, wooriRes, bcRes, samsungRes] = await Promise.all([
                         fetch('/api/shinhan-cards'),
                         fetch('/api/kb-cards'),
-                        fetch('/api/hana-cards')
+                        fetch('/api/hana-cards'),
+                        fetch('/api/woori-cards'),
+                        fetch('/api/bc-cards'),
+                        fetch('/api/samsung-cards')
                     ]);
                     
                     const shinhanData = await shinhanRes.json();
                     const kbData = await kbRes.json();
                     const hanaData = await hanaRes.json();
+                    const wooriData = await wooriRes.json();
+                    const bcData = await bcRes.json();
+                    const samsungData = await samsungRes.json();
 
-                    const shinhan = Array.isArray(shinhanData) ? shinhanData : (shinhanData.data || []);
-                    const kb = Array.isArray(kbData) ? kbData : (kbData.data || []);
-                    const hana = Array.isArray(hanaData) ? hanaData : (hanaData.data || []);
+                    const normalize = (data, company) => {
+                        const list = Array.isArray(data) ? data : (data.data || []);
+                        return list.map(item => ({ ...item, companyName: company }));
+                    };
 
-                    allEvents = [...shinhan, ...kb, ...hana];
+                    const shinhan = normalize(shinhanData, "신한카드");
+                    const kb = normalize(kbData, "KB국민카드");
+                    const hana = normalize(hanaData, "하나카드");
+                    const woori = normalize(wooriData, "우리카드");
+                    const bc = normalize(bcData, "BC카드");
+                    const samsung = normalize(samsungData, "삼성카드");
+
+                    allEvents = [...shinhan, ...kb, ...hana, ...woori, ...bc, ...samsung];
+                    
+                    const searchInput = document.getElementById('cardSearch');
+                    if(searchInput.value.trim().length > 0) {
+                        searchEvents(searchInput.value.trim().toLowerCase());
+                    }
                 } catch (error) {
                     console.error('Failed to fetch events:', error);
                 }
@@ -1223,7 +1330,8 @@ def card_events():
             function searchEvents(search) {
                 const filtered = allEvents.filter(ev => 
                     (ev.eventName || "").toLowerCase().includes(search) || 
-                    (ev.category || "").toLowerCase().includes(search)
+                    (ev.category || "").toLowerCase().includes(search) ||
+                    (ev.companyName || "").toLowerCase().includes(search)
                 );
                 
                 document.getElementById('cardGrid').style.display = 'none';
@@ -1232,49 +1340,36 @@ def card_events():
                 if (!eventList) {
                     eventList = document.createElement('div');
                     eventList.id = 'eventList';
-                    eventList.style.cssText = 'display:flex;flex-direction:column;gap:0.5rem;margin-top:2rem';
+                    eventList.className = 'event-list';
                     document.querySelector('.main-content').appendChild(eventList);
+                } else {
+                    eventList.className = 'event-list';
+                    eventList.style = '';
                 }
-                eventList.style.display = 'flex';
+                eventList.style.display = 'grid';
                 
                 if (filtered.length === 0) {
-                    eventList.innerHTML = '<div style="text-align:center;padding:4rem;color:#6e6e73;font-size:0.95rem">검색 결과가 없습니다.</div>';
+                    eventList.innerHTML = '<div class="loading">검색 결과가 없습니다.</div>';
                     return;
                 }
 
                 eventList.innerHTML = filtered.map(ev => `
-                    <a href="${ev.link}" target="_blank" style="background:white;border-radius:12px;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(0,0,0,0.06);text-decoration:none;color:inherit;transition:all 0.2s ease;min-height:60px">
-                        <div style="flex:1;display:flex;align-items:center;gap:1rem;min-width:0">
-                            <div style="width:8px;height:8px;border-radius:50%;background:${ev.bgColor};flex-shrink:0"></div>
-                            <div style="flex:1;min-width:0">
-                                <div style="font-size:0.95rem;font-weight:600;color:#1d1d1f;margin-bottom:0.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.eventName}</div>
-                                <div style="font-size:0.8rem;color:#6e6e73;display:flex;align-items:center;gap:0.75rem">
-                                    <span style="background:#f5f5f7;padding:2px 8px;border-radius:6px;font-weight:500;font-size:0.75rem">${ev.category}</span>
-                                    <span>${ev.period}</span>
-                                </div>
+                    <a href="${ev.link}" target="_blank" class="event-card">
+                        <div class="event-category-row">
+                            <div class="tags-wrapper">
+                                <span class="company-tag">${ev.companyName}</span>
+                                <span class="category-tag">${ev.category}</span>
                             </div>
+                            <div style="width:10px;height:10px;border-radius:50%;background:${ev.bgColor};flex-shrink:0;"></div>
                         </div>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;margin-left:1rem">
-                            <path d="M7.5 15L12.5 10L7.5 5" stroke="#6e6e73" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
+                        <div class="event-title">${ev.eventName}</div>
+                        <div class="event-date">${ev.period}</div>
                     </a>
                 `).join('');
-                
-                // 호버 효과 추가
-                document.querySelectorAll('#eventList a').forEach(link => {
-                    link.addEventListener('mouseenter', function() {
-                        this.style.backgroundColor = '#f9f9f9';
-                        this.style.transform = 'translateX(4px)';
-                    });
-                    link.addEventListener('mouseleave', function() {
-                        this.style.backgroundColor = 'white';
-                        this.style.transform = 'translateX(0)';
-                    });
-                });
             }
 
             fetchAllEvents();
-        </script>
+</script>
     </body>
     </html>
     """
