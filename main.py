@@ -48,6 +48,30 @@ async def get_shinhan_myshop():
             "Content-Type": "application/json",
             "X-Requested-With": "XMLHttpRequest",
             "Referer": f"{base_url}/mob/MOBFM501N/MOBFM501R31.shc",
+
+def get_cached_data(cache_key, file_path):
+    try:
+        if r:
+            cached = r.get(cache_key)
+            if cached: return json.loads(cached)
+        if os.path.exists(file_path):
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            unique_data = []
+            seen = set()
+            for item in data:
+                name = item.get('eventName')
+                if name and name not in seen:
+                    seen.add(name)
+                    unique_data.append(item)
+            mtime = os.path.getmtime(file_path)
+            last_updated = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
+            res = {'last_updated': last_updated, 'data': unique_data}
+            if r: r.setex(cache_key, CACHE_EXPIRE, json.dumps(res))
+            return res
+    except Exception: pass
+    return {'last_updated': None, 'data': []}
+
             "Origin": base_url,
             "Accept": "application/json, text/javascript, */*; q=0.01",
             "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"
@@ -55,6 +79,7 @@ async def get_shinhan_myshop():
         payload = {"QY_CCD": "T"}
         
         all_coupons = []
+        seen_names = set()
         async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
             # 1. 먼저 메인 페이지를 방문하여 기본 쿠키를 확보합니다.
             await client.get(f"{base_url}/mob/MOBFM501N/MOBFM501R31.shc", headers={"User-Agent": headers["User-Agent"]})
@@ -77,6 +102,10 @@ async def get_shinhan_myshop():
                     for i in range(len(names)):
                         name = names[i]
                         benefit = benefits[i] if i < len(benefits) else ""
+                        full_name = f"[{name}] {benefit}".strip()
+                        if full_name in seen_names: continue
+                        seen_names.add(full_name)
+
                         img = imgs[i] if i < len(imgs) else ""
                         end = ends[i] if i < len(ends) else ""
                         link = links[i] if i < len(links) else f"{base_url}/mob/MOBFM501N/MOBFM501R31.shc"
@@ -91,7 +120,7 @@ async def get_shinhan_myshop():
 
                         all_coupons.append({
                             "category": "마이샵 쿠폰",
-                            "eventName": f"[{name}] {benefit}",
+                            "eventName": full_name,
                             "period": end,
                             "link": link,
                             "image": img,
@@ -118,6 +147,7 @@ async def crawl_shinhan_bg():
     try:
         print(f"[{datetime.now()}] Starting Shinhan background crawl...")
         all_events = []
+        seen_titles = set()
         base_url = "https://www.shinhancard.com"
         
         async with httpx.AsyncClient(timeout=30.0, verify=False) as client:
@@ -140,6 +170,15 @@ async def crawl_shinhan_bg():
                         continue
                     
                     for ev in events:
+                        title = ev.get('mobWbEvtNm', '')
+                        sub_title = ev.get('evtImgSlTilNm', '')
+                        if sub_title and sub_title != title:
+                            title = f"{title} ({sub_title})" if sub_title else title
+                        
+                        clean_title = title.strip()
+                        if clean_title in seen_titles: continue
+                        seen_titles.add(clean_title)
+
                         start = ev.get('mobWbEvtStd', '')
                         end = ev.get('mobWbEvtEdd', '')
                         if len(start) == 8: start = f"{start[:4]}.{start[4:6]}.{start[6:]}"
@@ -152,15 +191,10 @@ async def crawl_shinhan_bg():
                         link_url = ev.get('hpgEvtDlPgeUrlAr', '')
                         if link_url and not link_url.startswith('http'):
                             link_url = f"{base_url}{link_url}"
-
-                        title = ev.get('mobWbEvtNm', '')
-                        sub_title = ev.get('evtImgSlTilNm', '')
-                        if sub_title and sub_title != title:
-                            title = f"{title} ({sub_title})" if sub_title else title
                             
                         all_events.append({
                             "category": ev.get('hpgEvtKindNm', '이벤트'),
-                            "eventName": title.strip(),
+                            "eventName": clean_title,
                             "period": f"{start} ~ {end}",
                             "link": link_url,
                             "image": img_url,
@@ -271,6 +305,15 @@ async def get_shinhan_cards():
             mtime = os.path.getmtime(local_path)
             last_updated = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
             
+            unique_data = []
+            seen = set()
+            for item in data:
+                name = item.get('eventName')
+                if name not in seen:
+                    seen.add(name)
+                    unique_data.append(item)
+            data = unique_data
+            
             response = {"last_updated": last_updated, "data": data}
             if r:
                 try:
@@ -298,6 +341,15 @@ async def get_kb_cards():
             mtime = os.path.getmtime(local_path)
             last_updated = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
             
+            unique_data = []
+            seen = set()
+            for item in data:
+                name = item.get('eventName')
+                if name not in seen:
+                    seen.add(name)
+                    unique_data.append(item)
+            data = unique_data
+
             response = {"last_updated": last_updated, "data": data}
             if r:
                 try:
@@ -382,9 +434,13 @@ async def crawl_hana_bg():
                     if not event_list:
                         break
                         
+                    seen_titles = set()
                     for ev in event_list:
                         # 필드 매핑
-                        title = ev.get("EVN_TIT_NM", "")
+                        title = ev.get("EVN_TIT_NM", "").strip()
+                        if not title or title in seen_titles: continue
+                        seen_titles.add(title)
+
                         category = ev.get("ITG_APP_EVN_MC_NM", "이벤트")
                         start_date = ev.get("EVN_SDT", "")
                         end_date = ev.get("EVN_EDT", "")
@@ -452,6 +508,15 @@ async def get_hana_cards():
             mtime = os.path.getmtime(local_path)
             last_updated = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
             
+            unique_data = []
+            seen = set()
+            for item in data:
+                name = item.get('eventName')
+                if name not in seen:
+                    seen.add(name)
+                    unique_data.append(item)
+            data = unique_data
+
             response = {"last_updated": last_updated, "data": data}
             if r:
                 try:
@@ -2171,8 +2236,12 @@ async def crawl_woori_bg():
                     events = json_data.get('prgEvntList', [])
                     print(f"Woori API captured with {len(events)} events")
                     
+                    seen_titles = set()
                     for ev in events:
-                        title = ev.get('cardEvntNm', '') or ev.get('mblDocTitlTxt', '')
+                        title = (ev.get('cardEvntNm', '') or ev.get('mblDocTitlTxt', '')).strip()
+                        if not title or title in seen_titles: continue
+                        seen_titles.add(title)
+
                         start_date = ev.get('evntSdt', '')
                         end_date = ev.get('evntEdt', '')
                         
@@ -2191,33 +2260,35 @@ async def crawl_woori_bg():
                         else:
                             link = "https://m.wooricard.com/dcmw/yh1/bnf/bnf02/prgevnt/M1BNF202S00.do"
                         
-                        if title:
-                            all_events.append({
-                                "category": "우리카드",
-                                "eventName": title,
-                                "period": period,
-                                "link": link,
-                                "image": img_path,
-                                "bgColor": "#007bc3"
-                            })
+                        all_events.append({
+                            "category": "우리카드",
+                            "eventName": title,
+                            "period": period,
+                            "link": link,
+                            "image": img_path,
+                            "bgColor": "#007bc3"
+                        })
                             
             except Exception as e:
                 print(f"Woori API wait failed, trying captured data: {e}")
                 if captured_json:
                     events = captured_json.get('prgEvntList', [])
+                    seen_titles = set()
                     for ev in events:
-                        title = ev.get('cardEvntNm', '')
+                        title = ev.get('cardEvntNm', '').strip()
+                        if not title or title in seen_titles: continue
+                        seen_titles.add(title)
+
                         img_path = ev.get('fileCoursWeb', '')
                         if img_path and not img_path.startswith('http'): img_path = f"{base_url}{img_path}"
-                        if title:
-                            all_events.append({
-                                "category": "우리카드",
-                                "eventName": title,
-                                "period": "",
-                                "link": base_url,
-                                "image": img_path,
-                                "bgColor": "#007bc3"
-                            })
+                        all_events.append({
+                            "category": "우리카드",
+                            "eventName": title,
+                            "period": "",
+                            "link": base_url,
+                            "image": img_path,
+                            "bgColor": "#007bc3"
+                        })
             finally:
                 await browser.close()
                 
@@ -2240,6 +2311,7 @@ async def crawl_bc_bg():
     try:
         print(f"[{datetime.now()}] Starting BC background crawl...")
         all_events = []
+        seen_titles = set()
         base_url = "https://web.paybooc.co.kr"
         api_url = f"{base_url}/web/evnt/lst-evnt-data"
         
@@ -2262,6 +2334,9 @@ async def crawl_bc_bg():
                         title_parts = [ev.get("pybcUnifEvntNm1", ""), ev.get("pybcUnifEvntNm2", ""), ev.get("pybcUnifEvntNm3", "")]
                         title = " ".join([p for p in title_parts if p]).strip()
                         
+                        if not title or title in seen_titles: continue
+                        seen_titles.add(title)
+
                         start_date = ev.get("evntBltnStrtDtm", "")
                         end_date = ev.get("evntBltnEndDtm", "")
                         if len(start_date) >= 8: start_date = f"{start_date[:4]}.{start_date[4:6]}.{start_date[6:8]}"
@@ -2273,15 +2348,14 @@ async def crawl_bc_bg():
                         link = f"{base_url}/web/evnt/evnt-dts?pybcUnifEvntNo={event_no}" if event_no else f"{base_url}/web/evnt/main"
                         bg_color = ev.get("evntBsBgColrVal", "#ffffff")
                         
-                        if title:
-                            all_events.append({
-                                "category": "BC카드",
-                                "eventName": title,
-                                "period": period,
-                                "link": link,
-                                "image": img_url,
-                                "bgColor": bg_color
-                            })
+                        all_events.append({
+                            "category": "BC카드",
+                            "eventName": title,
+                            "period": period,
+                            "link": link,
+                            "image": img_url,
+                            "bgColor": bg_color
+                        })
                 except Exception: break
         
         if all_events:
@@ -2420,12 +2494,15 @@ async def crawl_hyundai_bg():
                     return results;
                 }''')
                 for ev in events_data:
+                    title = ev.get('eventName', '').strip()
+                    if not title or any(x['eventName'] == title for x in all_events): continue
+                    
                     link = ev['link']
                     if not link or "javascript" in link:
                         link = "https://www.hyundaicard.com/cpb/ev/CPBEV0101_01.hc"
                     all_events.append({
                         "category": "현대카드",
-                        "eventName": ev['eventName'],
+                        "eventName": title,
                         "period": ev['period'],
                         "link": link,
                         "image": ev['image'],
