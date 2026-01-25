@@ -1075,22 +1075,22 @@ def card_events():
 
             .card-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-                gap: 1.5rem;
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+                gap: 1rem;
             }
 
             .card-link {
                 background: white;
                 border: 1px solid var(--border-color);
-                border-radius: 24px;
-                padding: 2rem 1.5rem;
+                border-radius: 16px;
+                padding: 1.25rem 1rem;
                 text-decoration: none;
                 color: inherit;
-                transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+                transition: all 0.2s ease;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             }
 
             .card-link:hover {
@@ -1100,19 +1100,20 @@ def card_events():
             }
 
             .card-logo {
-                width: 64px;
-                height: 64px;
-                border-radius: 16px;
-                margin-bottom: 1.2rem;
+                width: 40px;
+                height: 40px;
+                border-radius: 10px;
+                margin-bottom: 0.8rem;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 1.8rem;
+                font-size: 1.2rem;
                 background: #f2f2f7;
+                font-weight: 600;
             }
 
-            .card-name { font-weight: 600; font-size: 1.1rem; margin-bottom: 0.4rem; }
-            .card-desc { font-size: 0.85rem; color: var(--text-secondary); }
+            .card-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.3rem; color: #1d1d1f; }
+            .card-desc { font-size: 0.8rem; color: var(--text-secondary); }
 
             .search-box {
                 background: white;
@@ -1256,28 +1257,45 @@ def card_events():
                 if (!eventList) {
                     eventList = document.createElement('div');
                     eventList.id = 'eventList';
-                    eventList.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.5rem;margin-top:2rem';
+                    eventList.style.cssText = 'display:flex;flex-direction:column;gap:0.5rem;margin-top:2rem';
                     document.querySelector('.main-content').appendChild(eventList);
                 }
-                eventList.style.display = 'grid';
+                eventList.style.display = 'flex';
                 
                 if (filtered.length === 0) {
-                    eventList.innerHTML = '<div style="text-align:center;padding:4rem;grid-column:1/-1;color:#6e6e73">검색 결과가 없습니다.</div>';
+                    eventList.innerHTML = '<div style="text-align:center;padding:4rem;color:#6e6e73;font-size:0.95rem">검색 결과가 없습니다.</div>';
                     return;
                 }
 
                 eventList.innerHTML = filtered.map(ev => `
-                    <a href="${ev.link}" target="_blank" style="background:white;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;border:1px solid rgba(0,0,0,0.1);text-decoration:none;color:inherit;transition:all 0.3s">
-                        <div style="width:100%;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;overflow:hidden;background-color:${ev.bgColor}">
-                            <img src="${ev.image}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">
+                    <a href="${ev.link}" target="_blank" style="background:white;border-radius:12px;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(0,0,0,0.06);text-decoration:none;color:inherit;transition:all 0.2s ease;min-height:60px">
+                        <div style="flex:1;display:flex;align-items:center;gap:1rem;min-width:0">
+                            <div style="width:8px;height:8px;border-radius:50%;background:${ev.bgColor};flex-shrink:0"></div>
+                            <div style="flex:1;min-width:0">
+                                <div style="font-size:0.95rem;font-weight:600;color:#1d1d1f;margin-bottom:0.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.eventName}</div>
+                                <div style="font-size:0.8rem;color:#6e6e73;display:flex;align-items:center;gap:0.75rem">
+                                    <span style="background:#f5f5f7;padding:2px 8px;border-radius:6px;font-weight:500;font-size:0.75rem">${ev.category}</span>
+                                    <span>${ev.period}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div style="padding:1.5rem;flex:1;display:flex;flex-direction:column">
-                            <span style="background:#f2f2f7;color:#6e6e73;padding:4px 10px;border-radius:8px;font-size:0.7rem;font-weight:700;align-self:flex-start;margin-bottom:0.8rem">${ev.category}</span>
-                            <div style="font-size:1rem;font-weight:700;line-height:1.4;margin-bottom:0.8rem;flex:1">${ev.eventName}</div>
-                            <div style="font-size:0.75rem;color:#6e6e73">${ev.period}</div>
-                        </div>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;margin-left:1rem">
+                            <path d="M7.5 15L12.5 10L7.5 5" stroke="#6e6e73" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
                     </a>
                 `).join('');
+                
+                // 호버 효과 추가
+                document.querySelectorAll('#eventList a').forEach(link => {
+                    link.addEventListener('mouseenter', function() {
+                        this.style.backgroundColor = '#f9f9f9';
+                        this.style.transform = 'translateX(4px)';
+                    });
+                    link.addEventListener('mouseleave', function() {
+                        this.style.backgroundColor = 'white';
+                        this.style.transform = 'translateX(0)';
+                    });
+                });
             }
 
             fetchAllEvents();
