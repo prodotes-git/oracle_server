@@ -847,7 +847,7 @@ def read_root():
             <!-- Placeholder Card -->
             <div class="bento-card col-4 row-2">
                 <div>
-                    <div class="icon-wrapper" style="background: #f2f2f7; color: #1d1d1f;">🚀</div>
+                    <div class="icon-wrapper" style="background: #f2f2f7; color: #1d1d1f !important;">🚀</div>
                     <div class="btn-title">Future<br>Expansion</div>
                 </div>
                 <div class="btn-desc">New modules and AI-powered tools arriving soon.</div>
@@ -877,7 +877,7 @@ def kfcc_rates():
         <style>
             :root {
                 --bg-color: #F5F5F7;
-                --accent-color: #1d1d1f;
+                --accent-color: #1d1d1f !important;
                 --text-secondary: #6e6e73;
                 --blue-color: #0071e3;
                 --border-color: rgba(0,0,0,0.1);
@@ -1049,7 +1049,7 @@ def card_events():
         <style>
             :root {
                 --bg-color: #F5F5F7;
-                --accent-color: #1d1d1f;
+                --accent-color: #1d1d1f !important;
                 --text-secondary: #6e6e73;
                 --blue-color: #0071e3;
                 --border-color: rgba(0,0,0,0.1);
@@ -1095,7 +1095,7 @@ def card_events():
                 border-color: var(--blue-color);
             }
 
-            .card-name { font-weight: 600; font-size: 1rem; color: #1d1d1f; text-align: center; }
+            .card-name { font-weight: 600; font-size: 1rem; color: #1d1d1f !important; text-align: center; }
 
             .search-box {
                 background: white;
@@ -1183,7 +1183,7 @@ def card_events():
             .event-title {
                 font-size: 1.05rem;
                 font-weight: 700;
-                color: #1d1d1f;
+                color: #1d1d1f !important;
                 margin-bottom: 1rem;
                 line-height: 1.45;
                 letter-spacing: -0.01em;
@@ -1193,7 +1193,7 @@ def card_events():
                 overflow: hidden;
                 word-break: keep-all;
                 flex: 1;
-             color: #1d1d1f !important;}
+             }
             
             .event-date {
                 font-size: 0.8rem;
@@ -1410,7 +1410,7 @@ def kb_card_events():
         <style>
             :root {
                 --bg-color: #F5F5F7;
-                --accent-color: #1d1d1f;
+                --accent-color: #1d1d1f !important;
                 --text-secondary: #6e6e73;
                 --blue-color: #0071e3;
                 --border-color: rgba(0,0,0,0.1);
@@ -1481,7 +1481,7 @@ def kb_card_events():
             .event-title {
                 font-size: 1.05rem;
                 font-weight: 700;
-                color: #1d1d1f;
+                color: #1d1d1f !important;
                 margin-bottom: 1rem;
                 line-height: 1.45;
                 letter-spacing: -0.01em;
@@ -1491,7 +1491,7 @@ def kb_card_events():
                 overflow: hidden;
                 word-break: keep-all;
                 flex: 1;
-             color: #1d1d1f !important;}
+             }
             
             .event-date {
                 font-size: 0.8rem;
@@ -1619,7 +1619,7 @@ def hana_card_events():
         <style>
             :root {
                 --bg-color: #F5F5F7;
-                --accent-color: #1d1d1f;
+                --accent-color: #1d1d1f !important;
                 --text-secondary: #6e6e73;
                 --blue-color: #0071e3;
                 --border-color: rgba(0,0,0,0.1);
@@ -1690,7 +1690,7 @@ def hana_card_events():
             .event-title {
                 font-size: 1.05rem;
                 font-weight: 700;
-                color: #1d1d1f;
+                color: #1d1d1f !important;
                 margin-bottom: 1rem;
                 line-height: 1.45;
                 letter-spacing: -0.01em;
@@ -1700,7 +1700,7 @@ def hana_card_events():
                 overflow: hidden;
                 word-break: keep-all;
                 flex: 1;
-             color: #1d1d1f !important;}
+             }
             
             .event-date {
                 font-size: 0.8rem;
@@ -1828,7 +1828,7 @@ def shinhan_card_events():
         <style>
             :root {
                 --bg-color: #F5F5F7;
-                --accent-color: #1d1d1f;
+                --accent-color: #1d1d1f !important;
                 --text-secondary: #6e6e73;
                 --blue-color: #0071e3;
                 --border-color: rgba(0,0,0,0.1);
@@ -1901,7 +1901,7 @@ def shinhan_card_events():
             .event-title {
                 font-size: 1.05rem;
                 font-weight: 700;
-                color: #1d1d1f;
+                color: #1d1d1f !important;
                 margin-bottom: 1rem;
                 line-height: 1.45;
                 letter-spacing: -0.01em;
@@ -1911,7 +1911,7 @@ def shinhan_card_events():
                 overflow: hidden;
                 word-break: keep-all;
                 flex: 1;
-             color: #1d1d1f !important;}
+             }
             
             .event-date {
                 font-size: 0.8rem;
@@ -2524,7 +2524,7 @@ def woori_card_events():
         <style>
             :root {
                 --bg-color: #F5F5F7;
-                --accent-color: #1d1d1f;
+                --accent-color: #1d1d1f !important;
                 --text-secondary: #6e6e73;
                 --blue-color: #0071e3;
                 --border-color: rgba(0,0,0,0.1);
@@ -2597,7 +2597,7 @@ def woori_card_events():
             .event-title {
                 font-size: 1.05rem;
                 font-weight: 700;
-                color: #1d1d1f;
+                color: #1d1d1f !important;
                 margin-bottom: 1rem;
                 line-height: 1.45;
                 letter-spacing: -0.01em;
@@ -2607,7 +2607,7 @@ def woori_card_events():
                 overflow: hidden;
                 word-break: keep-all;
                 flex: 1;
-             color: #1d1d1f !important;}
+             }
             
             .event-date {
                 font-size: 0.8rem;
@@ -2735,7 +2735,7 @@ def bc_card_events():
         <style>
             :root {
                 --bg-color: #F5F5F7;
-                --accent-color: #1d1d1f;
+                --accent-color: #1d1d1f !important;
                 --text-secondary: #6e6e73;
                 --blue-color: #0071e3;
                 --border-color: rgba(0,0,0,0.1);
@@ -2808,7 +2808,7 @@ def bc_card_events():
             .event-title {
                 font-size: 1.05rem;
                 font-weight: 700;
-                color: #1d1d1f;
+                color: #1d1d1f !important;
                 margin-bottom: 1rem;
                 line-height: 1.45;
                 letter-spacing: -0.01em;
@@ -2818,7 +2818,7 @@ def bc_card_events():
                 overflow: hidden;
                 word-break: keep-all;
                 flex: 1;
-             color: #1d1d1f !important;}
+             }
             
             .event-date {
                 font-size: 0.8rem;
@@ -2946,7 +2946,7 @@ def samsung_card_events():
         <style>
             :root {
                 --bg-color: #F5F5F7;
-                --accent-color: #1d1d1f;
+                --accent-color: #1d1d1f !important;
                 --text-secondary: #6e6e73;
                 --blue-color: #0071e3;
                 --border-color: rgba(0,0,0,0.1);
@@ -3019,7 +3019,7 @@ def samsung_card_events():
             .event-title {
                 font-size: 1.05rem;
                 font-weight: 700;
-                color: #1d1d1f;
+                color: #1d1d1f !important;
                 margin-bottom: 1rem;
                 line-height: 1.45;
                 letter-spacing: -0.01em;
@@ -3029,7 +3029,7 @@ def samsung_card_events():
                 overflow: hidden;
                 word-break: keep-all;
                 flex: 1;
-             color: #1d1d1f !important;}
+             }
             
             .event-date {
                 font-size: 0.8rem;
@@ -3157,7 +3157,7 @@ def card_events_search():
         <style>
             :root {
                 --bg-color: #F5F5F7;
-                --accent-color: #1d1d1f;
+                --accent-color: #1d1d1f !important;
                 --text-secondary: #6e6e73;
                 --blue-color: #0071e3;
                 --border-color: rgba(0,0,0,0.1);
@@ -3230,7 +3230,7 @@ def card_events_search():
             .event-title {
                 font-size: 1.05rem;
                 font-weight: 700;
-                color: #1d1d1f;
+                color: #1d1d1f !important;
                 margin-bottom: 1rem;
                 line-height: 1.45;
                 letter-spacing: -0.01em;
@@ -3240,7 +3240,7 @@ def card_events_search():
                 overflow: hidden;
                 word-break: keep-all;
                 flex: 1;
-             color: #1d1d1f !important;}
+             }
             
             .event-date {
                 font-size: 0.8rem;
