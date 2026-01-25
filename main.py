@@ -24,7 +24,9 @@ boot_time = time.time()
 
 # 데이터 캐싱을 위한 설정
 SHINHAN_CACHE_KEY = "shinhan_card_events_cache_v1"
-SHINHAN_MYSHOP_CACHE_KEY = "shinhan_myshop_cache_v3" # 안정성 강화를 위한 v3
+SHINHAN_MYSHOP_CACHE_KEY = "shinhan_myshop_cache_v3"
+KB_CACHE_KEY = "kb_card_events_cache_v1"
+HANA_CACHE_KEY = "hana_card_events_cache_v1"
 WOORI_CACHE_KEY = "woori_card_events_cache_v1"
 BC_CACHE_KEY = "bc_card_events_cache_v1"
 SAMSUNG_CACHE_KEY = "samsung_card_events_cache_v1"
