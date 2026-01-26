@@ -30,6 +30,9 @@ HANA_CACHE_KEY = "hana_card_events_cache_v1"
 WOORI_CACHE_KEY = "woori_card_events_cache_v1"
 BC_CACHE_KEY = "bc_card_events_cache_v1"
 SAMSUNG_CACHE_KEY = "samsung_card_events_cache_v1"
+HYUNDAI_CACHE_KEY = "hyundai_card_events_cache_v1"
+LOTTE_CACHE_KEY = "lotte_card_events_cache_v1"
+KFCC_CACHE_KEY = "kfcc_rates_cache_v1"
 CACHE_EXPIRE = 3600  # 1시간 동안 캐시 유지
 
 def get_cached_data(cache_key, file_path):
@@ -451,7 +454,7 @@ async def get_kfcc_data():
     """
     try:
         import json
-        cached_data = r.get(CACHE_KEY)
+        cached_data = r.get(KFCC_CACHE_KEY)
         if cached_data:
             return json.loads(cached_data)
             
@@ -470,7 +473,7 @@ async def get_kfcc_data():
                 "data": data
             }
             
-            r.setex(CACHE_KEY, CACHE_EXPIRE, json.dumps(response_data))
+            r.setex(KFCC_CACHE_KEY, CACHE_EXPIRE, json.dumps(response_data))
             return response_data
 
         # 3. 로컬 파일도 없으면 빈 값 반환 (실시간 크롤링 방지)
@@ -516,7 +519,7 @@ async def background_crawl_kfcc():
         # 캐시 갱신
         if r:
             try:
-                r.setex(CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": data}))
+                r.setex(KFCC_CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": data}))
             except Exception as re:
                 print(f"KFCC Redis save failed: {re}")
         else:
@@ -829,177 +832,6 @@ def read_root():
     """
     return HTMLResponse(content=html_content)
 
-@app.get("/kfcc", response_class=HTMLResponse)
-def kfcc_rates():
-    html_content = """
-    <!DOCTYPE html>
-    <html lang="ko">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>금리조회 | Saemaul Geumgo</title>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;600&display=swap" rel="stylesheet">
-        <style>
-            :root {
-                --bg-color: #F5F5F7;
-                --accent-color: #1d1d1f !important;
-                --text-secondary: #6e6e73;
-                --blue-color: #0071e3;
-                --border-color: rgba(0,0,0,0.1);
-            }
-            
-            body { background-color: var(--bg-color); color: var(--accent-color); font-family: 'Inter', sans-serif; padding-bottom: 50px; }
-
-            .nav-header {
-                position: sticky; top: 0; background: rgba(245, 245, 247, 0.8); backdrop-filter: blur(20px);
-                z-index: 100; padding: 1rem; border-bottom: 1px solid var(--border-color);
-            }
-
-            .nav-content { max-width: 800px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
-            .back-btn { text-decoration: none; color: var(--blue-color); font-weight: 500; }
-            .main-content { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
-            h1 { font-family: 'Outfit', sans-serif; font-size: 2rem; margin-bottom: 1.5rem; }
-
-            .product-tabs { display: flex; background: #E8E8ED; padding: 4px; border-radius: 12px; margin-bottom: 2rem; }
-            .tab-btn {
-                flex: 1; border: none; padding: 10px; border-radius: 10px; font-family: inherit;
-                font-weight: 600; cursor: pointer; background: none; color: var(--text-secondary); transition: all 0.2s;
-            }
-            .tab-btn.active { background: white; color: var(--accent-color); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-
-            .filter-section { margin-bottom: 1.5rem; display: flex; gap: 10px; }
-            .search-input { flex: 1; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-color); font-size: 1rem; outline: none; }
-            .region-select { padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); background: white; outline: none; }
-
-            .top-rank-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-            .rank-card { background: linear-gradient(135deg, #0071e3 0%, #00c6fb 100%); color: white; padding: 1.5rem; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,113,227,0.2); }
-            .rank-title { font-size: 0.8rem; font-weight: 600; opacity: 0.8; }
-            .rank-name { font-size: 1.2rem; font-weight: 700; margin: 0.5rem 0; }
-            .rank-rate { font-size: 2rem; font-weight: 700; }
-
-            .rate-list { display: grid; gap: 12px; }
-            .rate-item {
-                background: white; padding: 1.5rem; border-radius: 20px; display: flex; justify-content: space-between;
-                align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-            }
-
-            .branch-info h3 { font-size: 1.1rem; margin-bottom: 4px; }
-            .branch-info p { font-size: 0.85rem; color: var(--text-secondary); }
-            .rate-value { font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--blue-color); }
-            .loading { text-align: center; padding: 3rem; color: var(--text-secondary); }
-        </style>
-    </head>
-    <body>
-        <div class="nav-header">
-            <div class="nav-content">
-                <a href="/" class="back-btn">← 대시보드</a>
-                <div style="font-weight: 600;">새마을금고 금리조회</div>
-                <div style="width: 60px;"></div>
-            </div>
-        </div>
-
-        <div class="main-content">
-            <h1>전국 금리 실시간 비교</h1>
-            <div class="product-tabs">
-                <button class="tab-btn active" onclick="switchProduct(3)">정기예금</button>
-                <button class="tab-btn" onclick="switchProduct(4)">정기적금</button>
-                <button class="tab-btn" onclick="switchProduct(5)">자유적금</button>
-            </div>
-            <div class="top-rank-container" id="topRank"></div>
-            <div class="filter-section">
-                <select class="region-select" id="regionFilter" onchange="filterData()">
-                    <option value="">전체 지역</option>
-                    <option value="서울">서울</option>
-                    <option value="경기">경기</option>
-                    <option value="인천">인천</option>
-                    <option value="부산">부산</option>
-                    <option value="대구">대구</option>
-                    <option value="광주">광주</option>
-                    <option value="대전">대전</option>
-                    <option value="울산">울산</option>
-                    <option value="세종">세종</option>
-                    <option value="강원">강원</option>
-                    <option value="충북">충북</option>
-                    <option value="충남">충남</option>
-                    <option value="전북">전북</option>
-                    <option value="전남">전남</option>
-                    <option value="경북">경북</option>
-                    <option value="경남">경남</option>
-                    <option value="제주">제주</option>
-                </select>
-                <input type="text" class="search-input" id="searchInput" placeholder="금고 이름으로 검색..." onkeyup="filterData()">
-            </div>
-            <div id="rateList" class="rate-list">
-                <div class="loading">데이터를 불러오는 중입니다...</div>
-            </div>
-        </div>
-
-        <script>
-            let allData = [];
-            let currentProductIdx = 3; 
-
-            async function fetchData() {
-                try {
-                    // 외부 사이트가 아닌 내 서버의 API(/api/kfcc)에서 데이터를 가져옵니다.
-                    const response = await fetch('/api/kfcc');
-                    const data = await response.json();
-                    allData = data.slice(1);
-                    renderData();
-                } catch (error) {
-                    document.getElementById('rateList').innerHTML = '<div class="loading">내 서버의 API에서 데이터를 불러오지 못했습니다.</div>';
-                }
-            }
-
-            function switchProduct(idx) {
-                currentProductIdx = idx;
-                document.querySelectorAll('.tab-btn').forEach((btn, i) => {
-                    btn.classList.toggle('active', i === (idx - 3));
-                });
-                renderData();
-            }
-
-            function filterData() { renderData(); }
-
-            function renderData() {
-                const region = document.getElementById('regionFilter').value;
-                const search = document.getElementById('searchInput').value.toLowerCase();
-                
-                let filtered = allData.filter(item => {
-                    const matchesRegion = region === "" || item[2].includes(region);
-                    const matchesSearch = search === "" || item[1].toLowerCase().includes(search);
-                    return matchesRegion && matchesSearch && item[currentProductIdx] !== null;
-                });
-
-                filtered.sort((a, b) => b[currentProductIdx] - a[currentProductIdx]);
-
-                const top3 = filtered.slice(0, 3);
-                document.getElementById('topRank').innerHTML = top3.map((item, i) => `
-                    <div class="rank-card">
-                        <div class="rank-title">${i+1}위 고금리</div>
-                        <div class="rank-name">${item[1]}</div>
-                        <div class="rank-rate">${item[currentProductIdx]}%</div>
-                        <div style="font-size: 0.7rem; opacity: 0.7;">${item[2]}</div>
-                    </div>
-                `).join('');
-
-                const listHtml = filtered.map(item => `
-                    <div class="rate-item">
-                        <div class="branch-info">
-                            <h3>${item[1]} 새마을금고</h3>
-                            <p>${item[2]}</p>
-                            <p style="font-size: 0.7rem; margin-top: 4px;">기준일: ${item[6]}</p>
-                        </div>
-                        <div class="rate-value">${item[currentProductIdx]}%</div>
-                    </div>
-                `).join('');
-                document.getElementById('rateList').innerHTML = listHtml || '<div class="loading">검색 결과가 없습니다.</div>';
-            }
-            fetchData();
-        </script>
-    </body>
-    </html>
-    """
-    return HTMLResponse(content=html_content)
 
 @app.get("/card-events", response_class=HTMLResponse)
 def card_events():

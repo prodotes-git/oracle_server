@@ -53,14 +53,23 @@ def parse_html(html, target_products=["MG더뱅킹정기예금", "MG더뱅킹정
     # 예: {"MG더뱅킹정기예금": {"12개월": "4.0", "6개월": "3.0"}}
     result = {prod: {} for prod in target_products}
     
-    tables = soup.select(".tblWrap")
-    for tbl in tables:
-        title_elem = tbl.select_one(".tbl-tit")
+    # Find all divTmp1 sections (기본이율 sections)
+    div_sections = soup.select("#divTmp1")
+    for div_section in div_sections:
+        title_elem = div_section.select_one(".tbl-tit")
         if not title_elem: continue
         title = title_elem.text.strip()
         
-        if title in target_products:
-            rows = tbl.select("#divTmp1 tbody tr")
+        # Match target products (handle extra spaces)
+        matched_product = None
+        for prod in target_products:
+            if prod in title:
+                matched_product = prod
+                break
+        
+        if matched_product:
+            # Find tbody rows in this section
+            rows = div_section.select("tbody tr")
             for row in rows:
                 cols = row.select("td")
                 if len(cols) >= 2:
@@ -75,7 +84,7 @@ def parse_html(html, target_products=["MG더뱅킹정기예금", "MG더뱅킹정
                             simple_key = duration
                             rate = parse_rate(val)
                             if rate:
-                                result[title][simple_key] = rate
+                                result[matched_product][simple_key] = rate
                             break
     
     return base_date_v, result
@@ -91,8 +100,7 @@ async def fetch_region_banks(client, r1, r2):
         rows = soup.select("tr")
         banks = []
         for row in rows:
-            if not row.has_attr("onclick"): continue
-            
+            # onclick 속성이 없어도 데이터 span이 있으면 처리하도록 변경
             td = row.select_one("td")
             if not td: continue
             
@@ -102,14 +110,19 @@ async def fetch_region_banks(client, r1, r2):
                 if span.has_attr("title"):
                     data[span["title"]] = span.text.strip()
             
-            if "새마을금고코드" in data:
+            # 새 필드명(gmgoCd, gmgoNm 등) 또는 기존 필드명(새마을금고코드 등) 모두 확인
+            cd = data.get("gmgoCd") or data.get("새마을금고코드")
+            nm = data.get("gmgoNm") or data.get("name") or data.get("새마을금고명")
+            div = data.get("divCd") or data.get("지점구분코드")
+            
+            if cd:
                 banks.append({
-                    "gmgoCd": data["새마을금고코드"],
-                    "gmgoNm": data.get("새마을금고명", ""),
-                    "divCd": data.get("지점구분코드", ""), 
+                    "gmgoCd": cd,
+                    "gmgoNm": nm,
+                    "divCd": div, 
                     "r1": r1,
                     "r2": r2,
-                    "location": f"{r1} {r2}"
+                    "location": data.get("addr") or f"{r1} {r2}"
                 })
         return banks
     except Exception as e:
