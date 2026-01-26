@@ -30,18 +30,22 @@ HEADERS = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
 }
 
-# 수집 대상 기간
-TARGET_DURATIONS = ["12개월", "6개월", "3개월", "36개월", "1개월", "13개월"]
+# 수집 대상 기간 (개월 수)
+TARGET_DURATIONS = [1, 3, 6, 12, 13, 24, 36]
 
 def parse_rate(val):
     try:
-        # '연5.20%' 또는 '5.20' 추출
+        # 숫자 형식만 추출 (예: '연5.20%' -> '5.20')
         match = re.search(r"([\d\.]+)", val)
         if match: return match.group(1)
         return None
     except: return None
 
-def parse_html(html, target_products=["정기예탁금", "정기적금", "자유적금", "MG더뱅킹정기예금", "MG더뱅킹정기적금", "MG더뱅킹자유적금"]):
+def cleanup_title(title):
+    # 공백 및 불필요한 문자 제거
+    return re.sub(r"\s+", "", title)
+
+def parse_html(html):
     soup = BeautifulSoup(html, "lxml")
     
     # 기준일 추출
@@ -51,39 +55,38 @@ def parse_html(html, target_products=["정기예탁금", "정기적금", "자유
         m = re.search(r"\d{4}/\d{2}/\d{2}", date_elem.text)
         if m: base_date = m.group(0)
 
-    result = {prod: {} for prod in target_products}
+    # 상품명별 금리 저장
+    product_rates = {}
     
     # #divTmp1 섹션 (기본이율 테이블)
     sections = soup.select("#divTmp1")
     for sec in sections:
         tit_elem = sec.select_one(".tbl-tit")
         if not tit_elem: continue
-        title = tit_elem.text.strip()
+        raw_title = tit_elem.text.strip()
+        title = cleanup_title(raw_title)
         
-        matched_prod = None
-        for p in target_products:
-            if p in title:
-                matched_prod = p
-                break
+        if title not in product_rates:
+            product_rates[title] = {}
         
-        if matched_prod:
-            rows = sec.select("tbody tr")
-            for row in rows:
-                cols = row.select("td")
-                if len(cols) >= 2:
-                    period_txt = cols[-2].text.strip()
-                    rate_txt = cols[-1].text.strip()
-                    
-                    if "이상" in period_txt or "개월" in period_txt:
-                        for dur in TARGET_DURATIONS:
-                            if dur in period_txt:
-                                rate = parse_rate(rate_txt)
-                                if rate:
-                                    # 기존 데이터가 있으면 더 높은 금리 유지 (또는 덮어쓰기)
-                                    if dur not in result[matched_prod] or float(rate) > 0:
-                                        result[matched_prod][dur] = rate
-                                break
-    return base_date, result
+        rows = sec.select("tbody tr")
+        for row in rows:
+            cols = row.select("td")
+            if len(cols) >= 2:
+                period_txt = cols[-2].text.strip()
+                rate_txt = cols[-1].text.strip()
+                
+                # 기간 추출 (숫자만)
+                period_match = re.search(r"(\d+)개월", period_txt)
+                if period_match:
+                    months = int(period_match.group(1))
+                    if months in TARGET_DURATIONS:
+                        rate = parse_rate(rate_txt)
+                        if rate:
+                            # 동일 상품 내 기간별 금리 저장
+                            product_rates[title][f"{months}개월"] = rate
+                            
+    return base_date, product_rates
 
 async def fetch_region_banks(client, r1, r2):
     url = f"https://www.kfcc.co.kr/map/list.do?r1={r1}&r2={r2}"
@@ -130,25 +133,25 @@ async def fetch_bank_rates(client, bank, semaphore):
         }
         
         try:
-            # 1. 거치식예탁금 (gubuncode 13) - 정기예금 등
+            # 1. 거치식예탁금 (gubuncode 13)
             res_dep = await client.get(f"https://www.kfcc.co.kr/map/goods_19.do?OPEN_TRMID={gmgoCd}&gubuncode=13", headers=HEADERS)
             if res_dep.status_code == 200:
                 date, r_dep = parse_html(res_dep.text)
                 if date: data["기준일"] = date
-                data["rates"].update({k: v for k, v in r_dep.items() if v})
+                data["rates"].update(r_dep)
             
-            # 2. 적립식예탁금 (gubuncode 14) - 정기적금, 자유적금 등
+            # 2. 적립식예탁금 (gubuncode 14)
             res_sav = await client.get(f"https://www.kfcc.co.kr/map/goods_19.do?OPEN_TRMID={gmgoCd}&gubuncode=14", headers=HEADERS)
             if res_sav.status_code == 200:
                 _, r_sav = parse_html(res_sav.text)
-                data["rates"].update({k: v for k, v in r_sav.items() if v})
+                data["rates"].update(r_sav)
                 
             return data
         except:
             return data
 
 async def run_crawler():
-    print("[KFCC] Starting improved crawl...")
+    print("[KFCC] Starting precision crawl...")
     async with httpx.AsyncClient(timeout=20, verify=False) as client:
         # 1. 금고 목록 수집
         print("[KFCC] Phase 1: Fetching bank list...")
@@ -173,8 +176,7 @@ async def run_crawler():
         total = len(rate_tasks)
         for i, coro in enumerate(asyncio.as_completed(rate_tasks)):
             res = await coro
-            # 유효한 금리 데이터가 하나라도 있는 금고만 포함
-            if res["rates"] and any(res["rates"].values()):
+            if res["rates"]:
                 results.append(res)
             
             if (i+1) % 50 == 0 or (i+1) == total:

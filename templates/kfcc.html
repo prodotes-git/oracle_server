@@ -324,7 +324,7 @@
             <p id="updateStatus">데이터를 불러오는 중입니다...</p>
         </div>
         <button id="manualUpdateBtn" class="update-btn" onclick="triggerUpdate()">
-            <span id="btnIcon">🔄</span> <span id="btnText">지금 업데이트</span>
+            <span id="btnIcon">🔄</span> <span id="btnText">정밀 수집 시작</span>
         </button>
     </div>
 
@@ -334,11 +334,11 @@
             <div class="stat-value" id="statCount">-</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label" id="bestRateLabel">최고 금리 (정기예금)</div>
+            <div class="stat-label" id="bestRateLabel">최고 금리 (정기예탁/예금)</div>
             <div class="stat-value" id="statBest">-</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">평준 금리</div>
+            <div class="stat-label">평균 금리 (12개월)</div>
             <div class="stat-value" id="statAvg">-</div>
         </div>
     </div>
@@ -361,15 +361,15 @@
                     <tr>
                         <th width="80">순위</th>
                         <th>금고 정보</th>
-                        <th>정기예탁/예금</th>
-                        <th>정기적금</th>
-                        <th>자유적금</th>
+                        <th width="200">정기예탁/예금 (최고)</th>
+                        <th width="200">정기적금 (최고)</th>
+                        <th width="200">자유적금 (최고)</th>
                         <th>기준일</th>
                     </tr>
                 </thead>
                 <tbody id="tbody">
                     <tr>
-                        <td colspan="6" class="loading">금리 정보를 분석 중입니다...</td>
+                        <td colspan="6" class="loading">정밀 금리 데이터를 분석 중입니다...</td>
                     </tr>
                 </tbody>
             </table>
@@ -387,7 +387,7 @@
                 allData = json.data || [];
 
                 if (json.last_updated) {
-                    document.getElementById('updateStatus').innerText = `${json.last_updated} 기준 (실시간 독립 수집)`;
+                    document.getElementById('updateStatus').innerText = `${json.last_updated} 기준 (정밀 정규화 수집)`;
                 } else {
                     document.getElementById('updateStatus').innerText = `최근 수집 정보 없음. 업데이트를 권장합니다.`;
                 }
@@ -402,31 +402,40 @@
         async function triggerUpdate() {
             const btn = document.getElementById('manualUpdateBtn');
             const text = document.getElementById('btnText');
-            if (!confirm("전국 금고 데이터를 수집하는 데 약 1~2분이 소요됩니다. 시작하시겠습니까?")) return;
+            if (!confirm("전국 1,200개 이상의 금고 데이터를 정밀 수집합니다. 약 1~2분이 소요됩니다. 시작하시겠습니까?")) return;
 
             try {
                 btn.disabled = true;
-                text.innerText = "업데이트 요청됨...";
+                text.innerText = "수집 요청됨...";
                 const res = await fetch('/api/kfcc/update', { method: 'POST' });
                 if (res.ok) {
-                    alert("수집을 시작했습니다. 약 2분 후 페이지를 새로고침해 주세요.");
+                    alert("정밀 수집을 시작했습니다. 약 2분 후 페이지를 새로고침해 주세요.");
                 }
             } catch (e) {
-                alert("업데이트 요청 실패");
+                alert("수집 요청 실패");
                 btn.disabled = false;
-                text.innerText = "지금 업데이트";
+                text.innerText = "정밀 수집 시작";
             }
         }
 
-        function getBestRate(item, duration) {
-            // 정기예금 또는 MG더뱅킹정기예금 중 높은 값
-            const r1 = parseFloat(item.rates?.["정기예탁금"]?.[duration] || 0);
-            const r2 = parseFloat(item.rates?.["MG더뱅킹정기예금"]?.[duration] || 0);
-            return Math.max(r1, r2);
+        // 특정 카테고리(예금, 적금 등)에서 해당 기간의 최고 금리를 찾음
+        function findBestRate(ratesObj, categories, duration) {
+            let max = 0;
+            if (!ratesObj) return 0;
+
+            for (const [prodName, durObj] of Object.entries(ratesObj)) {
+                // 카테고리 키워드 중 하나라도 상품명에 포함되어 있는지 확인
+                const isMatch = categories.some(cat => prodName.includes(cat));
+                if (isMatch) {
+                    const rate = parseFloat(durObj[duration] || 0);
+                    if (rate > max) max = rate;
+                }
+            }
+            return max;
         }
 
         function updateStats() {
-            const rates = allData.map(d => getBestRate(d, '12개월')).filter(r => r > 0);
+            const rates = allData.map(d => findBestRate(d.rates, ["예탁금", "예금"], '12개월')).filter(r => r > 0);
             document.getElementById('statCount').innerText = allData.length.toLocaleString();
             document.getElementById('statBest').innerText = rates.length > 0 ? (Math.max(...rates)).toFixed(2) + '%' : '-';
             const avg = rates.length > 0 ? rates.reduce((a, b) => a + b, 0) / rates.length : 0;
@@ -449,8 +458,8 @@
 
             // 현재 선택된 기간의 예금 금리순 정렬
             filtered.sort((a, b) => {
-                const rA = getBestRate(a, currentDuration);
-                const rB = getBestRate(b, currentDuration);
+                const rA = findBestRate(a.rates, ["예탁금", "예금"], currentDuration);
+                const rB = findBestRate(b.rates, ["예탁금", "예금"], currentDuration);
                 return rB - rA;
             });
 
@@ -461,18 +470,16 @@
             }
 
             tbody.innerHTML = filtered.map((d, i) => {
-                const depRate = getBestRate(d, currentDuration);
+                const depRate = findBestRate(d.rates, ["예탁금", "예금"], currentDuration);
                 const dep = depRate > 0 ? depRate.toFixed(2) : '-';
 
-                const rSav1 = parseFloat(d.rates?.["정기적금"]?.[currentDuration] || 0);
-                const rSav2 = parseFloat(d.rates?.["MG더뱅킹정기적금"]?.[currentDuration] || 0);
-                const savVal = Math.max(rSav1, rSav2);
-                const sav = savVal > 0 ? savVal.toFixed(2) : '-';
+                // 적금 (자유적립 제외한 정기적금 우선)
+                const savRate = findBestRate(d.rates, ["정기적금"], currentDuration);
+                const sav = savRate > 0 ? savRate.toFixed(2) : '-';
 
-                const rFree1 = parseFloat(d.rates?.["자유적금"]?.[currentDuration] || 0);
-                const rFree2 = parseFloat(d.rates?.["MG더뱅킹자유적금"]?.[currentDuration] || 0);
-                const freeVal = Math.max(rFree1, rFree2);
-                const free = freeVal > 0 ? freeVal.toFixed(2) : '-';
+                // 자유적금
+                const freeRate = findBestRate(d.rates, ["자유적금", "자유적립"], currentDuration);
+                const free = freeRate > 0 ? freeRate.toFixed(2) : '-';
 
                 const rankClass = i < 3 && dep !== '-' ? `top-${i + 1} top-rank` : '';
                 const highClass = parseFloat(dep) >= 4.0 ? 'rate-high' : '';
