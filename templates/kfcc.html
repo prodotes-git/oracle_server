@@ -4,74 +4,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>새마을금고 금리 조회</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;600&display=swap"
+    <title>새마을금고 금리 트래커 | Oracle Finance</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;600;700&display=swap"
         rel="stylesheet">
     <style>
         :root {
-            --primary-color: #0046ff;
-            --bg-color: #F5F5F7;
-            --text-color: #1d1d1f;
+            --primary: #0046ff;
+            --bg: #F5F5F7;
+            --card: #ffffff;
+            --text: #1d1d1f;
+            --text-mute: #86868b;
+            --border: rgba(0, 0, 0, 0.08);
+            --success: #10b981;
         }
 
         body {
             margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-            background: var(--bg-color);
-            color: var(--text-color);
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
         }
 
-        .container {
+        .header {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+        }
+
+        .header-content {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 2rem;
-        }
-
-        h1 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 2rem;
-            margin-bottom: 2rem;
+            padding: 1rem 2rem;
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-family: 'Outfit';
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 1.2rem;
+        }
+
+        .back-link {
+            text-decoration: none;
+            color: var(--text-mute);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .hero {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .hero h1 {
+            font-family: 'Outfit';
+            font-size: 3rem;
+            margin: 0;
+            letter-spacing: -0.04em;
+            font-weight: 700;
+        }
+
+        .hero p {
+            color: var(--text-mute);
+            font-size: 1.2rem;
+            margin-top: 0.5rem;
+            font-weight: 300;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-mute);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            font-family: 'Outfit';
+            color: var(--primary);
+            margin-top: 0.2rem;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
         }
 
         .controls {
             display: flex;
             gap: 1rem;
             margin-bottom: 2rem;
+            flex-wrap: wrap;
             align-items: center;
-            background: white;
-            padding: 1rem;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
-        select {
-            padding: 8px 16px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            font-size: 1rem;
-        }
-
-        .search-box {
+        .search-wrapper {
             flex: 1;
+            min-width: 250px;
+            position: relative;
         }
 
-        input {
+        .search-wrapper input {
             width: 100%;
-            padding: 8px 16px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
+            padding: 12px 20px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
             font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
         }
 
-        .table-container {
+        .search-wrapper input:focus {
+            border-color: var(--primary);
+        }
+
+        .filter-chip-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chip {
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
             background: white;
-            border-radius: 16px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .chip.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Table Design */
+        .data-table-wrapper {
+            background: var(--card);
+            border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border);
         }
 
         table {
@@ -80,73 +190,149 @@
             text-align: left;
         }
 
-        th,
-        td {
-            padding: 1rem;
-            border-bottom: 1px solid #eee;
-        }
-
         th {
-            background: #f9f9f9;
+            padding: 1.2rem;
+            background: #fafafa;
+            font-size: 0.85rem;
+            color: var(--text-mute);
             font-weight: 600;
-            font-size: 0.9rem;
-            color: #666;
+            border-bottom: 1px solid var(--border);
         }
 
-        tr:hover {
-            background: #f5f5f7;
+        td {
+            padding: 1.2rem;
+            border-bottom: 1px solid #f2f2f2;
+            font-size: 0.95rem;
+        }
+
+        tr:hover td {
+            background: #fcfcfd;
+        }
+
+        tr.top-rank {
+            background: #f0f7ff;
+        }
+
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            background: #e5e7eb;
+            color: #4b5563;
+        }
+
+        .top-1 .rank-badge {
+            background: #fbbf24;
+            color: white;
+        }
+
+        .top-2 .rank-badge {
+            background: #9ca3af;
+            color: white;
+        }
+
+        .top-3 .rank-badge {
+            background: #d97706;
+            color: white;
+        }
+
+        .rate-cell {
+            font-family: 'Outfit';
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text);
         }
 
         .rate-high {
             color: #d32f2f;
-            font-weight: 700;
+        }
+
+        .location-cell {
+            color: var(--text-mute);
+            font-size: 0.85rem;
         }
 
         .loading {
-            padding: 2rem;
+            padding: 5rem;
             text-align: center;
-            color: #666;
+            color: var(--text-mute);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            th:nth-child(4),
+            td:nth-child(4) {
+                display: none;
+            }
+
+            /* Hide free savings on mobile */
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <h1>🏦 새마을금고 금리 조회</h1>
-        <div id="lastUpdated" style="margin-bottom: 20px; color: #666; font-size: 0.9rem;"></div>
+    <header class="header">
+        <div class="header-content">
+            <a href="/" class="logo">ORACLE FINANCE</a>
+            <a href="/card-events" class="back-link">← 통합 검색으로</a>
+        </div>
+    </header>
 
+    <div class="hero">
+        <h1>새마을금고 금리 트래커</h1>
+        <p id="updateStatus">데이터를 불러오는 중입니다...</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">조회된 금고 수</div>
+            <div class="stat-value" id="statCount">-</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">최고 금리 (12개월)</div>
+            <div class="stat-value" id="statBest">-</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">평균 금리</div>
+            <div class="stat-value" id="statAvg">-</div>
+        </div>
+    </div>
+
+    <div class="main-container">
         <div class="controls">
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="금고명 또는 지역 검색..." onkeyup="renderTable()">
+            <div class="search-wrapper">
+                <input type="text" id="searchInput" placeholder="금고명, 지역, 또는 도로명 주소를 입력하세요..." onkeyup="render()">
             </div>
-            <div>
-                <label>계약 기간: </label>
-                <select id="durationSelect" onchange="renderTable()">
-                    <option value="12개월" selected>12개월</option>
-                    <option value="6개월">6개월</option>
-                    <option value="3개월">3개월</option>
-                    <option value="1개월">1개월</option>
-                    <option value="13개월">13개월</option>
-                    <option value="36개월">36개월</option>
-                </select>
+            <div class="filter-chip-group">
+                <div class="chip active" onclick="setDuration('12개월', this)">12개월</div>
+                <div class="chip" onclick="setDuration('6개월', this)">6개월</div>
+                <div class="chip" onclick="setDuration('36개월', this)">36개월</div>
             </div>
         </div>
 
-        <div class="table-container">
+        <div class="data-table-wrapper">
             <table>
                 <thead>
                     <tr>
-                        <th width="20%">금고명</th>
-                        <th width="15%">위치</th>
-                        <th width="20%">정기예금 (MG더뱅킹)</th>
-                        <th width="20%">정기적금 (MG더뱅킹)</th>
-                        <th width="20%">자유적금 (MG더뱅킹)</th>
-                        <th width="5%">기준일</th>
+                        <th width="80">순위</th>
+                        <th>금고 정보</th>
+                        <th>정기예금</th>
+                        <th>정기적금</th>
+                        <th>자유적금</th>
+                        <th>조회기준일</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody">
+                <tbody id="tbody">
                     <tr>
-                        <td colspan="6" class="loading">데이터를 불러오는 중입니다...</td>
+                        <td colspan="6" class="loading">금리 정보를 분석 중입니다...</td>
                     </tr>
                 </tbody>
             </table>
@@ -155,76 +341,85 @@
 
     <script>
         let allData = [];
+        let currentDuration = '12개월';
 
-        async function fetchData() {
+        async function init() {
             try {
                 const res = await fetch('/api/kfcc');
                 const json = await res.json();
+                allData = json.data || [];
 
-                // 업데이트 시간 표시
                 if (json.last_updated) {
-                    document.getElementById('lastUpdated').innerText = `🕒 마지막 업데이트: ${json.last_updated}`;
-                } else {
-                    document.getElementById('lastUpdated').innerText = `ℹ️ 아직 수집된 데이터가 없습니다. (업데이트 필요)`;
+                    document.getElementById('updateStatus').innerText = `${json.last_updated} 기준 (실시간 독립 수집)`;
                 }
 
-                // 데이터 처리 (신형 포맷: { data: [...], last_updated: ... })
-                if (json.data) {
-                    allData = json.data;
-                } else if (Array.isArray(json)) {
-                    // 구형 포맷 호환 (혹시 모를 캐시 문제 대비)
-                    allData = json;
-                }
-
-                renderTable();
+                updateStats();
+                render();
             } catch (e) {
-                document.getElementById('tableBody').innerHTML = `<tr><td colspan="6" class="loading">오류 발생: ${e.message}</td></tr>`;
+                document.getElementById('tbody').innerHTML = '<tr><td colspan="6" class="loading">데이터 로드 실패</td></tr>';
             }
         }
 
-        function renderTable() {
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            const duration = document.getElementById('durationSelect').value;
-            const tbody = document.getElementById('tableBody');
+        function updateStats() {
+            const rates = allData.map(d => parseFloat(d.rates?.["MG더뱅킹정기예금"]?.["12개월"] || 0)).filter(r => r > 0);
+            document.getElementById('statCount').innerText = allData.length.toLocaleString();
+            document.getElementById('statBest').innerText = (Math.max(...rates) || 0).toFixed(2) + '%';
+            const avg = rates.reduce((a, b) => a + b, 0) / rates.length;
+            document.getElementById('statAvg').innerText = (avg || 0).toFixed(2) + '%';
+        }
 
-            // 필터링
-            const filtered = allData.filter(item =>
-                (item.gmgoNm || "").toLowerCase().includes(search) ||
-                (item.location || "").toLowerCase().includes(search)
+        function setDuration(dur, el) {
+            currentDuration = dur;
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            render();
+        }
+
+        function render() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allData.filter(d =>
+                (d.gmgoNm || "").toLowerCase().includes(query) ||
+                (d.location || "").toLowerCase().includes(query)
             );
 
+            // 12개월 예금 금리순 정렬
+            filtered.sort((a, b) => {
+                const rA = parseFloat(a.rates?.["MG더뱅킹정기예금"]?.[currentDuration] || 0);
+                const rB = parseFloat(b.rates?.["MG더뱅킹정기예금"]?.[currentDuration] || 0);
+                return rB - rA;
+            });
+
+            const tbody = document.getElementById('tbody');
             if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="loading">검색 결과가 없습니다.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="loading">일치하는 금고가 없습니다.</td></tr>';
                 return;
             }
 
-            // 정렬 (예금 금리 높은 순)
-            filtered.sort((a, b) => {
-                const rateA = parseFloat(a.rates?.["MG더뱅킹정기예금"]?.[duration] || 0);
-                const rateB = parseFloat(b.rates?.["MG더뱅킹정기예금"]?.[duration] || 0);
-                return rateB - rateA;
-            });
+            tbody.innerHTML = filtered.map((d, i) => {
+                const dep = d.rates?.["MG더뱅킹정기예금"]?.[currentDuration] || '-';
+                const sav = d.rates?.["MG더뱅킹정기적금"]?.[currentDuration] || '-';
+                const free = d.rates?.["MG더뱅킹자유적금"]?.[currentDuration] || '-';
 
-            tbody.innerHTML = filtered.map(item => {
-                const getRate = (prod) => {
-                    const r = item.rates?.[prod]?.[duration];
-                    return r ? `<span class="rate-high">${r}%</span>` : '-';
-                };
+                const rankClass = i < 3 ? `top-${i + 1} top-rank` : '';
+                const highClass = parseFloat(dep) >= 4.0 ? 'rate-high' : '';
 
                 return `
-                    <tr>
-                        <td>${item.gmgoNm}</td>
-                        <td style="color: #666; font-size: 0.9em;">${item.location}</td>
-                        <td>${getRate("MG더뱅킹정기예금")}</td>
-                        <td>${getRate("MG더뱅킹정기적금")}</td>
-                        <td>${getRate("MG더뱅킹자유적금")}</td>
-                        <td style="color: #999; font-size: 0.8em;">${item["기준일"] || '-'}</td>
+                    <tr class="${rankClass}">
+                        <td><span class="rank-badge">${i + 1}</span></td>
+                        <td>
+                            <div style="font-weight:700;">${d.gmgoNm}</div>
+                            <div class="location-cell">${d.location}</div>
+                        </td>
+                        <td class="rate-cell ${highClass}">${dep}${dep !== '-' ? '%' : ''}</td>
+                        <td class="rate-cell">${sav}${sav !== '-' ? '%' : ''}</td>
+                        <td class="rate-cell">${free}${free !== '-' ? '%' : ''}</td>
+                        <td class="location-cell">${d["기준일"] || '-'}</td>
                     </tr>
                 `;
             }).join('');
         }
 
-        fetchData();
+        init();
     </script>
 </body>
 
