@@ -182,28 +182,6 @@
             border-color: var(--primary);
         }
 
-        .filter-chip-group {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .chip {
-            padding: 8px 16px;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            background: white;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .chip.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
         .data-table-wrapper {
             background: var(--card);
             border-radius: 24px;
@@ -225,6 +203,22 @@
             color: var(--text-mute);
             font-weight: 600;
             border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        th:hover {
+            background: #f0f0f0;
+        }
+
+        th.sort-active {
+            color: var(--primary);
+        }
+
+        th span.sort-icon {
+            margin-left: 5px;
+            font-size: 0.7rem;
         }
 
         td {
@@ -301,11 +295,6 @@
             .hero h1 {
                 font-size: 2.2rem;
             }
-
-            th:nth-child(4),
-            td:nth-child(4) {
-                display: none;
-            }
         }
     </style>
 </head>
@@ -320,11 +309,11 @@
 
     <div class="hero">
         <div class="hero-text">
-            <h1>새마을금고 금리 트래커</h1>
+            <h1>새마을금고 12개월 금리</h1>
             <p id="updateStatus">데이터를 불러오는 중입니다...</p>
         </div>
         <button id="manualUpdateBtn" class="update-btn" onclick="triggerUpdate()">
-            <span id="btnIcon">🔄</span> <span id="btnText">정밀 수집 시작</span>
+            <span>🔄</span> <span id="btnText">지금 업데이트</span>
         </button>
     </div>
 
@@ -334,11 +323,11 @@
             <div class="stat-value" id="statCount">-</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label" id="bestRateLabel">최고 금리 (정기예탁/예금)</div>
+            <div class="stat-label">최고 예금 금리</div>
             <div class="stat-value" id="statBest">-</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">평균 금리 (12개월)</div>
+            <div class="stat-label">평균 예금 금리</div>
             <div class="stat-value" id="statAvg">-</div>
         </div>
     </div>
@@ -348,10 +337,8 @@
             <div class="search-wrapper">
                 <input type="text" id="searchInput" placeholder="금고명 또는 지역 검색..." onkeyup="render()">
             </div>
-            <div class="filter-chip-group">
-                <div class="chip active" onclick="setDuration('12개월', this)">12개월</div>
-                <div class="chip" onclick="setDuration('6개월', this)">6개월</div>
-                <div class="chip" onclick="setDuration('36개월', this)">36개월</div>
+            <div style="font-size: 0.9rem; color: var(--text-mute); font-weight: 500;">
+                💡 각 항목의 제목을 클릭하면 금리순으로 정렬됩니다.
             </div>
         </div>
 
@@ -359,17 +346,17 @@
             <table>
                 <thead>
                     <tr>
-                        <th width="80">순위</th>
+                        <th onclick="setSort('rank')">순위<span class="sort-icon" id="icon-rank"></span></th>
                         <th>금고 정보</th>
-                        <th width="200">정기예탁/예금 (최고)</th>
-                        <th width="200">정기적금 (최고)</th>
-                        <th width="200">자유적금 (최고)</th>
-                        <th>기준일</th>
+                        <th onclick="setSort('dep')">MG더뱅킹정기예금<span class="sort-icon" id="icon-dep"></span></th>
+                        <th onclick="setSort('sav')">MG더뱅킹정기적금<span class="sort-icon" id="icon-sav"></span></th>
+                        <th onclick="setSort('free')">MG더뱅킹자유적금<span class="sort-icon" id="icon-free"></span></th>
+                        <th>조회기준일</th>
                     </tr>
                 </thead>
                 <tbody id="tbody">
                     <tr>
-                        <td colspan="6" class="loading">정밀 금리 데이터를 분석 중입니다...</td>
+                        <td colspan="6" class="loading">데이터를 분석 중입니다...</td>
                     </tr>
                 </tbody>
             </table>
@@ -378,7 +365,7 @@
 
     <script>
         let allData = [];
-        let currentDuration = '12개월';
+        let currentSort = { key: 'dep', order: 'desc' }; // 기본: 예금 높은 순
 
         async function init() {
             try {
@@ -387,9 +374,7 @@
                 allData = json.data || [];
 
                 if (json.last_updated) {
-                    document.getElementById('updateStatus').innerText = `${json.last_updated} 기준 (정밀 정규화 수집)`;
-                } else {
-                    document.getElementById('updateStatus').innerText = `최근 수집 정보 없음. 업데이트를 권장합니다.`;
+                    document.getElementById('updateStatus').innerText = `${json.last_updated} 기준 (12개월 맞춤 수집)`;
                 }
 
                 updateStats();
@@ -401,51 +386,36 @@
 
         async function triggerUpdate() {
             const btn = document.getElementById('manualUpdateBtn');
-            const text = document.getElementById('btnText');
-            if (!confirm("전국 1,200개 이상의 금고 데이터를 정밀 수집합니다. 약 1~2분이 소요됩니다. 시작하시겠습니까?")) return;
-
+            if (!confirm("전국 금고의 12개월 금리를 수집합니다. 시작하시겠습니까?")) return;
             try {
                 btn.disabled = true;
-                text.innerText = "수집 요청됨...";
-                const res = await fetch('/api/kfcc/update', { method: 'POST' });
-                if (res.ok) {
-                    alert("정밀 수집을 시작했습니다. 약 2분 후 페이지를 새로고침해 주세요.");
-                }
-            } catch (e) {
-                alert("수집 요청 실패");
-                btn.disabled = false;
-                text.innerText = "정밀 수집 시작";
-            }
+                await fetch('/api/kfcc/update', { method: 'POST' });
+                alert("수집을 시작했습니다. 약 1~2분 후 페이지를 새로고침해 주세요.");
+            } catch (e) { alert("업데이트 실패"); btn.disabled = false; }
         }
 
-        // 특정 카테고리(예금, 적금 등)에서 해당 기간의 최고 금리를 찾음
-        function findBestRate(ratesObj, categories, duration) {
-            let max = 0;
-            if (!ratesObj) return 0;
-
-            for (const [prodName, durObj] of Object.entries(ratesObj)) {
-                // 카테고리 키워드 중 하나라도 상품명에 포함되어 있는지 확인
-                const isMatch = categories.some(cat => prodName.includes(cat));
-                if (isMatch) {
-                    const rate = parseFloat(durObj[duration] || 0);
-                    if (rate > max) max = rate;
-                }
-            }
-            return max;
+        function getVal(item, key) {
+            if (key === 'dep') return parseFloat(item.rates?.["MG더뱅킹정기예금"] || 0);
+            if (key === 'sav') return parseFloat(item.rates?.["MG더뱅킹정기적금"] || 0);
+            if (key === 'free') return parseFloat(item.rates?.["MG더뱅킹자유적금"] || 0);
+            return 0;
         }
 
         function updateStats() {
-            const rates = allData.map(d => findBestRate(d.rates, ["예탁금", "예금"], '12개월')).filter(r => r > 0);
+            const rates = allData.map(d => getVal(d, 'dep')).filter(r => r > 0);
             document.getElementById('statCount').innerText = allData.length.toLocaleString();
-            document.getElementById('statBest').innerText = rates.length > 0 ? (Math.max(...rates)).toFixed(2) + '%' : '-';
+            document.getElementById('statBest').innerText = rates.length > 0 ? Math.max(...rates).toFixed(2) + '%' : '-';
             const avg = rates.length > 0 ? rates.reduce((a, b) => a + b, 0) / rates.length : 0;
             document.getElementById('statAvg').innerText = avg > 0 ? avg.toFixed(2) + '%' : '-';
         }
 
-        function setDuration(dur, el) {
-            currentDuration = dur;
-            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-            el.classList.add('active');
+        function setSort(key) {
+            if (currentSort.key === key) {
+                currentSort.order = currentSort.order === 'desc' ? 'asc' : 'desc';
+            } else {
+                currentSort.key = key;
+                currentSort.order = 'desc';
+            }
             render();
         }
 
@@ -456,33 +426,35 @@
                 (d.location || "").toLowerCase().includes(query)
             );
 
-            // 현재 선택된 기간의 예금 금리순 정렬
+            // 정렬 처리
             filtered.sort((a, b) => {
-                const rA = findBestRate(a.rates, ["예탁금", "예금"], currentDuration);
-                const rB = findBestRate(b.rates, ["예탁금", "예금"], currentDuration);
-                return rB - rA;
+                let valA, valB;
+                if (currentSort.key === 'rank') {
+                    // 순위 정렬은 정기예금 기준 원본 인덱스 개념이라 생략하거나 기본 가나다순 처리
+                    return currentSort.order === 'desc' ? 0 : 0;
+                }
+                valA = getVal(a, currentSort.key);
+                valB = getVal(b, currentSort.key);
+                return currentSort.order === 'desc' ? valB - valA : valA - valB;
             });
+
+            // 헤더 아이콘 업데이트
+            document.querySelectorAll('th span.sort-icon').forEach(span => span.innerText = '');
+            const activeIcon = document.getElementById(`icon-${currentSort.key}`);
+            if (activeIcon) activeIcon.innerText = currentSort.order === 'desc' ? ' ▼' : ' ▲';
 
             const tbody = document.getElementById('tbody');
             if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="loading">검색 결과가 없습니다.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="loading">결과가 없습니다.</td></tr>';
                 return;
             }
 
             tbody.innerHTML = filtered.map((d, i) => {
-                const depRate = findBestRate(d.rates, ["예탁금", "예금"], currentDuration);
-                const dep = depRate > 0 ? depRate.toFixed(2) : '-';
+                const dep = d.rates?.["MG더뱅킹정기예금"] ? parseFloat(d.rates["MG더뱅킹정기예금"]).toFixed(2) + '%' : '-';
+                const sav = d.rates?.["MG더뱅킹정기적금"] ? parseFloat(d.rates["MG더뱅킹정기적금"]).toFixed(2) + '%' : '-';
+                const free = d.rates?.["MG더뱅킹자유적금"] ? parseFloat(d.rates["MG더뱅킹자유적금"]).toFixed(2) + '%' : '-';
 
-                // 적금 (자유적립 제외한 정기적금 우선)
-                const savRate = findBestRate(d.rates, ["정기적금"], currentDuration);
-                const sav = savRate > 0 ? savRate.toFixed(2) : '-';
-
-                // 자유적금
-                const freeRate = findBestRate(d.rates, ["자유적금", "자유적립"], currentDuration);
-                const free = freeRate > 0 ? freeRate.toFixed(2) : '-';
-
-                const rankClass = i < 3 && dep !== '-' ? `top-${i + 1} top-rank` : '';
-                const highClass = parseFloat(dep) >= 4.0 ? 'rate-high' : '';
+                const rankClass = i < 3 && dep !== '-' && currentSort.key === 'dep' ? `top-${i + 1} top-rank` : '';
 
                 return `
                     <tr class="${rankClass}">
@@ -491,9 +463,9 @@
                             <div style="font-weight:700;">${d.gmgoNm}</div>
                             <div class="location-cell">${d.location}</div>
                         </td>
-                        <td class="rate-cell ${highClass}">${dep}${dep !== '-' ? '%' : ''}</td>
-                        <td class="rate-cell">${sav}${sav !== '-' ? '%' : ''}</td>
-                        <td class="rate-cell">${free}${free !== '-' ? '%' : ''}</td>
+                        <td class="rate-cell ${parseFloat(dep) >= 3.0 ? 'rate-high' : ''}">${dep}</td>
+                        <td class="rate-cell">${sav}</td>
+                        <td class="rate-cell">${free}</td>
                         <td class="location-cell">${d["기준일"] || '-'}</td>
                     </tr>
                 `;
