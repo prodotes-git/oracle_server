@@ -450,13 +450,18 @@ async def get_kfcc_data():
     새마을금고 금리 데이터를 반환합니다.
     1. Redis 캐시 우선 확인
     2. 캐시 없으면 로컬 파일 확인
-    3. 둘 다 없으면 실시간 크롤링 (시간 소요됨)
+    3. 둘 다 없으면 빈 데이터 반환
     """
     try:
         import json
-        cached_data = r.get(KFCC_CACHE_KEY)
-        if cached_data:
-            return json.loads(cached_data)
+        # Redis 캐시 확인 (Redis 연결이 있을 때만)
+        if r:
+            try:
+                cached_data = r.get(KFCC_CACHE_KEY)
+                if cached_data:
+                    return json.loads(cached_data)
+            except Exception as redis_error:
+                print(f"Redis error: {redis_error}")
             
         # 로컬 파일 확인
         local_path = "kfcc_data.json"
@@ -473,14 +478,16 @@ async def get_kfcc_data():
                 "data": data
             }
             
-            r.setex(KFCC_CACHE_KEY, CACHE_EXPIRE, json.dumps(response_data))
+            # Redis에 캐시 저장 시도
+            if r:
+                try:
+                    r.setex(KFCC_CACHE_KEY, CACHE_EXPIRE, json.dumps(response_data))
+                except Exception:
+                    pass
             return response_data
 
-        # 3. 로컬 파일도 없으면 빈 값 반환 (실시간 크롤링 방지)
-        if not os.path.exists(local_path):
-             return {"last_updated": None, "message": "데이터가 없습니다.", "data": []}
-        
-        return {"last_updated": None, "data": []}
+        # 로컬 파일도 없으면 빈 값 반환
+        return {"last_updated": None, "message": "데이터가 없습니다.", "data": []}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"서버 내부 오류: {str(e)}")
