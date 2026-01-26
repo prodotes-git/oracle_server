@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+    <html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>카드사 이벤트 | Oracle Dashboard</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;600&display=swap" rel="stylesheet">
+        <style>
+            :root {
+                --bg-color: #F5F5F7;
+                --accent-color: #1d1d1f !important;
+                --text-secondary: #6e6e73;
+                --blue-color: #0071e3;
+                --border-color: rgba(0,0,0,0.1);
+            }
+            
+            body { background-color: var(--bg-color); color: var(--accent-color); font-family: 'Inter', sans-serif; padding-bottom: 50px; }
+
+            .nav-header {
+                position: sticky; top: 0; background: rgba(245, 245, 247, 0.8); backdrop-filter: blur(20px);
+                z-index: 100; padding: 1rem; border-bottom: 1px solid var(--border-color);
+            }
+
+            .nav-content { max-width: 800px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+            .back-btn { text-decoration: none; color: var(--blue-color); font-weight: 500; }
+            
+            .main-content { max-width: 800px; margin: 3rem auto; padding: 0 1.5rem; text-align: center; }
+            h1 { font-family: 'Outfit', sans-serif; font-size: 2.5rem; margin-bottom: 1rem; letter-spacing: -0.02em; }
+            .subtitle { color: var(--text-secondary); margin-bottom: 3rem; font-weight: 300; }
+
+            .card-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+                gap: 1rem;
+            }
+
+            .card-link {
+                background: white;
+                border: 1px solid var(--border-color);
+                border-radius: 16px;
+                padding: 1rem;
+                text-decoration: none;
+                color: inherit;
+                transition: all 0.2s ease;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            }
+
+            .card-link:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+                border-color: var(--blue-color);
+            }
+
+            .card-name { font-weight: 600; font-size: 1rem; color: #1d1d1f !important; text-align: center; }
+
+            .search-box {
+                background: white;
+                border-radius: 16px;
+                padding: 1rem 1.5rem;
+                margin-bottom: 3rem;
+                display: flex;
+                align-items: center;
+                border: 1px solid var(--border-color);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            }
+            
+            
+            .search-box input {
+                border: none;
+                outline: none;
+                width: 100%;
+                font-size: 1rem;
+                font-family: inherit;
+                margin-left: 10px;
+            }
+
+            .event-list { 
+                display: grid; 
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+                gap: 1.25rem; 
+                margin-top: 2rem; 
+            }
+            .event-card {
+                background: white; 
+                border-radius: 18px; 
+                padding: 1.5rem; 
+                display: flex; 
+                flex-direction: column; 
+                justify-content: space-between;
+                border: 1px solid rgba(0,0,0,0.08); 
+                text-decoration: none; 
+                color: inherit; 
+                transition: all 0.2s ease;
+                height: 100%;
+                min-height: 180px;
+                position: relative;
+                box-sizing: border-box;
+            }
+            .event-card:hover { 
+                transform: translateY(-4px);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+                border-color: rgba(0,0,0,0.12);
+            }
+            
+            .event-image { width: 100%; height: 120px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem; background: #f5f5f7; }
+            .event-category-row {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 0.8rem;
+            }
+
+            .event-image {
+                width: 100%;
+                height: 120px;
+                object-fit: cover;
+                border-radius: 12px;
+                margin-bottom: 1rem;
+                background: #f5f5f7;
+            }
+
+            
+            .tags-wrapper {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                align-items: center;
+            }
+
+            .company-tag {
+                background: #1d1d1f; 
+                color: white; 
+                padding: 4px 8px; 
+                border-radius: 6px; 
+                font-weight: 600; 
+                font-size: 0.7rem;
+                letter-spacing: -0.01em;
+            }
+            .category-tag {
+                background: #f5f5f7; 
+                color: #6e6e73; 
+                padding: 4px 8px; 
+                border-radius: 6px; 
+                font-weight: 600; 
+                font-size: 0.7rem;
+                letter-spacing: -0.01em;
+            }
+            
+            .event-title {
+                font-size: 1.05rem;
+                font-weight: 700;
+                color: #1d1d1f !important;
+                margin-bottom: 1rem;
+                line-height: 1.45;
+                letter-spacing: -0.01em;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                word-break: keep-all;
+                flex: 1;
+             }
+            
+            .event-date {
+                font-size: 0.8rem;
+                color: #86868b;
+                letter-spacing: -0.01em;
+                margin-top: auto;
+            }
+            
+            .loading { text-align: center; padding: 4rem; color: var(--text-secondary); font-size: 0.95rem; grid-column: 1 / -1; }
+
+        </style>
+    </head>
+    <body>
+        <div class="nav-header">
+            <div class="nav-content">
+                <a href="/" class="back-btn">← 대시보드</a>
+                <div style="font-weight: 600;">카드사 이벤트 검색</div>
+                <div style="width: 60px;"></div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="search-box" style="margin-top: 20px;">
+                <span>🔍</span>
+                <input type="text" id="cardSearch" placeholder='통합 검색 (예: 할인 캐시백 -> OR 검색, "할인" "캐시백" -> AND 검색)' onkeyup="filterCards()">
+            </div>
+
+
+            <div class="card-grid" id="cardGrid">
+                <a href="/card-events/shinhan" class="card-link" data-name="신한카드">
+                    <div class="card-name">신한카드</div>
+                </a>
+                <a href="/card-events/samsung" class="card-link" data-name="삼성카드">
+                    <div class="card-name">삼성카드</div>
+                </a>
+                <a href="/card-events/hyundai" class="card-link" data-name="현대카드">
+                    <div class="card-name">현대카드</div>
+                </a>
+                <a href="/card-events/kb" class="card-link" data-name="KB국민카드">
+                    <div class="card-name">KB국민카드</div>
+                </a>
+                <a href="/card-events/lotte" class="card-link" data-name="롯데카드">
+                    <div class="card-name">롯데카드</div>
+                </a>
+                <a href="/card-events/woori" class="card-link" data-name="우리카드">
+                    <div class="card-name">우리카드</div>
+                </a>
+                <a href="/card-events/hana" class="card-link" data-name="하나카드">
+                    <div class="card-name">하나카드</div>
+                </a>
+                <a href="/card-events/bc" class="card-link" data-name="BC카드">
+                    <div class="card-name">BC카드</div>
+                </a>
+            </div>
+        </div>
+
+        <script>
+            let allEvents = [];
+
+            async function updateData() {
+                const path = window.location.pathname.split("/").pop();
+                try {
+                    await fetch(`/api/${path}/update`, {method:"POST"});
+                    alert("데이터 갱신을 시작했습니다. 10초 후 새로고침 해주세요.");
+                } catch(e) {}
+            }
+            
+            async function fetchAllEvents() {
+                try {
+                    const [shinhanRes, kbRes, hanaRes, wooriRes, bcRes, samsungRes, hyundaiRes, lotteRes] = await Promise.all([
+                        fetch('/api/shinhan-cards'),
+                        fetch('/api/kb-cards'),
+                        fetch('/api/hana-cards'),
+                        fetch('/api/woori-cards'),
+                        fetch('/api/bc-cards'),
+                        fetch('/api/samsung-cards'),
+                        fetch('/api/hyundai-cards'),
+                        fetch('/api/lotte-cards')
+                    ]);
+                    
+                    const shinhanData = await shinhanRes.json();
+                    const kbData = await kbRes.json();
+                    const hanaData = await hanaRes.json();
+                    const wooriData = await wooriRes.json();
+                    const bcData = await bcRes.json();
+                    const samsungData = await samsungRes.json();
+                    const hyundaiData = await hyundaiRes.json();
+                    const lotteData = await lotteRes.json();
+
+                    // 회사별 색상 매핑
+                    const companyColors = {
+                        "신한카드": { bg: "#0046ff", text: "white" },
+                        "KB국민카드": { bg: "#ffbc00", text: "#3d3d3d" }, // KB는 노란색이라 글자 검정
+                        "하나카드": { bg: "#009490", text: "white" },
+                        "우리카드": { bg: "#007bc3", text: "white" },
+                        "BC카드": { bg: "#ed1c24", text: "white" },
+                        "삼성카드": { bg: "#0056b3", text: "white" },
+                        "현대카드": { bg: "#000000", text: "white" },
+                        "롯데카드": { bg: "#ed1c24", text: "white" }
+                    };
+
+                    const normalize = (data, company) => {
+                        const list = Array.isArray(data) ? data : (data.data || []);
+                        const colorInfo = companyColors[company] || { bg: "#1d1d1f", text: "white" };
+                        
+                        return list.map(item => ({ 
+                            ...item, 
+                            companyName: company,
+                            tagBg: colorInfo.bg,
+                            tagColor: colorInfo.text
+                        }));
+                    };
+
+                    const shinhan = normalize(shinhanData, "신한카드");
+                    const kb = normalize(kbData, "KB국민카드");
+                    const hana = normalize(hanaData, "하나카드");
+                    const woori = normalize(wooriData, "우리카드");
+                    const bc = normalize(bcData, "BC카드");
+                    const samsung = normalize(samsungData, '삼성카드');
+                    const hyundai = normalize(hyundaiData, '현대카드');
+                    const lotte = normalize(lotteData, '롯데카드');
+
+                    allEvents = [...shinhan, ...kb, ...hana, ...woori, ...bc, ...samsung, ...hyundai, ...lotte];
+                    
+                    const searchInput = document.getElementById('cardSearch');
+                    if(searchInput.value.trim().length > 0) {
+                        searchEvents(searchInput.value.trim().toLowerCase());
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch events:', error);
+                }
+            }
+
+            function filterCards() {
+                const search = document.getElementById('cardSearch').value.toLowerCase();
+                if (search.length === 0) { showCards(); return; }
+                if (allEvents.length === 0) { fetchAllEvents().then(() => searchEvents(search)); }
+                else { searchEvents(search); }
+            }
+
+            function showCards() {
+                document.getElementById('cardGrid').style.display = 'grid';
+                const eventList = document.getElementById('eventList');
+                if (eventList) eventList.style.display = 'none';
+            }
+
+            function parseQuery(q) {
+                const terms = {and:[], or:[]};
+                const re = /"([^"]+)"/g;
+                let m, left=q;
+                while((m=re.exec(q))!==null){ terms.and.push(m[1]); left=left.replace(m[0],''); }
+                const split = left.trim().split(/\s+/).filter(x=>x);
+                if(split.length>0) terms.or = split;
+                return terms;
+            }
+            function match(ev, terms) {
+                const txt = ((ev.eventName||"")+" "+(ev.category||"")+" "+(ev.companyName||"")).toLowerCase();
+                for(const t of terms.and) if(!txt.includes(t)) return false;
+                if(terms.or && terms.or.length > 0) {
+                    let hit = false;
+                    for(const t of terms.or) if(txt.includes(t)) { hit=true; break; }
+                    if(!hit) return false;
+                }
+                return true;
+            }
+
+            function searchEvents(search) {
+                const terms = parseQuery(search);
+                const filtered = allEvents.filter(ev => match(ev, terms));
+                
+                document.getElementById('cardGrid').style.display = 'none';
+                
+                let eventList = document.getElementById('eventList');
+                if (!eventList) {
+                    eventList = document.createElement('div');
+                    eventList.id = 'eventList';
+                    eventList.className = 'event-list';
+                    document.querySelector('.main-content').appendChild(eventList);
+                } else {
+                    eventList.className = 'event-list';
+                    // 기존 인라인 스타일 제거 (중요)
+                    eventList.style.display = 'grid'; 
+                    eventList.style.cssText = ''; 
+                    eventList.style.display = 'grid';
+                }
+                eventList.style.display = 'grid';
+                
+                if (filtered.length === 0) {
+                    eventList.innerHTML = '<div class="loading">검색 결과가 없습니다.</div>';
+                    return;
+                }
+
+                eventList.innerHTML = filtered.map(ev => `
+                    <a href="${ev.link}" target="_blank" class="event-card" referrerpolicy="no-referrer" rel="noreferrer noopener">
+                        ${ev.image ? `<img src="${ev.image}" class="event-image" loading="lazy" onerror="this.style.display='none'">` : ""}
+                        <div class="event-category-row">
+                            <div class="tags-wrapper">
+                                <span class="company-tag" style="background:${ev.tagBg}; color:${ev.tagColor}">${ev.companyName}</span>
+                                <span class="category-tag">${ev.category}</span>
+                            </div>
+                        </div>
+                        <div class="event-title">${ev.eventName}</div>
+                        <div class="event-date">${ev.period}</div>
+                    </a>
+                `).join('');
+            }
+
+            fetchAllEvents();
+</script>
+    </body>
+    </html>
