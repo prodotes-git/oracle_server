@@ -374,7 +374,7 @@
                 allData = json.data || [];
 
                 if (json.last_updated) {
-                    document.getElementById('updateStatus').innerText = `${json.last_updated} 기준 (12개월 맞춤 수집)`;
+                    document.getElementById('updateStatus').innerText = `${json.last_updated} 기준`;
                 }
 
                 updateStats();
@@ -449,7 +449,7 @@
                 return;
             }
 
-            tbody.innerHTML = filtered.map((d, i) => {
+            tbody.innerHTML = filtered.slice(0, 10).map((d, i) => {
                 const dep = d.rates?.["MG더뱅킹정기예금"] ? parseFloat(d.rates["MG더뱅킹정기예금"]).toFixed(2) + '%' : '-';
                 const sav = d.rates?.["MG더뱅킹정기적금"] ? parseFloat(d.rates["MG더뱅킹정기적금"]).toFixed(2) + '%' : '-';
                 const free = d.rates?.["MG더뱅킹자유적금"] ? parseFloat(d.rates["MG더뱅킹자유적금"]).toFixed(2) + '%' : '-';
