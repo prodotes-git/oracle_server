@@ -1073,12 +1073,9 @@ def card_events():
         </div>
 
         <div class="main-content">
-            <h1>혜택의 시작</h1>
-            <p class="subtitle">국내 주요 카드사의 실시간 이벤트를 한눈에 확인하세요.</p>
-
-            <div class="search-box">
+            <div class="search-box" style="margin-top: 20px;">
                 <span>🔍</span>
-                <input type="text" id="cardSearch" placeholder="모든 카드사의 이벤트를 검색해보세요... (예: 할인, 캐시백, 포인트)" onkeyup="filterCards()">
+                <input type="text" id="cardSearch" placeholder='통합 검색 (예: 할인 캐시백 -> OR 검색, "할인" "캐시백" -> AND 검색)' onkeyup="filterCards()">
             </div>
 
 
