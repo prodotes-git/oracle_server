@@ -510,31 +510,50 @@ async def update_kfcc_data(background_tasks: BackgroundTasks):
 
 async def background_crawl_kfcc():
     try:
-        print(f"[{datetime.now()}] Starting KFCC background crawl...")
+        print(f"[{datetime.now()}] ========== Starting KFCC background crawl ==========")
         from kfcc_crawler import run_crawler
         # json은 상단 import 사용
         
         data = await run_crawler()
         
+        print(f"[{datetime.now()}] Crawler returned {len(data)} records")
+        
+        if not data:
+            print(f"[{datetime.now()}] WARNING: No data collected from crawler!")
+            return
+        
         # 파일 저장
         try:
             with open("kfcc_data.json", "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False)
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            print(f"[{datetime.now()}] Successfully saved to kfcc_data.json")
         except Exception as fe:
-            print(f"KFCC file save failed: {fe}")
+            print(f"[{datetime.now()}] ERROR: KFCC file save failed: {fe}")
+            import traceback
+            traceback.print_exc()
             
         # 캐시 갱신
         if r:
             try:
-                r.setex(KFCC_CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": data}))
+                cache_data = {
+                    "last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 
+                    "data": data
+                }
+                r.setex(KFCC_CACHE_KEY, CACHE_EXPIRE, json.dumps(cache_data, ensure_ascii=False))
+                print(f"[{datetime.now()}] Successfully updated Redis cache")
             except Exception as re:
-                print(f"KFCC Redis save failed: {re}")
+                print(f"[{datetime.now()}] ERROR: KFCC Redis save failed: {re}")
+                import traceback
+                traceback.print_exc()
         else:
-            print("Redis not available, skipped cache update.")
+            print(f"[{datetime.now()}] WARNING: Redis not available, skipped cache update.")
                 
-        print(f"[{datetime.now()}] KFCC background crawl finished. {len(data)-1} records updated.")
+        print(f"[{datetime.now()}] ========== KFCC background crawl finished. {len(data)} records updated ==========")
     except Exception as e:
-        print(f"[{datetime.now()}] KFCC background crawl failed: {e}")
+        print(f"[{datetime.now()}] ========== KFCC background crawl FAILED ==========")
+        print(f"[{datetime.now()}] ERROR: {e}")
+        import traceback
+        traceback.print_exc()
 
 # 스케줄러 설정
 from apscheduler.schedulers.asyncio import AsyncIOScheduler

@@ -96,6 +96,10 @@ async def fetch_region_banks(client, r1, r2):
         
     try:
         resp = await client.get(url, headers=HEADERS)
+        if resp.status_code != 200:
+            print(f"[WARN] {r1}/{r2}: HTTP {resp.status_code}")
+            return []
+            
         soup = BeautifulSoup(resp.text, "lxml")
         rows = soup.select("tr")
         banks = []
@@ -124,9 +128,14 @@ async def fetch_region_banks(client, r1, r2):
                     "r2": r2,
                     "location": data.get("addr") or f"{r1} {r2}"
                 })
+        
+        if banks:
+            print(f"[INFO] {r1}/{r2}: Found {len(banks)} banks")
         return banks
     except Exception as e:
-        print(f"Error fetching region {r1} {r2}: {e}")
+        print(f"[ERROR] fetch_region_banks({r1}, {r2}): {e}")
+        import traceback
+        traceback.print_exc()
         return []
 
 async def fetch_bank_rates(client, bank):
@@ -145,23 +154,38 @@ async def fetch_bank_rates(client, bank):
         # 예탁금 (13)
         url_dep = f"https://www.kfcc.co.kr/map/goods_19.do?OPEN_TRMID={gmgoCd}&gubuncode=13"
         resp_dep = await client.get(url_dep, headers=HEADERS)
-        date, rates_dep = parse_html(resp_dep.text)
-        if date: res_data["기준일"] = date
-        res_data["rates"].update(rates_dep)
+        if resp_dep.status_code != 200:
+            print(f"[WARN] Bank {gmgoCd}: Deposit HTTP {resp_dep.status_code}")
+        else:
+            date, rates_dep = parse_html(resp_dep.text)
+            if date: res_data["기준일"] = date
+            res_data["rates"].update(rates_dep)
 
         # 적금 (14)
         url_sav = f"https://www.kfcc.co.kr/map/goods_19.do?OPEN_TRMID={gmgoCd}&gubuncode=14"
         resp_sav = await client.get(url_sav, headers=HEADERS)
-        _, rates_sav = parse_html(resp_sav.text)
-        res_data["rates"].update(rates_sav)
+        if resp_sav.status_code != 200:
+            print(f"[WARN] Bank {gmgoCd}: Savings HTTP {resp_sav.status_code}")
+        else:
+            _, rates_sav = parse_html(resp_sav.text)
+            res_data["rates"].update(rates_sav)
+        
+        # Check if we got any rates
+        has_rates = any(res_data["rates"].get(prod, {}) for prod in ["MG더뱅킹정기예금", "MG더뱅킹정기적금", "MG더뱅킹자유적금"])
+        if not has_rates:
+            print(f"[WARN] Bank {gmgoCd} ({bank['gmgoNm']}): No rates found")
         
         return res_data
     except Exception as e:
+        print(f"[ERROR] fetch_bank_rates({gmgoCd}): {e}")
+        import traceback
+        traceback.print_exc()
         return res_data
 
 async def run_crawler():
+    print("[KFCC] Starting crawler...")
     async with httpx.AsyncClient(timeout=10.0, verify=False) as client:
-        print("Fetching bank lists...")
+        print("[KFCC] Fetching bank lists...")
         bank_tasks = []
         for region in ALL_REGIONS:
             r1 = region[0]
@@ -174,30 +198,56 @@ async def run_crawler():
             async with semaphore:
                 return await coro
 
-        all_banks_nested = await asyncio.gather(*(fetch_with_sem(t) for t in bank_tasks))
-        all_banks = [b for sublist in all_banks_nested for b in sublist]
-        unique_banks = {b['gmgoCd']: b for b in all_banks}.values()
-        print(f"Total unique banks found: {len(unique_banks)}")
+        try:
+            all_banks_nested = await asyncio.gather(*(fetch_with_sem(t) for t in bank_tasks), return_exceptions=True)
+            all_banks = []
+            for result in all_banks_nested:
+                if isinstance(result, Exception):
+                    print(f"[ERROR] Bank list fetch failed: {result}")
+                elif isinstance(result, list):
+                    all_banks.extend(result)
+            
+            unique_banks = {b['gmgoCd']: b for b in all_banks}.values()
+            print(f"[KFCC] Total unique banks found: {len(unique_banks)}")
+            
+            if len(unique_banks) == 0:
+                print("[ERROR] No banks found! Check network or website structure.")
+                return []
 
-        print("Fetching interest rates...")
-        rate_tasks = [fetch_bank_rates(client, bank) for bank in unique_banks]
-        
-        rate_sem = asyncio.Semaphore(20)
-        async def fetch_rate_with_sem(coro):
-            async with rate_sem:
-                await asyncio.sleep(0.05)
-                return await coro
-                
-        results = []
-        total = len(rate_tasks)
-        for i, coro in enumerate(asyncio.as_completed([fetch_rate_with_sem(t) for t in rate_tasks])):
-            res = await coro
-            results.append(res)
-            if i % 100 == 0:
-                print(f"Progress: {i}/{total}")
+            print("[KFCC] Fetching interest rates...")
+            rate_tasks = [fetch_bank_rates(client, bank) for bank in unique_banks]
+            
+            rate_sem = asyncio.Semaphore(20)
+            async def fetch_rate_with_sem(coro):
+                async with rate_sem:
+                    await asyncio.sleep(0.05)
+                    return await coro
+                    
+            results = []
+            total = len(rate_tasks)
+            completed = 0
+            
+            for coro in asyncio.as_completed([fetch_rate_with_sem(t) for t in rate_tasks]):
+                try:
+                    res = await coro
+                    results.append(res)
+                    completed += 1
+                    if completed % 50 == 0 or completed == total:
+                        print(f"[KFCC] Progress: {completed}/{total} banks processed")
+                except Exception as e:
+                    print(f"[ERROR] Rate fetch failed: {e}")
+                    completed += 1
 
-        # JSON(List of Dicts) 형태로 반환
-        return results
+            # Filter out banks with no rates
+            results_with_rates = [r for r in results if any(r["rates"].get(p, {}) for p in ["MG더뱅킹정기예금", "MG더뱅킹정기적금", "MG더뱅킹자유적금"])]
+            print(f"[KFCC] Finished! {len(results_with_rates)}/{len(results)} banks have rate data")
+            
+            return results
+        except Exception as e:
+            print(f"[ERROR] Crawler failed: {e}")
+            import traceback
+            traceback.print_exc()
+            return []
 
 if __name__ == "__main__":
     data = asyncio.run(run_crawler())
