@@ -5,9 +5,10 @@ import os
 import redis
 import psutil
 import time
-from datetime import datetime
 import json
 import ssl
+import pytz
+from datetime import datetime
 
 app = FastAPI()
 
@@ -34,24 +35,43 @@ HYUNDAI_CACHE_KEY = "hyundai_card_events_cache_v1"
 LOTTE_CACHE_KEY = "lotte_card_events_cache_v1"
 KFCC_CACHE_KEY = "kfcc_rates_cache_v1"
 CACHE_EXPIRE = 3600  # 1시간 동안 캐시 유지
+seoul_tz = pytz.timezone('Asia/Seoul')
 
 def get_cached_data(cache_key, file_path):
     try:
         if r:
             cached = r.get(cache_key)
-            if cached: return json.loads(cached)
+            if cached:
+                cached_json = json.loads(cached)
+                # Redis에 저장된 데이터의 시간대 보정 (필요한 경우)
+                return cached_json
         if os.path.exists(file_path):
             with open(file_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
+                json_content = json.load(f)
+            
+            # 파일 내용의 형식 확인 (신규: dict, 기존: list)
+            if isinstance(json_content, dict) and 'data' in json_content:
+                raw_list = json_content['data']
+                # 파일 내부에 last_updated가 있으면 우선 사용
+                last_updated = json_content.get('last_updated')
+            else:
+                raw_list = json_content
+                last_updated = None
+
             unique_data = []
             seen = set()
-            for item in data:
+            for item in raw_list:
                 name = item.get('eventName')
                 if name and name not in seen:
                     seen.add(name)
                     unique_data.append(item)
-            mtime = os.path.getmtime(file_path)
-            last_updated = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
+            
+            # 파일 내부 시간이 없으면 파일 수정 시간(mtime) 사용
+            if not last_updated:
+                mtime = os.path.getmtime(file_path)
+                dt = datetime.fromtimestamp(mtime, tz=pytz.UTC).astimezone(seoul_tz)
+                last_updated = dt.strftime('%Y-%m-%d %H:%M:%S')
+
             res = {'last_updated': last_updated, 'data': unique_data}
             if r: r.setex(cache_key, CACHE_EXPIRE, json.dumps(res))
             return res
@@ -143,7 +163,7 @@ async def get_shinhan_myshop():
 # 신한카드 데이터 갱신 (백그라운드)
 async def crawl_shinhan_bg():
     try:
-        print(f"[{datetime.now()}] Starting Shinhan background crawl...")
+        print(f"[{datetime.now(seoul_tz)}] Starting Shinhan background crawl...")
         all_events = []
         seen_titles = set()
         base_url = "https://www.shinhancard.com"
@@ -202,27 +222,27 @@ async def crawl_shinhan_bg():
 
         if all_events:
             try:
+                output_data = {"last_updated": datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}
                 with open("shinhan_data.json", "w", encoding="utf-8") as f:
-                    json.dump(all_events, f, ensure_ascii=False)
+                    json.dump(output_data, f, ensure_ascii=False)
+                
+                if r:
+                    try:
+                        r.setex(SHINHAN_CACHE_KEY, CACHE_EXPIRE, json.dumps(output_data))
+                    except Exception as re:
+                        print(f"Shinhan Redis save failed: {re}")
+                print(f"[{datetime.now(seoul_tz)}] Shinhan crawl finished. {len(all_events)} events.")
             except Exception as fe:
                 print(f"Shinhan file save failed: {fe}")
-
-            if r:
-                try:
-                    r.setex(SHINHAN_CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
-                except Exception as re:
-                    print(f"Shinhan Redis save failed: {re}")
-
-            print(f"[{datetime.now()}] Shinhan crawl finished. {len(all_events)} events.")
             
     except Exception as e:
-        print(f"[{datetime.now()}] Shinhan crawl failed: {e}")
+        print(f"[{datetime.now(seoul_tz)}] Shinhan crawl failed: {e}")
 
 # KB카드 데이터 갱신 (백그라운드)
 # KB카드 데이터 갱신 (백그라운드)
 async def crawl_kb_bg():
     try:
-        print(f"[{datetime.now()}] Starting KB background crawl...")
+        print(f"[{datetime.now(seoul_tz)}] Starting KB background crawl...")
         all_events = []
         seen_ids = set()
         api_url = "https://m.kbcard.com/BON/API/MBBACXHIABNC0064"
@@ -278,14 +298,15 @@ async def crawl_kb_bg():
         
         if all_events:
             try:
+                output_data = {"last_updated": datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}
                 with open("kb_data.json", "w", encoding="utf-8") as f:
-                    json.dump(all_events, f, ensure_ascii=False)
-                if r: r.setex(KB_CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
-                print(f"[{datetime.now()}] KB crawl finished. {len(all_events)} events.")
+                    json.dump(output_data, f, ensure_ascii=False)
+                if r: r.setex(KB_CACHE_KEY, CACHE_EXPIRE, json.dumps(output_data))
+                print(f"[{datetime.now(seoul_tz)}] KB crawl finished. {len(all_events)} events.")
             except Exception as e: print(e)
             
     except Exception as e:
-        print(f"[{datetime.now()}] KB crawl failed: {e}")
+        print(f"[{datetime.now(seoul_tz)}] KB crawl failed: {e}")
 
 @app.get("/api/shinhan-cards")
 async def get_shinhan_cards():
@@ -310,7 +331,7 @@ HANA_CACHE_KEY = "hana_card_events_cache_v1"
 # 하나카드 데이터 갱신 (백그라운드)
 async def crawl_hana_bg():
     try:
-        print(f"[{datetime.now()}] Starting Hana background crawl...")
+        print(f"[{datetime.now(seoul_tz)}] Starting Hana background crawl...")
         all_events = []
         base_url = "https://m.hanacard.co.kr"
         api_url = "https://m.hanacard.co.kr/MKEVT1000M.ajax"
@@ -410,21 +431,20 @@ async def crawl_hana_bg():
 
         if all_events:
             try:
+                output_data = {"last_updated": datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}
                 with open("hana_data.json", "w", encoding="utf-8") as f:
-                    json.dump(all_events, f, ensure_ascii=False)
+                    json.dump(output_data, f, ensure_ascii=False)
+                if r:
+                    try:
+                        r.setex(HANA_CACHE_KEY, CACHE_EXPIRE, json.dumps(output_data))
+                    except Exception as re:
+                         print(f"Hana Redis save failed: {re}")
+                print(f"[{datetime.now(seoul_tz)}] Hana crawl finished. {len(all_events)} events.")
             except Exception as fe:
-                print(f"Hana file save failed: {fe}")
-
-            if r:
-                try:
-                    r.setex(HANA_CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
-                except Exception as re:
-                     print(f"Hana Redis save failed: {re}")
-            
-            print(f"[{datetime.now()}] Hana crawl finished. {len(all_events)} events.")
+                print(f"Hana save failed: {fe}")
             
     except Exception as e:
-        print(f"[{datetime.now()}] Hana crawl failed: {e}")
+        print(f"[{datetime.now(seoul_tz)}] Hana crawl failed: {e}")
 
 @app.get("/api/hana-cards")
 async def get_hana_cards():
@@ -510,48 +530,51 @@ async def update_kfcc_data(background_tasks: BackgroundTasks):
 
 async def background_crawl_kfcc():
     try:
-        print(f"[{datetime.now()}] ========== Starting KFCC background crawl ==========")
+        print(f"[{datetime.now(seoul_tz)}] ========== Starting KFCC background crawl ==========")
         from kfcc_crawler import run_crawler
         # json은 상단 import 사용
         
         data = await run_crawler()
         
-        print(f"[{datetime.now()}] Crawler returned {len(data)} records")
+        print(f"[{datetime.now(seoul_tz)}] Crawler returned {len(data)} records")
         
         if not data:
-            print(f"[{datetime.now()}] WARNING: No data collected from crawler!")
+            print(f"[{datetime.now(seoul_tz)}] WARNING: No data collected from crawler!")
             return
+        
+        # 파일 및 캐시 저장 데이터 구성
+        current_time = datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S')
+        save_data = {
+            "last_updated": current_time,
+            "data": data
+        }
         
         # 파일 저장
         try:
             with open("kfcc_data.json", "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
-            print(f"[{datetime.now()}] Successfully saved to kfcc_data.json")
+                json.dump(save_data, f, ensure_ascii=False, indent=2)
+            print(f"[{datetime.now(seoul_tz)}] Successfully saved to kfcc_data.json")
         except Exception as fe:
-            print(f"[{datetime.now()}] ERROR: KFCC file save failed: {fe}")
+            print(f"[{datetime.now(seoul_tz)}] ERROR: KFCC file save failed: {fe}")
             import traceback
             traceback.print_exc()
             
         # 캐시 갱신
         if r:
             try:
-                cache_data = {
-                    "last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 
-                    "data": data
-                }
-                r.setex(KFCC_CACHE_KEY, CACHE_EXPIRE, json.dumps(cache_data, ensure_ascii=False))
-                print(f"[{datetime.now()}] Successfully updated Redis cache")
+                r.setex(KFCC_CACHE_KEY, CACHE_EXPIRE, json.dumps(save_data, ensure_ascii=False))
+                print(f"[{datetime.now(seoul_tz)}] Successfully updated Redis cache")
             except Exception as re:
-                print(f"[{datetime.now()}] ERROR: KFCC Redis save failed: {re}")
+                print(f"[{datetime.now(seoul_tz)}] ERROR: KFCC Redis save failed: {re}")
                 import traceback
                 traceback.print_exc()
         else:
-            print(f"[{datetime.now()}] WARNING: Redis not available, skipped cache update.")
+            print(f"[{datetime.now(seoul_tz)}] WARNING: Redis not available, skipped cache update.")
                 
-        print(f"[{datetime.now()}] ========== KFCC background crawl finished. {len(data)} records updated ==========")
+        print(f"[{datetime.now(seoul_tz)}] ========== KFCC background crawl finished. {len(data)} records updated ==========")
     except Exception as e:
-        print(f"[{datetime.now()}] ========== KFCC background crawl FAILED ==========")
-        print(f"[{datetime.now()}] ERROR: {e}")
+        print(f"[{datetime.now(seoul_tz)}] ========== KFCC background crawl FAILED ==========")
+        print(f"[{datetime.now(seoul_tz)}] ERROR: {e}")
         import traceback
         traceback.print_exc()
 
@@ -559,7 +582,7 @@ async def background_crawl_kfcc():
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from contextlib import asynccontextmanager
 
-scheduler = AsyncIOScheduler()
+scheduler = AsyncIOScheduler(timezone=seoul_tz)
 
 @app.on_event("startup")
 async def start_scheduler():
@@ -1950,7 +1973,7 @@ def health_check():
 # 우리카드 크롤러 (Playwright API 가로채기 - 최적화)
 async def crawl_woori_bg():
     try:
-        print(f"[{datetime.now()}] Starting Woori background crawl (Playwright)...")
+        print(f"[{datetime.now(seoul_tz)}] Starting Woori background crawl (Playwright)...")
         from playwright.async_api import async_playwright
         
         all_events = []
@@ -2046,13 +2069,14 @@ async def crawl_woori_bg():
                 
         if all_events:
             try:
+                output_data = {"last_updated": datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}
                 with open("woori_data.json", "w", encoding="utf-8") as f:
-                    json.dump(all_events, f, ensure_ascii=False)
-                if r: r.setex(WOORI_CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
-                print(f"[{datetime.now()}] Woori crawl finished. {len(all_events)} events.")
+                    json.dump(output_data, f, ensure_ascii=False)
+                if r: r.setex(WOORI_CACHE_KEY, CACHE_EXPIRE, json.dumps(output_data))
+                print(f"[{datetime.now(seoul_tz)}] Woori crawl finished. {len(all_events)} events.")
             except Exception as fe: print(f"Woori save failed: {fe}")
         else:
-            print(f"[{datetime.now()}] Woori crawl finished but no events found.")
+            print(f"[{datetime.now(seoul_tz)}] Woori crawl finished but no events found.")
             
     except Exception as e:
         print(f"Woori crawl failed: {e}")
@@ -2061,7 +2085,7 @@ async def crawl_woori_bg():
 # BC카드 크롤러 (실제 API 사용 - 복원)
 async def crawl_bc_bg():
     try:
-        print(f"[{datetime.now()}] Starting BC background crawl...")
+        print(f"[{datetime.now(seoul_tz)}] Starting BC background crawl...")
         all_events = []
         seen_titles = set()
         base_url = "https://web.paybooc.co.kr"
@@ -2112,19 +2136,20 @@ async def crawl_bc_bg():
         
         if all_events:
             try:
+                output_data = {"last_updated": datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}
                 with open("bc_data.json", "w", encoding="utf-8") as f:
-                    json.dump(all_events, f, ensure_ascii=False)
-                if r: r.setex(BC_CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
-                print(f"[{datetime.now()}] BC crawl finished. {len(all_events)} events.")
+                    json.dump(output_data, f, ensure_ascii=False)
+                if r: r.setex(BC_CACHE_KEY, CACHE_EXPIRE, json.dumps(output_data))
+                print(f"[{datetime.now(seoul_tz)}] BC crawl finished. {len(all_events)} events.")
             except Exception as fe: print(f"BC file save failed: {fe}")
     except Exception as e:
-        print(f"[{datetime.now()}] BC crawl failed: {e}")
+        print(f"[{datetime.now(seoul_tz)}] BC crawl failed: {e}")
 
 
 # 삼성카드 크롤러 (Playwright - cms_id 기반 직접 링크 지원)
 async def crawl_samsung_bg():
     try:
-        print(f"[{datetime.now()}] Starting Samsung background crawl (Playwright Mobile)...")
+        print(f"[{datetime.now(seoul_tz)}] Starting Samsung background crawl (Playwright Mobile)...")
         from playwright.async_api import async_playwright
         
         all_events = []
@@ -2198,14 +2223,15 @@ async def crawl_samsung_bg():
                 unique_events = {v['eventName']:v for v in all_events}.values()
                 all_events = list(unique_events)
                 
+                output_data = {"last_updated": datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}
                 with open("samsung_data.json", "w", encoding="utf-8") as f:
-                    json.dump(all_events, f, ensure_ascii=False)
-                if r: r.setex(SAMSUNG_CACHE_KEY, CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
-                print(f"[{datetime.now()}] Samsung crawl finished. {len(all_events)} events.")
+                    json.dump(output_data, f, ensure_ascii=False)
+                if r: r.setex(SAMSUNG_CACHE_KEY, CACHE_EXPIRE, json.dumps(output_data))
+                print(f"[{datetime.now(seoul_tz)}] Samsung crawl finished. {len(all_events)} events.")
             except Exception as e:
                 print(f"Samsung save failed: {e}")
         else:
-            print(f"[{datetime.now()}] Samsung crawl finished but no events found.")
+            print(f"[{datetime.now(seoul_tz)}] Samsung crawl finished but no events found.")
 
     except Exception as e:
         print(f"Samsung crawl failed: {e}")
@@ -2214,7 +2240,7 @@ async def crawl_samsung_bg():
 # 현대카드 크롤러
 async def crawl_hyundai_bg():
     try:
-        print(f"[{datetime.now()}] Starting Hyundai background crawl...")
+        print(f"[{datetime.now(seoul_tz)}] Starting Hyundai background crawl...")
         from playwright.async_api import async_playwright
         all_events = []
         async with async_playwright() as p:
@@ -2264,10 +2290,11 @@ async def crawl_hyundai_bg():
             finally: await browser.close()
         if all_events:
             try:
+                output_data = {"last_updated": datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}
                 with open("hyundai_data.json", "w", encoding="utf-8") as f:
-                    json.dump(all_events, f, ensure_ascii=False)
-                if r: r.setex("events:hyundai", CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
-                print(f"[{datetime.now()}] Hyundai crawl finished. {len(all_events)} events.")
+                    json.dump(output_data, f, ensure_ascii=False)
+                if r: r.setex("events:hyundai", CACHE_EXPIRE, json.dumps(output_data))
+                print(f"[{datetime.now(seoul_tz)}] Hyundai crawl finished. {len(all_events)} events.")
             except Exception as e: print(f"Hyundai save failed: {e}")
     except Exception as e: print(f"Hyundai crawl failed: {e}")
 
@@ -2276,7 +2303,7 @@ async def crawl_hyundai_bg():
 # 롯데카드 크롤러
 async def crawl_lotte_bg():
     try:
-        print(f"[{datetime.now()}] Starting Lotte background crawl...")
+        print(f"[{datetime.now(seoul_tz)}] Starting Lotte background crawl...")
         from playwright.async_api import async_playwright
         all_events = []
         async with async_playwright() as p:
@@ -2326,11 +2353,14 @@ async def crawl_lotte_bg():
             try:
                 unique = {v['eventName']:v for v in all_events}.values()
                 all_events = list(unique)
+                output_data = {"last_updated": datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}
                 with open("lotte_data.json", "w", encoding="utf-8") as f:
-                    json.dump(all_events, f, ensure_ascii=False)
-                if r: r.setex("events:lotte", CACHE_EXPIRE, json.dumps({"last_updated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'), "data": all_events}))
-                print(f"[{datetime.now()}] Lotte crawl finished. {len(all_events)} events.")
+                    json.dump(output_data, f, ensure_ascii=False)
+                if r: r.setex("events:lotte", CACHE_EXPIRE, json.dumps(output_data))
+                print(f"[{datetime.now(seoul_tz)}] Lotte crawl finished. {len(all_events)} events.")
             except Exception as e: print(f"Lotte save failed: {e}")
+        else:
+            print(f"[{datetime.now(seoul_tz)}] Lotte crawl finished but no events found.")
     except Exception as e: print(f"Lotte crawl failed: {e}")
 
 
