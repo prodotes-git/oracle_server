@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import re
 import json
 
-# KFCC 지역 데이터 (Regions) - shiroko-kfcc와 유사한 체계적인 구성
+# KFCC 지역 데이터 (Regions)
 ALL_REGIONS = [
     ["서울", "도봉구", "마포구", "관악구", "강북구", "용산구", "서초구", "노원구", "성동구", "강남구", "성북구", "광진구", "송파구", "은평구", "강서구", "강동구", "종로구", "양천구", "중랑구", "영등포구", "서대문구", "구로구", "동대문구", "동작구", "중구", "금천구"],
     ["인천", "강화군", "서구", "동구", "중구", "미추홀구", "연수구", "계양구", "부평구", "남동구"],
@@ -31,17 +31,17 @@ HEADERS = {
 }
 
 # 수집 대상 기간
-TARGET_DURATIONS = ["12개월", "6개월", "3개월", "36개월"]
+TARGET_DURATIONS = ["12개월", "6개월", "3개월", "36개월", "1개월", "13개월"]
 
 def parse_rate(val):
     try:
-        # '연5.20%' -> '5.20'
-        match = re.search(r"연([\d\.]+)%", val)
+        # '연5.20%' 또는 '5.20' 추출
+        match = re.search(r"([\d\.]+)", val)
         if match: return match.group(1)
         return None
     except: return None
 
-def parse_html(html, target_products=["MG더뱅킹정기예금", "MG더뱅킹정기적금", "MG더뱅킹자유적금"]):
+def parse_html(html, target_products=["정기예탁금", "정기적금", "자유적금", "MG더뱅킹정기예금", "MG더뱅킹정기적금", "MG더뱅킹자유적금"]):
     soup = BeautifulSoup(html, "lxml")
     
     # 기준일 추출
@@ -53,7 +53,7 @@ def parse_html(html, target_products=["MG더뱅킹정기예금", "MG더뱅킹정
 
     result = {prod: {} for prod in target_products}
     
-    # #divTmp1 섹션 순회 (각 상품군별 테이블)
+    # #divTmp1 섹션 (기본이율 테이블)
     sections = soup.select("#divTmp1")
     for sec in sections:
         tit_elem = sec.select_one(".tbl-tit")
@@ -74,11 +74,15 @@ def parse_html(html, target_products=["MG더뱅킹정기예금", "MG더뱅킹정
                     period_txt = cols[-2].text.strip()
                     rate_txt = cols[-1].text.strip()
                     
-                    for dur in TARGET_DURATIONS:
-                        if dur in period_txt:
-                            rate = parse_rate(rate_txt)
-                            if rate: result[matched_prod][dur] = rate
-                            break
+                    if "이상" in period_txt or "개월" in period_txt:
+                        for dur in TARGET_DURATIONS:
+                            if dur in period_txt:
+                                rate = parse_rate(rate_txt)
+                                if rate:
+                                    # 기존 데이터가 있으면 더 높은 금리 유지 (또는 덮어쓰기)
+                                    if dur not in result[matched_prod] or float(rate) > 0:
+                                        result[matched_prod][dur] = rate
+                                break
     return base_date, result
 
 async def fetch_region_banks(client, r1, r2):
@@ -95,8 +99,6 @@ async def fetch_region_banks(client, r1, r2):
         for row in rows:
             td = row.select_one("td")
             if not td: continue
-            
-            # span의 title 속성에서 메타데이터 추출 (shiroko-kfcc 방식)
             meta = {}
             for s in td.select("span"):
                 if s.has_attr("title"): meta[s["title"]] = s.text.strip()
@@ -128,25 +130,25 @@ async def fetch_bank_rates(client, bank, semaphore):
         }
         
         try:
-            # 예금 (gubuncode 13)
+            # 1. 거치식예탁금 (gubuncode 13) - 정기예금 등
             res_dep = await client.get(f"https://www.kfcc.co.kr/map/goods_19.do?OPEN_TRMID={gmgoCd}&gubuncode=13", headers=HEADERS)
             if res_dep.status_code == 200:
                 date, r_dep = parse_html(res_dep.text)
                 if date: data["기준일"] = date
-                data["rates"].update(r_dep)
+                data["rates"].update({k: v for k, v in r_dep.items() if v})
             
-            # 적금 (gubuncode 14)
+            # 2. 적립식예탁금 (gubuncode 14) - 정기적금, 자유적금 등
             res_sav = await client.get(f"https://www.kfcc.co.kr/map/goods_19.do?OPEN_TRMID={gmgoCd}&gubuncode=14", headers=HEADERS)
             if res_sav.status_code == 200:
                 _, r_sav = parse_html(res_sav.text)
-                data["rates"].update(r_sav)
+                data["rates"].update({k: v for k, v in r_sav.items() if v})
                 
             return data
         except:
             return data
 
 async def run_crawler():
-    print("[KFCC] Starting independent crawl...")
+    print("[KFCC] Starting improved crawl...")
     async with httpx.AsyncClient(timeout=20, verify=False) as client:
         # 1. 금고 목록 수집
         print("[KFCC] Phase 1: Fetching bank list...")
@@ -159,27 +161,26 @@ async def run_crawler():
         all_banks = []
         for res in region_results: all_banks.extend(res)
         
-        # 중복 제거
         unique_banks = {b['gmgoCd']: b for b in all_banks}.values()
         print(f"[KFCC] Found {len(unique_banks)} unique banks.")
         
-        # 2. 금리 정보 수집 (병렬 처리 속도 제한)
+        # 2. 금리 정보 수집
         print("[KFCC] Phase 2: Fetching rates...")
-        rate_semaphore = asyncio.Semaphore(30) # 30개 동시 요청
+        rate_semaphore = asyncio.Semaphore(25)
         rate_tasks = [fetch_bank_rates(client, bank, rate_semaphore) for bank in unique_banks]
         
         results = []
         total = len(rate_tasks)
         for i, coro in enumerate(asyncio.as_completed(rate_tasks)):
             res = await coro
-            # 유효한 금리가 있는 것만 수집 (정제)
-            if any(res["rates"].values()):
+            # 유효한 금리 데이터가 하나라도 있는 금고만 포함
+            if res["rates"] and any(res["rates"].values()):
                 results.append(res)
             
-            if (i+1) % 100 == 0 or (i+1) == total:
+            if (i+1) % 50 == 0 or (i+1) == total:
                 print(f"[KFCC] Progress: {i+1}/{total} banks processed.")
         
-        print(f"[KFCC] Crawl complete. {len(results)} banks with rates collected.")
+        print(f"[KFCC] Crawl complete. {len(results)} banks collected.")
         return results
 
 if __name__ == "__main__":

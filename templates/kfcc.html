@@ -69,9 +69,12 @@
             max-width: 1200px;
             margin: 3rem auto;
             padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
         }
 
-        .hero h1 {
+        .hero-text h1 {
             font-family: 'Outfit';
             font-size: 3rem;
             margin: 0;
@@ -79,11 +82,37 @@
             font-weight: 700;
         }
 
-        .hero p {
+        .hero-text p {
             color: var(--text-mute);
             font-size: 1.2rem;
             margin-top: 0.5rem;
             font-weight: 300;
+        }
+
+        .update-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 70, 255, 0.2);
+        }
+
+        .update-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 70, 255, 0.3);
+        }
+
+        .update-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
         }
 
         .stats-grid {
@@ -175,7 +204,6 @@
             border-color: var(--primary);
         }
 
-        /* Table Design */
         .data-table-wrapper {
             background: var(--card);
             border-radius: 24px;
@@ -264,6 +292,12 @@
         }
 
         @media (max-width: 768px) {
+            .hero {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.5rem;
+            }
+
             .hero h1 {
                 font-size: 2.2rem;
             }
@@ -272,8 +306,6 @@
             td:nth-child(4) {
                 display: none;
             }
-
-            /* Hide free savings on mobile */
         }
     </style>
 </head>
@@ -287,8 +319,13 @@
     </header>
 
     <div class="hero">
-        <h1>새마을금고 금리 트래커</h1>
-        <p id="updateStatus">데이터를 불러오는 중입니다...</p>
+        <div class="hero-text">
+            <h1>새마을금고 금리 트래커</h1>
+            <p id="updateStatus">데이터를 불러오는 중입니다...</p>
+        </div>
+        <button id="manualUpdateBtn" class="update-btn" onclick="triggerUpdate()">
+            <span id="btnIcon">🔄</span> <span id="btnText">지금 업데이트</span>
+        </button>
     </div>
 
     <div class="stats-grid">
@@ -297,11 +334,11 @@
             <div class="stat-value" id="statCount">-</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">최고 금리 (12개월)</div>
+            <div class="stat-label" id="bestRateLabel">최고 금리 (정기예금)</div>
             <div class="stat-value" id="statBest">-</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">평균 금리</div>
+            <div class="stat-label">평준 금리</div>
             <div class="stat-value" id="statAvg">-</div>
         </div>
     </div>
@@ -309,7 +346,7 @@
     <div class="main-container">
         <div class="controls">
             <div class="search-wrapper">
-                <input type="text" id="searchInput" placeholder="금고명, 지역, 또는 도로명 주소를 입력하세요..." onkeyup="render()">
+                <input type="text" id="searchInput" placeholder="금고명 또는 지역 검색..." onkeyup="render()">
             </div>
             <div class="filter-chip-group">
                 <div class="chip active" onclick="setDuration('12개월', this)">12개월</div>
@@ -324,10 +361,10 @@
                     <tr>
                         <th width="80">순위</th>
                         <th>금고 정보</th>
-                        <th>정기예금</th>
+                        <th>정기예탁/예금</th>
                         <th>정기적금</th>
                         <th>자유적금</th>
-                        <th>조회기준일</th>
+                        <th>기준일</th>
                     </tr>
                 </thead>
                 <tbody id="tbody">
@@ -351,6 +388,8 @@
 
                 if (json.last_updated) {
                     document.getElementById('updateStatus').innerText = `${json.last_updated} 기준 (실시간 독립 수집)`;
+                } else {
+                    document.getElementById('updateStatus').innerText = `최근 수집 정보 없음. 업데이트를 권장합니다.`;
                 }
 
                 updateStats();
@@ -360,12 +399,38 @@
             }
         }
 
+        async function triggerUpdate() {
+            const btn = document.getElementById('manualUpdateBtn');
+            const text = document.getElementById('btnText');
+            if (!confirm("전국 금고 데이터를 수집하는 데 약 1~2분이 소요됩니다. 시작하시겠습니까?")) return;
+
+            try {
+                btn.disabled = true;
+                text.innerText = "업데이트 요청됨...";
+                const res = await fetch('/api/kfcc/update', { method: 'POST' });
+                if (res.ok) {
+                    alert("수집을 시작했습니다. 약 2분 후 페이지를 새로고침해 주세요.");
+                }
+            } catch (e) {
+                alert("업데이트 요청 실패");
+                btn.disabled = false;
+                text.innerText = "지금 업데이트";
+            }
+        }
+
+        function getBestRate(item, duration) {
+            // 정기예금 또는 MG더뱅킹정기예금 중 높은 값
+            const r1 = parseFloat(item.rates?.["정기예탁금"]?.[duration] || 0);
+            const r2 = parseFloat(item.rates?.["MG더뱅킹정기예금"]?.[duration] || 0);
+            return Math.max(r1, r2);
+        }
+
         function updateStats() {
-            const rates = allData.map(d => parseFloat(d.rates?.["MG더뱅킹정기예금"]?.["12개월"] || 0)).filter(r => r > 0);
+            const rates = allData.map(d => getBestRate(d, '12개월')).filter(r => r > 0);
             document.getElementById('statCount').innerText = allData.length.toLocaleString();
-            document.getElementById('statBest').innerText = (Math.max(...rates) || 0).toFixed(2) + '%';
-            const avg = rates.reduce((a, b) => a + b, 0) / rates.length;
-            document.getElementById('statAvg').innerText = (avg || 0).toFixed(2) + '%';
+            document.getElementById('statBest').innerText = rates.length > 0 ? (Math.max(...rates)).toFixed(2) + '%' : '-';
+            const avg = rates.length > 0 ? rates.reduce((a, b) => a + b, 0) / rates.length : 0;
+            document.getElementById('statAvg').innerText = avg > 0 ? avg.toFixed(2) + '%' : '-';
         }
 
         function setDuration(dur, el) {
@@ -382,25 +447,34 @@
                 (d.location || "").toLowerCase().includes(query)
             );
 
-            // 12개월 예금 금리순 정렬
+            // 현재 선택된 기간의 예금 금리순 정렬
             filtered.sort((a, b) => {
-                const rA = parseFloat(a.rates?.["MG더뱅킹정기예금"]?.[currentDuration] || 0);
-                const rB = parseFloat(b.rates?.["MG더뱅킹정기예금"]?.[currentDuration] || 0);
+                const rA = getBestRate(a, currentDuration);
+                const rB = getBestRate(b, currentDuration);
                 return rB - rA;
             });
 
             const tbody = document.getElementById('tbody');
             if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="loading">일치하는 금고가 없습니다.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="loading">검색 결과가 없습니다.</td></tr>';
                 return;
             }
 
             tbody.innerHTML = filtered.map((d, i) => {
-                const dep = d.rates?.["MG더뱅킹정기예금"]?.[currentDuration] || '-';
-                const sav = d.rates?.["MG더뱅킹정기적금"]?.[currentDuration] || '-';
-                const free = d.rates?.["MG더뱅킹자유적금"]?.[currentDuration] || '-';
+                const depRate = getBestRate(d, currentDuration);
+                const dep = depRate > 0 ? depRate.toFixed(2) : '-';
 
-                const rankClass = i < 3 ? `top-${i + 1} top-rank` : '';
+                const rSav1 = parseFloat(d.rates?.["정기적금"]?.[currentDuration] || 0);
+                const rSav2 = parseFloat(d.rates?.["MG더뱅킹정기적금"]?.[currentDuration] || 0);
+                const savVal = Math.max(rSav1, rSav2);
+                const sav = savVal > 0 ? savVal.toFixed(2) : '-';
+
+                const rFree1 = parseFloat(d.rates?.["자유적금"]?.[currentDuration] || 0);
+                const rFree2 = parseFloat(d.rates?.["MG더뱅킹자유적금"]?.[currentDuration] || 0);
+                const freeVal = Math.max(rFree1, rFree2);
+                const free = freeVal > 0 ? freeVal.toFixed(2) : '-';
+
+                const rankClass = i < 3 && dep !== '-' ? `top-${i + 1} top-rank` : '';
                 const highClass = parseFloat(dep) >= 4.0 ? 'rate-high' : '';
 
                 return `
