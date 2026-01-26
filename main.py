@@ -46,42 +46,171 @@ def read_root():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Dashboard</title>
-        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+        <title>Oracle Dashboard</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
         <style>
-            :root {{ --bg: #f5f5f7; --card-bg: rgba(255, 255, 255, 0.82); --text: #1d1d1f; --accent: #0071e3; }}
-            body {{ background: var(--bg); font-family: -apple-system, sans-serif; padding: 4vw; }}
-            .dashboard-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; max-width: 1200px; margin: 0 auto; }}
-            .bento-card {{ background: var(--card-bg); backdrop-filter: blur(20px); border-radius: 24px; padding: 2rem; text-decoration: none; color: inherit; transition: 0.3s; }}
-            .bento-card:hover {{ transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }}
-            .card-label {{ font-size: 0.8rem; color: #86868b; text-transform: uppercase; }}
-            .card-value {{ font-size: 2.5rem; font-weight: 700; margin: 0.5rem 0; font-family: 'Outfit'; }}
+            :root {{
+                --apple-bg: #f5f5f7;
+                --apple-text: #1d1d1f;
+                --apple-blue: #0071e3;
+                --nav-bg: rgba(255, 255, 255, 0.72);
+                --card-bg: #ffffff;
+                --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            }}
+
+            * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+            
+            body {{
+                background-color: var(--apple-bg);
+                color: var(--apple-text);
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                -webkit-font-smoothing: antialiased;
+                line-height: 1.47059;
+            }}
+
+            /* Apple Navigation Bar */
+            nav {{
+                position: fixed; top: 0; width: 100%; height: 50px;
+                background: var(--nav-bg); backdrop-filter: saturate(180%) blur(20px);
+                z-index: 9999; border-bottom: 1px solid rgba(0,0,0,0.08);
+            }}
+            .nav-content {{
+                max-width: 980px; margin: 0 auto; height: 100%;
+                display: flex; align-items: center; justify-content: space-between;
+                padding: 0 20px; font-weight: 500; font-size: 14px;
+            }}
+
+            .hero {{
+                padding-top: 100px;
+                text-align: center;
+                max-width: 800px;
+                margin: 0 auto 60px auto;
+            }}
+            .hero-label {{
+                font-size: 21px; font-weight: 600; color: var(--apple-blue); margin-bottom: 10px;
+                letter-spacing: -0.01em;
+            }}
+            .hero-title {{
+                font-size: 56px; line-height: 1.07143; font-weight: 700;
+                letter-spacing: -0.005em; font-family: 'Outfit';
+            }}
+            .hero-subtitle {{
+                font-size: 24px; line-height: 1.16667; font-weight: 400;
+                letter-spacing: .009em; margin-top: 15px; color: #86868b;
+            }}
+
+            .dashboard-grid {{
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 1.5rem;
+                max-width: 1000px;
+                margin: 0 auto 100px auto;
+                padding: 0 20px;
+            }}
+
+            .bento-card {{
+                background: var(--card-bg);
+                border-radius: 20px;
+                padding: 2.5rem;
+                text-decoration: none;
+                color: inherit;
+                transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s ease;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                box-shadow: var(--card-shadow);
+                position: relative;
+                overflow: hidden;
+            }}
+            .bento-card:hover {{
+                transform: scale(1.02);
+                box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            }}
+
+            .card-label {{
+                font-size: 12px;
+                color: #86868b;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                font-weight: 600;
+                margin-bottom: 8px;
+            }}
+            .card-value {{
+                font-size: 2.8rem;
+                font-weight: 700;
+                color: var(--apple-text);
+                font-family: 'Outfit';
+            }}
+            .card-desc {{
+                font-size: 1rem;
+                color: #86868b;
+                margin-top: 10px;
+            }}
+            
+            .service-link {{
+                background: #000;
+                color: #fff;
+            }}
+            .service-link .card-value {{ color: #fff; }}
+            .service-link .explore {{ 
+                margin-top: 20px; 
+                color: var(--apple-blue); 
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }}
+
+            @media (max-width: 734px) {{
+                .hero-title {{ font-size: 40px; }}
+                .hero-subtitle {{ font-size: 21px; }}
+                .card-value {{ font-size: 2rem; }}
+            }}
         </style>
     </head>
     <body>
-        <h1>System Overview</h1>
+        <nav>
+            <div class="nav-content">
+                <div>Oracle Intelligence</div>
+                <div style="color: #86868b;">Enterprise Systems</div>
+            </div>
+        </nav>
+
+        <section class="hero">
+            <div class="hero-label">System Performance</div>
+            <h1 class="hero-title">Intelligent Oracle Dashboard</h1>
+            <p class="hero-subtitle">Real-time financial data and system health tracking.</p>
+        </section>
+
         <div class="dashboard-grid">
             <div class="bento-card">
-                <div class="card-label">CPU Usage</div>
+                <div class="card-label">CPU LOAD</div>
                 <div class="card-value">{cpu}%</div>
+                <div class="card-desc">System computing resources.</div>
             </div>
             <div class="bento-card">
-                <div class="card-label">Memory</div>
+                <div class="card-label">MEMORY USAGE</div>
                 <div class="card-value">{mem}%</div>
+                <div class="card-desc">Dynamic RAM optimization active.</div>
             </div>
             <div class="bento-card">
-                <div class="card-label">Uptime</div>
+                <div class="card-label">UPTIME</div>
                 <div class="card-value">{get_uptime()}</div>
+                <div class="card-desc">Stable server operation.</div>
             </div>
-            <a href="/card-events" class="bento-card">
-                <div class="card-label">Services</div>
+            
+            <a href="/card-events" class="bento-card service-link">
+                <div class="card-label">ACTIVE SERVICE</div>
                 <div class="card-value">Card Events</div>
-                <div style="color:var(--accent)">Explore ↗</div>
+                <div class="card-desc">Integrated promotion tracker.</div>
+                <div class="explore">Explore Promotions <span>↗</span></div>
             </a>
-            <a href="/kfcc" class="bento-card">
-                <div class="card-label">Services</div>
+
+            <a href="/kfcc" class="bento-card service-link" style="background: linear-gradient(135deg, #0046ff, #0071e3);">
+                <div class="card-label" style="color: rgba(255,255,255,0.7);">FINANCE SERVICE</div>
                 <div class="card-value">KFCC Rates</div>
-                <div style="color:var(--accent)">Explore ↗</div>
+                <div class="card-desc" style="color: rgba(255,255,255,0.8);">Real-time interest tracker.</div>
+                <div class="explore" style="color: #fff;">Check Rates <span>↗</span></div>
             </a>
         </div>
     </body>
