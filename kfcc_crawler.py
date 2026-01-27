@@ -175,7 +175,16 @@ async def run_crawler():
         return results
 
 if __name__ == "__main__":
+    from datetime import datetime
+    import pytz
+    seoul_tz = pytz.timezone('Asia/Seoul')
+    
     loop = asyncio.get_event_loop()
     data = loop.run_until_complete(run_crawler())
+    
+    current_time = datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S')
+    save_data = {"last_updated": current_time, "data": data}
+    
     with open("kfcc_data.json", "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+        json.dump(save_data, f, ensure_ascii=False, indent=2)
+    print(f"Saved {len(data)} items to kfcc_data.json")

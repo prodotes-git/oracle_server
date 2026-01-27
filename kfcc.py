@@ -12,21 +12,36 @@ KFCC_CACHE_KEY = "kfcc_rates_cache_v1"
 @router.get("/api/kfcc")
 async def get_kfcc_data():
     try:
+        # 1. Redis 캐시 확인
         if r:
             cached = r.get(KFCC_CACHE_KEY)
-            if cached: return json.loads(cached)
+            if cached:
+                return json.loads(cached)
         
+        # 2. 로컬 파일 확인
         local_path = "kfcc_data.json"
         if os.path.exists(local_path):
             with open(local_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            mtime = os.path.getmtime(local_path)
-            last_updated = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
-            res = {"last_updated": last_updated, "data": data}
-            if r: r.setex(KFCC_CACHE_KEY, CACHE_EXPIRE, json.dumps(res))
+            
+            # 데이터 구조 확인 (기존 리스트 형태 vs 신규 딕셔너리 형태)
+            if isinstance(data, dict) and "data" in data and "last_updated" in data:
+                res = data
+            elif isinstance(data, list):
+                mtime = os.path.getmtime(local_path)
+                last_updated = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
+                res = {"last_updated": last_updated, "data": data}
+            else:
+                return {"last_updated": None, "message": "데이터 형식이 올바르지 않습니다.", "data": []}
+
+            # 캐시 업데이트 및 반환
+            if r:
+                r.setex(KFCC_CACHE_KEY, CACHE_EXPIRE, json.dumps(res))
             return res
+            
         return {"last_updated": None, "message": "데이터가 없습니다.", "data": []}
     except Exception as e:
+        print(f"Error in get_kfcc_data: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/kfcc", response_class=HTMLResponse)
