@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>지역화폐 가맹점 지도 | inbestlab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --apple-bg: #ffffff;
+            --apple-text: #1d1d1f;
+            --apple-blue: #0066cc;
+            --nav-bg: rgba(255, 255, 255, 0.8);
+            --card-bg: #f5f5f7;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --secondary-text: #86868b;
+            --onnuri-color: #e67e22;
+            --gyeonggi-color: #27ae60;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--apple-bg);
+            color: var(--apple-text);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro KR", "SF Pro Display", "Noto Sans KR", sans-serif;
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .nav-header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: var(--nav-bg);
+            backdrop-filter: saturate(180%) blur(20px);
+            z-index: 1000;
+            height: 44px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-content {
+            max-width: 1024px;
+            margin: 0 auto;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 22px;
+            font-size: 12px;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            color: var(--apple-text);
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .back-btn:hover {
+            opacity: 1;
+        }
+
+        #map {
+            width: 100%;
+            height: 100vh;
+            margin-top: 0;
+        }
+
+        .search-panel {
+            position: absolute;
+            top: 64px;
+            left: 20px;
+            width: 360px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 18px;
+            padding: 20px;
+            z-index: 100;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-color);
+        }
+
+        .search-box {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .search-box input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-size: 15px;
+            background: transparent;
+            margin-left: 8px;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .tab.active {
+            background: var(--apple-text);
+            color: white;
+        }
+
+        .tab-onnuri {
+            background: #fff;
+            color: var(--onnuri-color);
+            border-color: var(--onnuri-color);
+        }
+
+        .tab-onnuri.active {
+            background: var(--onnuri-color);
+            color: white;
+        }
+
+        .tab-gg {
+            background: #fff;
+            color: var(--gyeonggi-color);
+            border-color: var(--gyeonggi-color);
+        }
+
+        .tab-gg.active {
+            background: var(--gyeonggi-color);
+            color: white;
+        }
+
+        .result-list {
+            max-height: calc(100vh - 300px);
+            overflow-y: auto;
+        }
+
+        .merchant-item {
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .merchant-item:hover {
+            background: var(--card-bg);
+        }
+
+        .merchant-name {
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .merchant-addr {
+            font-size: 13px;
+            color: var(--secondary-text);
+            margin-bottom: 8px;
+        }
+
+        .merchant-tag {
+            display: inline-block;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 734px) {
+            .search-panel {
+                top: auto;
+                bottom: 20px;
+                left: 10px;
+                right: 10px;
+                width: auto;
+                max-height: 40vh;
+            }
+        }
+
+        /* Loading UI */
+        .loader-container {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--apple-blue);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="nav-header">
+        <div class="nav-content">
+            <a href="/" class="back-btn">
+                < 대시보드</a>
+                    <div style="font-weight: 600;">지역화폐 지도</div>
+                    <div style="width: 60px;"></div>
+        </div>
+    </nav>
+
+    <div id="map"></div>
+
+    <div class="search-panel">
+        <div class="filter-tabs">
+            <div class="tab tab-onnuri active" onclick="setMode('onnuri')">온누리상품권</div>
+            <div class="tab tab-gg" onclick="setMode('gg')">경기지역화폐</div>
+        </div>
+        <div class="search-box">
+            <span style="color: var(--secondary-text);">🔍</span>
+            <input type="text" id="keyword" placeholder="가맹점 이름 또는 지역 검색" onkeypress="handleEnter(event)">
+            <button onclick="searchPlace()" style="background: none; border: none; font-size: 13px; color: var(--apple-blue); cursor: pointer; font-weight: 600;">검색</button>
+        </div>
+        <div id="results" class="result-list">
+            <div style="text-align: center; color: var(--secondary-text); padding: 40px 0;">
+                <p style="font-size: 14px;">궁금한 곳을 검색해보세요.</p>
+                <p style="font-size: 12px; margin-top: 8px;">예: 수원 전통시장, 온누리 약국 등</p>
+            </div>
+        </div>
+        <div id="loader" class="loader-container">
+            <div class="loader"></div>
+        </div>
+    </div>
+
+    <!-- Kakao Maps API -->
+    <!-- 사용자분께서는 실제 API 키를 발급받아 아래 appkey= 뒤에 넣어주세요 -->
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=732785d1d6e19f18721c5180f2d5fcb0&libraries=services"></script>
+    <script>
+        let map;
+        let ps;
+        let infowindow;
+        let markers = [];
+        let currentMode = 'onnuri';
+
+        function initMap() {
+            const container = document.getElementById('map');
+            const options = {
+                center: new kakao.maps.LatLng(37.566826, 126.9786567), // 서울시청 기준
+                level: 3
+            };
+
+            map = new kakao.maps.Map(container, options);
+            ps = new kakao.maps.services.Places();
+            infowindow = new kakao.maps.InfoWindow({ zIndex: 1 });
+
+            // 현재 위치 가져오기 시도
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const locPosition = new kakao.maps.LatLng(lat, lon);
+                    map.setCenter(locPosition);
+                });
+            }
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            if (mode === 'onnuri') {
+                document.querySelector('.tab-onnuri').classList.add('active');
+                document.getElementById('keyword').placeholder = "온누리상품권 가맹점 검색";
+            } else {
+                document.querySelector('.tab-gg').classList.add('active');
+                document.getElementById('keyword').placeholder = "경기지역화폐 가맹점 검색";
+            }
+            searchPlace();
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter') searchPlace();
+        }
+
+        function searchPlace() {
+            const keyword = document.getElementById('keyword').value.trim();
+            if (!keyword && !currentMode) return;
+
+            // 로딩 표시
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('loader').style.display = 'block';
+
+            const searchQuery = keyword + (currentMode === 'onnuri' ? " 온누리상품권" : " 경기지역화폐");
+            
+            ps.keywordSearch(searchQuery, placesSearchCB, {
+                location: map.getCenter(),
+                radius: 5000
+            });
+        }
+
+        function placesSearchCB(data, status, pagination) {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+
+            if (status === kakao.maps.services.Status.OK) {
+                displayPlaces(data);
+            } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
+                document.getElementById('results').innerHTML = '<div style="text-align: center; padding: 40px 0; color: var(--secondary-text);">검색 결과가 없습니다.</div>';
+                removeMarkers();
+            } else {
+                document.getElementById('results').innerHTML = '<div style="text-align: center; padding: 40px 0; color: #ff3b30;">검색 중 오류가 발생했습니다.</div>';
+            }
+        }
+
+        function displayPlaces(places) {
+            const listEl = document.getElementById('results');
+            const bounds = new kakao.maps.LatLngBounds();
+            
+            listEl.innerHTML = '';
+            removeMarkers();
+
+            places.forEach((place, i) => {
+                const placePosition = new kakao.maps.LatLng(place.y, place.x);
+                const marker = addMarker(placePosition, i);
+                const itemEl = getListItem(place, i);
+
+                bounds.extend(placePosition);
+
+                (function(marker, title, place) {
+                    kakao.maps.event.addListener(marker, 'click', function() {
+                        displayInfowindow(marker, title, place);
+                    });
+
+                    itemEl.onclick = function() {
+                        displayInfowindow(marker, title, place);
+                        map.panTo(placePosition);
+                    };
+                })(marker, place.place_name, place);
+
+                listEl.appendChild(itemEl);
+            });
+
+            map.setBounds(bounds);
+        }
+
+        function getListItem(place, i) {
+            const el = document.createElement('div');
+            el.className = 'merchant-item';
+            
+            const color = currentMode === 'onnuri' ? 'var(--onnuri-color)' : 'var(--gyeonggi-color)';
+            const label = currentMode === 'onnuri' ? '온누리' : '경기지역';
+
+            el.innerHTML = `
+                <div class="merchant-name">${place.place_name}</div>
+                <div class="merchant-addr">${place.address_name}</div>
+                <div class="merchant-tag" style="background: ${color}20; color: ${color}">${label} 가맹점</div>
+            `;
+            return el;
+        }
+
+        function addMarker(position, i) {
+            const marker = new kakao.maps.Marker({
+                position: position,
+                map: map
+            });
+            markers.push(marker);
+            return marker;
+        }
+
+        function removeMarkers() {
+            markers.forEach(m => m.setMap(null));
+            markers = [];
+        }
+
+        function displayInfowindow(marker, title, place) {
+            const content = `
+                <div style="padding:15px; min-width:200px;">
+                    <strong style="display:block;margin-bottom:5px;font-size:14px;">${title}</strong>
+                    <span style="font-size:12px;color:#666;">${place.road_address_name || place.address_name}</span><br>
+                    <span style="font-size:12px;color:var(--apple-blue);">${place.phone || ''}</span>
+                    <a href="https://map.kakao.com/link/map/${place.id}" target="_blank" style="display:block;margin-top:10px;font-size:12px;color:var(--apple-blue);text-decoration:none;">길찾기 ></a>
+                </div>
+            `;
+            infowindow.setContent(content);
+            infowindow.open(map, marker);
+        }
+
+        // 초기화
+        window.onload = initMap;
+    </script>
+</body>
+
+</html>

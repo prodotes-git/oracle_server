@@ -13,12 +13,14 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from shared import r, seoul_tz, CACHE_EXPIRE, boot_time, get_cached_data
 import card_events
 import kfcc
+import local_currency
 
 app = FastAPI()
 
 # 라우터 연결
 app.include_router(card_events.router)
 app.include_router(kfcc.router)
+app.include_router(local_currency.router)
 
 # --- 공통 라우터 (대시보드, 헬스체크) ---
 
@@ -187,6 +189,15 @@ def read_root():
                     <div class="card-desc" style="color: rgba(255,255,255,0.8);">전국의 새마을금고 예적금 금리를 실시간으로 비교하고 최적의 투자처를 발견하세요.</div>
                 </div>
                 <div class="explore" style="color: #0066cc;">데이터 확인하기 <span>></span></div>
+            </a>
+
+            <a href="/local-currency" class="bento-card" style="background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);">
+                <div>
+                    <div class="card-label">지역 경제 활성화</div>
+                    <div class="card-value">온누리 & 경기지역화폐</div>
+                    <div class="card-desc">내 주변의 온누리상품권 및 경기지역화폐 가맹점을 지도로 쉽고 빠르게 찾아보세요.</div>
+                </div>
+                <div class="explore">지도에서 찾기 <span>></span></div>
             </a>
         </div>
     </body>
