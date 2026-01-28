@@ -23,9 +23,14 @@ class Merchant(Base):
     phone = Column(String)
     last_updated = Column(String)
 
-# 테이블 생성
-if engine is not None:
-    Base.metadata.create_all(bind=engine)
+# 테이블 생성 함수
+def init_db():
+    if engine is not None:
+        try:
+            Base.metadata.create_all(bind=engine)
+            print("PostgreSQL tables created successfully")
+        except Exception as e:
+            print(f"Failed to create tables: {e}")
 
 # API Keys
 GG_KEY = "54450ac8d7d048f8b26d5cba3b983663"

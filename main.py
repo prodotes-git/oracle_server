@@ -210,6 +210,9 @@ scheduler = AsyncIOScheduler(timezone=seoul_tz)
 
 @app.on_event("startup")
 async def start_scheduler():
+    # 데이터베이스 초기화
+    local_currency.init_db()
+    
     # 매일 새벽 4시부터 순차적 실행
     scheduler.add_job(kfcc.background_crawl_kfcc, 'cron', hour=4, minute=0)
     scheduler.add_job(card_events.crawl_shinhan_bg, 'cron', hour=4, minute=5)
