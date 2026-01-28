@@ -219,8 +219,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
@@ -245,7 +250,8 @@
         <div class="search-box">
             <span style="color: var(--secondary-text);">🔍</span>
             <input type="text" id="keyword" placeholder="가맹점 이름 또는 지역 검색" onkeypress="handleEnter(event)">
-            <button onclick="searchPlace()" style="background: none; border: none; font-size: 13px; color: var(--apple-blue); cursor: pointer; font-weight: 600;">검색</button>
+            <button onclick="searchPlace()"
+                style="background: none; border: none; font-size: 13px; color: var(--apple-blue); cursor: pointer; font-weight: 600;">검색</button>
         </div>
         <div id="results" class="result-list">
             <div style="text-align: center; color: var(--secondary-text); padding: 40px 0;">
@@ -259,13 +265,14 @@
     </div>
 
     <!-- Kakao Maps API -->
-    <!-- 사용자분께서는 실제 API 키를 발급받아 아래 appkey= 뒤에 넣어주세요 -->
-    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=732785d1d6e19f18721c5180f2d5fcb0&libraries=services"></script>
+    <script type="text/javascript"
+        src="//dapi.kakao.com/v2/maps/sdk.js?appkey=7cc5e3d5543b5daa49bbeecf93392e35&libraries=services,clusterer"></script>
     <script>
         let map;
         let ps;
         let infowindow;
         let markers = [];
+        let clusterer;
         let currentMode = 'onnuri';
 
         function initMap() {
@@ -279,9 +286,21 @@
             ps = new kakao.maps.services.Places();
             infowindow = new kakao.maps.InfoWindow({ zIndex: 1 });
 
+            // 클러스터러 초기화
+            clusterer = new kakao.maps.MarkerClusterer({
+                map: map,
+                averageCenter: true,
+                minLevel: 6
+            });
+
+            // 지도 이동 시 데이터 재검색
+            kakao.maps.event.addListener(map, 'idle', function () {
+                searchPlace();
+            });
+
             // 현재 위치 가져오기 시도
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
+                navigator.geolocation.getCurrentPosition(function (position) {
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
                     const locPosition = new kakao.maps.LatLng(lat, lon);
@@ -309,54 +328,65 @@
 
         function searchPlace() {
             const keyword = document.getElementById('keyword').value.trim();
-            if (!keyword && !currentMode) return;
 
             // 로딩 표시
             document.getElementById('results').style.display = 'none';
             document.getElementById('loader').style.display = 'block';
 
-            const searchQuery = keyword + (currentMode === 'onnuri' ? " 온누리상품권" : " 경기지역화폐");
-            
-            ps.keywordSearch(searchQuery, placesSearchCB, {
-                location: map.getCenter(),
-                radius: 5000
-            });
-        }
+            const center = map.getCenter();
+            const lat = center.getLat();
+            const lon = center.getLng();
 
-        function placesSearchCB(data, status, pagination) {
-            document.getElementById('loader').style.display = 'none';
-            document.getElementById('results').style.display = 'block';
+            // 백엔드 API 호출
+            fetch(`/api/local-currency/merchants?lat=${lat}&lon=${lon}&type=${currentMode}`)
+                .then(res => res.json())
+                .then(res => {
+                    document.getElementById('loader').style.display = 'none';
+                    document.getElementById('results').style.display = 'block';
 
-            if (status === kakao.maps.services.Status.OK) {
-                displayPlaces(data);
-            } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
-                document.getElementById('results').innerHTML = '<div style="text-align: center; padding: 40px 0; color: var(--secondary-text);">검색 결과가 없습니다.</div>';
-                removeMarkers();
-            } else {
-                document.getElementById('results').innerHTML = '<div style="text-align: center; padding: 40px 0; color: #ff3b30;">검색 중 오류가 발생했습니다.</div>';
-            }
+                    let data = res.data || [];
+
+                    // 키워드가 있으면 추가 필터링
+                    if (keyword) {
+                        data = data.filter(p => p.place_name.includes(keyword) || p.address_name.includes(keyword));
+                    }
+
+                    if (data.length > 0) {
+                        displayPlaces(data);
+                    } else {
+                        document.getElementById('results').innerHTML = '<div style="text-align: center; padding: 40px 0; color: var(--secondary-text);">주변에 가맹점이 없습니다.<br><small>(데이터 동기화가 필요할 수 있습니다)</small></div>';
+                        removeMarkers();
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    document.getElementById('loader').style.display = 'none';
+                    document.getElementById('results').style.display = 'block';
+                });
         }
 
         function displayPlaces(places) {
             const listEl = document.getElementById('results');
             const bounds = new kakao.maps.LatLngBounds();
-            
+
             listEl.innerHTML = '';
             removeMarkers();
 
+            const newMarkers = [];
             places.forEach((place, i) => {
                 const placePosition = new kakao.maps.LatLng(place.y, place.x);
                 const marker = addMarker(placePosition, i);
                 const itemEl = getListItem(place, i);
 
+                newMarkers.push(marker);
                 bounds.extend(placePosition);
 
-                (function(marker, title, place) {
-                    kakao.maps.event.addListener(marker, 'click', function() {
+                (function (marker, title, place) {
+                    kakao.maps.event.addListener(marker, 'click', function () {
                         displayInfowindow(marker, title, place);
                     });
 
-                    itemEl.onclick = function() {
+                    itemEl.onclick = function () {
                         displayInfowindow(marker, title, place);
                         map.panTo(placePosition);
                     };
@@ -365,13 +395,14 @@
                 listEl.appendChild(itemEl);
             });
 
-            map.setBounds(bounds);
+            clusterer.addMarkers(newMarkers);
+            // map.setBounds(bounds); // 매번 bounds를 조절하면 지도가 튀므로 생략하거나 조건부 실행
         }
 
         function getListItem(place, i) {
             const el = document.createElement('div');
             el.className = 'merchant-item';
-            
+
             const color = currentMode === 'onnuri' ? 'var(--onnuri-color)' : 'var(--gyeonggi-color)';
             const label = currentMode === 'onnuri' ? '온누리' : '경기지역';
 
@@ -393,6 +424,7 @@
         }
 
         function removeMarkers() {
+            if (clusterer) clusterer.clear();
             markers.forEach(m => m.setMap(null));
             markers = [];
         }

@@ -4,6 +4,9 @@ import pytz
 import json
 import time
 from datetime import datetime
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
 # 시간대 설정
 seoul_tz = pytz.timezone('Asia/Seoul')
@@ -29,6 +32,34 @@ try:
 except Exception as e:
     print(f"Warning: Redis connection failed ({e}). Running without cache.")
     r = None
+
+# PostgreSQL 설정
+DATABASE_URL = os.getenv("DATABASE_URL")
+engine = None
+SessionLocal = None
+Base = declarative_base()
+
+if DATABASE_URL:
+    try:
+        # Coolify/Docker 환경에서 호환성을 위해 조절
+        if DATABASE_URL.startswith("postgres://"):
+            DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+        
+        engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        print("Connected to PostgreSQL")
+    except Exception as e:
+        print(f"PostgreSQL connection failed: {e}")
+
+def get_db():
+    if SessionLocal:
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    else:
+        yield None
 
 # 서버 시작 시간 기록 (Uptime 계산용)
 boot_time = time.time()

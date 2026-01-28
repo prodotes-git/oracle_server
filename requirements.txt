@@ -11,3 +11,5 @@ python-multipart==0.0.9
 psutil==6.0.0
 playwright
 pytz==2024.1
+sqlalchemy==2.0.31
+psycopg2-binary==2.9.9
