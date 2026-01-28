@@ -96,9 +96,9 @@ def read_root():
 
             .dashboard-grid {{
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
-                gap: 22px;
-                max-width: 1024px;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+                max-width: 1200px;
                 margin: 0 auto 100px auto;
                 padding: 0 22px;
             }}
@@ -106,15 +106,16 @@ def read_root():
             .bento-card {{
                 background: var(--card-bg);
                 border-radius: 18px;
-                padding: 40px;
+                padding: 30px;
                 text-decoration: none;
                 color: inherit;
                 transition: transform 0.3s ease;
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
-                min-height: 320px;
+                min-height: 280px;
                 overflow: hidden;
+                border: 1px solid var(--border-color);
             }}
             .bento-card:hover {{
                 transform: scale(1.01);
@@ -126,15 +127,16 @@ def read_root():
                 margin-bottom: 5px;
             }}
             .card-value {{
-                font-size: 40px;
+                font-size: 28px;
                 font-weight: 700;
                 letter-spacing: -0.02em;
-                margin-bottom: 10px;
+                margin-bottom: 12px;
+                line-height: 1.2;
             }}
             .card-desc {{
-                font-size: 19px;
+                font-size: 15px;
                 color: var(--secondary-text);
-                line-height: 1.21;
+                line-height: 1.4;
                 font-weight: 400;
             }}
             
@@ -149,13 +151,16 @@ def read_root():
             }}
             .explore:hover {{ text-decoration: underline; }}
 
+            @media (max-width: 1024px) {{
+                .dashboard-grid {{ grid-template-columns: repeat(2, 1fr); }}
+            }}
+
             @media (max-width: 734px) {{
                 .hero-title {{ font-size: 40px; }}
                 .hero-subtitle {{ font-size: 19px; }}
                 .dashboard-grid {{ grid-template-columns: 1fr; }}
-                .bento-card {{ min-height: 280px; padding: 30px; }}
-                .card-value {{ font-size: 32px; }}
-                .card-desc {{ font-size: 17px; }}
+                .bento-card {{ min-height: 240px; padding: 25px; }}
+                .card-value {{ font-size: 24px; }}
             }}
         </style>
     </head>
