@@ -36,26 +36,22 @@ async def health_check():
 
 @app.get("/", response_class=HTMLResponse)
 def read_root():
-    try: visits = r.incr("counter") if r else "---"
-    except: visits = "---"
-    cpu = psutil.cpu_percent(); mem = psutil.virtual_memory().percent
-    
     html_content = f"""
     <!DOCTYPE html>
     <html lang="ko">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Oracle Dashboard</title>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+        <title>inbestlab</title>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
         <style>
             :root {{
-                --apple-bg: #f5f5f7;
+                --apple-bg: #ffffff;
                 --apple-text: #1d1d1f;
-                --apple-blue: #0071e3;
-                --nav-bg: rgba(255, 255, 255, 0.72);
-                --card-bg: #ffffff;
-                --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
+                --apple-blue: #0066cc;
+                --nav-bg: rgba(255, 255, 255, 0.8);
+                --card-bg: #f5f5f7;
+                --secondary-text: #86868b;
             }}
 
             * {{ margin: 0; padding: 0; box-sizing: border-box; }}
@@ -63,154 +59,134 @@ def read_root():
             body {{
                 background-color: var(--apple-bg);
                 color: var(--apple-text);
-                font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                font-family: -apple-system, BlinkMacSystemFont, "SF Pro KR", "SF Pro Display", "Noto Sans KR", sans-serif;
                 -webkit-font-smoothing: antialiased;
                 line-height: 1.47059;
             }}
 
-            /* Apple Navigation Bar */
             nav {{
-                position: fixed; top: 0; width: 100%; height: 50px;
+                position: fixed; top: 0; width: 100%; height: 44px;
                 background: var(--nav-bg); backdrop-filter: saturate(180%) blur(20px);
-                z-index: 9999; border-bottom: 1px solid rgba(0,0,0,0.08);
+                z-index: 9999; border-bottom: 1px solid rgba(0,0,0,0.1);
             }}
             .nav-content {{
-                max-width: 980px; margin: 0 auto; height: 100%;
+                max-width: 1024px; margin: 0 auto; height: 100%;
                 display: flex; align-items: center; justify-content: space-between;
-                padding: 0 20px; font-weight: 500; font-size: 14px;
+                padding: 0 22px; font-weight: 400; font-size: 12px;
+                letter-spacing: -0.01em;
             }}
+            .nav-logo {{ font-weight: 600; font-size: 17px; cursor: default; }}
 
             .hero {{
-                padding-top: 100px;
+                padding-top: 120px;
                 text-align: center;
                 max-width: 800px;
-                margin: 0 auto 60px auto;
-            }}
-            .hero-label {{
-                font-size: 21px; font-weight: 600; color: var(--apple-blue); margin-bottom: 10px;
-                letter-spacing: -0.01em;
+                margin: 0 auto 80px auto;
             }}
             .hero-title {{
                 font-size: 56px; line-height: 1.07143; font-weight: 700;
-                letter-spacing: -0.005em; font-family: 'Outfit';
+                letter-spacing: -0.005em; margin-bottom: 15px;
             }}
             .hero-subtitle {{
                 font-size: 24px; line-height: 1.16667; font-weight: 400;
-                letter-spacing: .009em; margin-top: 15px; color: #86868b;
+                letter-spacing: .009em; color: var(--secondary-text);
             }}
 
             .dashboard-grid {{
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-                gap: 1.5rem;
-                max-width: 1000px;
+                grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+                gap: 22px;
+                max-width: 1024px;
                 margin: 0 auto 100px auto;
-                padding: 0 20px;
+                padding: 0 22px;
             }}
 
             .bento-card {{
                 background: var(--card-bg);
-                border-radius: 20px;
-                padding: 2.5rem;
+                border-radius: 18px;
+                padding: 40px;
                 text-decoration: none;
                 color: inherit;
-                transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s ease;
+                transition: transform 0.3s ease;
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
-                box-shadow: var(--card-shadow);
-                position: relative;
+                justify-content: space-between;
+                min-height: 320px;
                 overflow: hidden;
             }}
             .bento-card:hover {{
-                transform: scale(1.02);
-                box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+                transform: scale(1.01);
             }}
 
             .card-label {{
-                font-size: 12px;
-                color: #86868b;
-                text-transform: uppercase;
-                letter-spacing: 0.05em;
+                font-size: 14px;
                 font-weight: 600;
-                margin-bottom: 8px;
+                margin-bottom: 5px;
             }}
             .card-value {{
-                font-size: 2.8rem;
+                font-size: 40px;
                 font-weight: 700;
-                color: var(--apple-text);
-                font-family: 'Outfit';
+                letter-spacing: -0.02em;
+                margin-bottom: 10px;
             }}
             .card-desc {{
-                font-size: 1rem;
-                color: #86868b;
-                margin-top: 10px;
+                font-size: 19px;
+                color: var(--secondary-text);
+                line-height: 1.21;
+                font-weight: 400;
             }}
             
-            .service-link {{
-                background: #000;
-                color: #fff;
-            }}
-            .service-link .card-value {{ color: #fff; }}
-            .service-link .explore {{ 
-                margin-top: 20px; 
+            .explore {{ 
+                margin-top: 30px; 
                 color: var(--apple-blue); 
-                font-weight: 600;
+                font-size: 17px;
+                font-weight: 400;
                 display: flex;
                 align-items: center;
                 gap: 5px;
             }}
+            .explore:hover {{ text-decoration: underline; }}
 
             @media (max-width: 734px) {{
                 .hero-title {{ font-size: 40px; }}
-                .hero-subtitle {{ font-size: 21px; }}
-                .card-value {{ font-size: 2rem; }}
+                .hero-subtitle {{ font-size: 19px; }}
+                .dashboard-grid {{ grid-template-columns: 1fr; }}
+                .bento-card {{ min-height: 280px; padding: 30px; }}
+                .card-value {{ font-size: 32px; }}
+                .card-desc {{ font-size: 17px; }}
             }}
         </style>
     </head>
     <body>
         <nav>
             <div class="nav-content">
-                <div>Oracle Intelligence</div>
-                <div style="color: #86868b;">Enterprise Systems</div>
+                <div class="nav-logo">inbestlab</div>
+                <div style="color: var(--secondary-text);">지능형 금융 서비스</div>
             </div>
         </nav>
 
         <section class="hero">
-            <div class="hero-label">System Performance</div>
-            <h1 class="hero-title">Intelligent Oracle Dashboard</h1>
-            <p class="hero-subtitle">Real-time financial data and system health tracking.</p>
+            <h1 class="hero-title">더 스마트한 금융의 시작</h1>
+            <p class="hero-subtitle">실시간 데이터 분석을 통한 인사이트를 경험해보세요.</p>
         </section>
 
         <div class="dashboard-grid">
-            <div class="bento-card">
-                <div class="card-label">CPU LOAD</div>
-                <div class="card-value">{cpu}%</div>
-                <div class="card-desc">System computing resources.</div>
-            </div>
-            <div class="bento-card">
-                <div class="card-label">MEMORY USAGE</div>
-                <div class="card-value">{mem}%</div>
-                <div class="card-desc">Dynamic RAM optimization active.</div>
-            </div>
-            <div class="bento-card">
-                <div class="card-label">UPTIME</div>
-                <div class="card-value">{get_uptime()}</div>
-                <div class="card-desc">Stable server operation.</div>
-            </div>
-            
-            <a href="/card-events" class="bento-card service-link">
-                <div class="card-label">ACTIVE SERVICE</div>
-                <div class="card-value">Card Events</div>
-                <div class="card-desc">Integrated promotion tracker.</div>
-                <div class="explore">Explore Promotions <span>↗</span></div>
+            <a href="/card-events" class="bento-card">
+                <div>
+                    <div class="card-label">카드 혜택 정렬</div>
+                    <div class="card-value">모든 카드사 이벤트</div>
+                    <div class="card-desc">주요 카드사의 프로모션과 혜택을 한눈에 확인하고 나에게 맞는 혜택을 찾아보세요.</div>
+                </div>
+                <div class="explore">더 알아보기 <span>></span></div>
             </a>
 
-            <a href="/kfcc" class="bento-card service-link" style="background: linear-gradient(135deg, #0046ff, #0071e3);">
-                <div class="card-label" style="color: rgba(255,255,255,0.7);">FINANCE SERVICE</div>
-                <div class="card-value">KFCC Rates</div>
-                <div class="card-desc" style="color: rgba(255,255,255,0.8);">Real-time interest tracker.</div>
-                <div class="explore" style="color: #fff;">Check Rates <span>↗</span></div>
+            <a href="/kfcc" class="bento-card" style="background-color: #000; color: #fff;">
+                <div>
+                    <div class="card-label" style="color: rgba(255,255,255,0.7);">금리 추적</div>
+                    <div class="card-value">새마을금고 금리 지표</div>
+                    <div class="card-desc" style="color: rgba(255,255,255,0.8);">전국의 새마을금고 예적금 금리를 실시간으로 비교하고 최적의 투자처를 발견하세요.</div>
+                </div>
+                <div class="explore" style="color: #0066cc;">데이터 확인하기 <span>></span></div>
             </a>
         </div>
     </body>

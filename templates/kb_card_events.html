@@ -4,18 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KB Kookmin Bank Promotions | Oracle Dashboard</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;600;700&display=swap"
+    <title>KB국민카드 이벤트 | inbestlab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
         rel="stylesheet">
     <style>
         :root {
-            --apple-bg: #f5f5f7;
+            --apple-bg: #ffffff;
             --apple-text: #1d1d1f;
-            --apple-blue: #0071e3;
-            --nav-bg: rgba(255, 255, 255, 0.72);
-            --card-bg: #ffffff;
-            --border-color: rgba(0, 0, 0, 0.08);
+            --apple-blue: #0066cc;
+            --nav-bg: rgba(255, 255, 255, 0.8);
+            --card-bg: #f5f5f7;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --secondary-text: #86868b;
             --kb-color: #ffbc00;
         }
 
@@ -28,198 +28,184 @@
         body {
             background-color: var(--apple-bg);
             color: var(--apple-text);
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro KR", "SF Pro Display", "Noto Sans KR", sans-serif;
             -webkit-font-smoothing: antialiased;
-            padding-bottom: 50px;
+            padding-bottom: 80px;
         }
 
-        /* Apple Glass Header */
         .nav-header {
             position: sticky;
             top: 0;
             background: var(--nav-bg);
             backdrop-filter: saturate(180%) blur(20px);
             z-index: 1000;
-            padding: 0.8rem 1.5rem;
+            padding: 0;
+            height: 44px;
             border-bottom: 1px solid var(--border-color);
         }
 
         .nav-content {
-            max-width: 980px;
+            max-width: 1024px;
             margin: 0 auto;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 14px;
-            font-weight: 500;
+            padding: 0 22px;
+            font-size: 12px;
         }
 
         .back-btn {
             text-decoration: none;
-            color: var(--apple-blue);
-            font-weight: 600;
-            font-size: 13px;
+            color: var(--apple-text);
+            font-weight: 400;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .back-btn:hover {
+            opacity: 1;
         }
 
         .main-content {
-            max-width: 980px;
-            margin: 4rem auto;
-            padding: 0 20px;
+            max-width: 1024px;
+            margin: 0 auto;
+            padding: 80px 22px 0 22px;
         }
 
         .hero-section {
-            margin-bottom: 3rem;
             text-align: center;
+            margin-bottom: 60px;
         }
 
         h1 {
-            font-family: 'Outfit';
-            font-size: 42px;
+            font-size: 48px;
             font-weight: 700;
             letter-spacing: -0.015em;
             line-height: 1.1;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
+            color: var(--kb-color);
         }
 
         .subtitle {
-            color: #86868b;
-            font-size: 19px;
+            color: var(--secondary-text);
+            font-size: 21px;
             font-weight: 400;
             letter-spacing: 0.011em;
-            line-height: 1.3;
+            margin-bottom: 30px;
+        }
+
+        .update-btn {
+            background: var(--apple-blue);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 980px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .update-btn:hover {
+            background: #0077ed;
         }
 
         .search-container {
             max-width: 600px;
-            margin: 0 auto 3rem auto;
+            margin: 0 auto 60px auto;
         }
 
         .search-box {
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 18px;
-            padding: 12px 20px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 12px 18px;
             display: flex;
             align-items: center;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
-            transition: all 0.3s ease;
-        }
-
-        .search-box:focus-within {
-            background: #fff;
-            border-color: var(--apple-blue);
-            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
         }
 
         .search-box input {
             border: none;
             outline: none;
             width: 100%;
-            font-size: 16px;
+            font-size: 17px;
             font-family: inherit;
-            margin-left: 12px;
+            margin-left: 10px;
             background: transparent;
-        }
-
-        .refresh-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            transition: transform 0.3s ease;
-        }
-
-        .refresh-btn:hover {
-            transform: rotate(180deg);
+            color: var(--apple-text);
         }
 
         .event-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 22px;
         }
 
         .event-card {
-            background: white;
-            border-radius: 20px;
-            padding: 1.8rem;
+            background: #fff;
+            border-radius: 18px;
             display: flex;
             flex-direction: column;
-            border: 1px solid var(--border-color);
             text-decoration: none;
             color: inherit;
-            transition: all 0.4s ease;
+            transition: transform 0.3s ease;
             height: 100%;
-            min-height: 220px;
-            box-sizing: border-box;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
         }
 
         .event-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+            transform: scale(1.01);
         }
 
         .event-image {
             width: 100%;
-            height: 140px;
+            height: 180px;
             object-fit: cover;
-            border-radius: 12px;
-            margin-bottom: 1.2rem;
             background: #f5f5f7;
         }
 
-        .tags-wrapper {
+        .event-info {
+            padding: 24px;
+            flex-grow: 1;
             display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            align-items: center;
-            margin-bottom: 1rem;
+            flex-direction: column;
         }
 
-        .tag-category {
-            background: #f5f5f7;
-            color: #86868b;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-weight: 600;
+        .tag {
             font-size: 11px;
-            text-transform: uppercase;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: var(--card-bg);
+            color: var(--secondary-text);
+            align-self: flex-start;
+            margin-bottom: 12px;
         }
 
         .event-title {
             font-size: 19px;
             font-weight: 700;
-            color: #1d1d1f;
-            margin-bottom: 1.5rem;
+            margin-bottom: 15px;
             line-height: 1.3;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
             flex-grow: 1;
         }
 
         .event-date {
             font-size: 13px;
-            color: #86868b;
-            border-top: 1px solid #f2f2f2;
-            padding-top: 12px;
+            color: var(--secondary-text);
         }
 
         .loading {
             text-align: center;
-            padding: 6rem;
-            color: #86868b;
+            padding: 100px;
+            color: var(--secondary-text);
             grid-column: 1 / -1;
-            font-size: 19px;
         }
 
         .stats {
-            text-align: left;
-            font-size: 13px;
-            color: #86868b;
-            margin-bottom: 1rem;
+            font-size: 14px;
+            color: var(--secondary-text);
+            margin-bottom: 20px;
             font-weight: 500;
         }
 
@@ -236,32 +222,32 @@
 </head>
 
 <body>
-    <div class="nav-header">
+    <nav class="nav-header">
         <div class="nav-content">
-            <a href="/card-events" class="back-btn">Card Promotions</a>
-            <div style="font-family: 'Outfit'; font-weight: 700; color: var(--kb-color);">KB Kookmin Bank</div>
-            <div id="lastUpdated" style="font-size: 12px; color: #86868b; min-width: 80px; text-align: right;"></div>
+            <a href="/card-events" class="back-btn">
+                < 카드 목록</a>
+                    <div style="font-weight: 600;">inbestlab</div>
+                    <div id="lastUpdated" style="font-size: 11px; color: var(--secondary-text);"></div>
         </div>
-    </div>
+    </nav>
 
     <div class="main-content">
         <div class="hero-section">
-            <h1>Financial Rewards</h1>
-            <p class="subtitle">Exclusive events and cashback offers from KB Kookmin.</p>
-            <button onclick="updateData()" class="refresh-btn" style="margin-top: 1rem;">🔄 Update Data</button>
+            <h1>KB국민카드 혜택</h1>
+            <p class="subtitle">KB국민카드에서 진행 중인 다양한 이벤트와 캐시백 혜택을 확인하세요.</p>
+            <button onclick="updateData()" class="update-btn">새로고침</button>
         </div>
 
         <div class="search-container">
             <div class="search-box">
-                <span style="color: #86868b;">🔍</span>
-                <input type="text" id="searchInput" placeholder="Find KB Kookmin promotions..."
-                    onkeyup="filterEvents()">
+                <span style="color: var(--secondary-text); font-size: 18px;">🔍</span>
+                <input type="text" id="searchInput" placeholder="이벤트 검색..." onkeyup="filterEvents()">
             </div>
         </div>
 
         <div id="stats" class="stats"></div>
         <div id="eventList" class="event-list">
-            <div class="loading">Fetching data...</div>
+            <div class="loading">혜택 정보를 분석하고 있습니다...</div>
         </div>
     </div>
 
@@ -269,21 +255,24 @@
         let allEvents = [];
 
         async function updateData() {
+            if (!confirm("최신 정보를 다시 수집하시겠습니까?")) return;
             try {
                 await fetch('/api/kb/update', { method: 'POST' });
-                alert('Update requested. Please refresh in 10 seconds.');
-            } catch (e) { }
+                alert('업데이트가 요청되었습니다. 잠시 후 새로고침 해주세요.');
+            } catch (e) { alert("연결 오류가 발생했습니다."); }
         }
 
         async function fetchEvents() {
             try {
                 const response = await fetch('/api/kb-cards');
                 const json = await response.json();
-                if (json.last_updated) document.getElementById('lastUpdated').innerText = json.last_updated.substring(5, 16);
+                if (json.last_updated) {
+                    document.getElementById('lastUpdated').innerText = `최근 업데이트: ${json.last_updated}`;
+                }
                 allEvents = Array.isArray(json) ? json : (json.data || []);
                 renderEvents(allEvents);
             } catch (error) {
-                document.getElementById('eventList').innerHTML = '<div class="loading">Link failure.</div>';
+                document.getElementById('eventList').innerHTML = '<div class="loading">데이터를 불러올 수 없습니다.</div>';
             }
         }
 
@@ -299,21 +288,21 @@
 
         function renderEvents(events) {
             const list = document.getElementById('eventList');
-            document.getElementById('stats').innerText = `${events.length} Promotions Available`;
+            document.getElementById('stats').innerText = `총 ${events.length}개의 혜택을 찾았습니다.`;
 
             if (events.length === 0) {
-                list.innerHTML = '<div class="loading">No records found.</div>';
+                list.innerHTML = '<div class="loading">검색 결과가 없습니다.</div>';
                 return;
             }
 
             list.innerHTML = events.map(ev => `
                 <a href="${ev.link}" target="_blank" class="event-card">
-                    ${ev.image ? `<img src="${ev.image}" class="event-image" loading="lazy" onerror="this.style.display='none'">` : ""}
-                    <div class="tags-wrapper">
-                        <span class="tag-category">${ev.category}</span>
+                    ${ev.image ? `<img src="${ev.image}" class="event-image" loading="lazy">` : `<div class="event-image"></div>`}
+                    <div class="event-info">
+                        <span class="tag">${ev.category}</span>
+                        <div class="event-title">${ev.eventName}</div>
+                        <div class="event-date">${ev.period}</div>
                     </div>
-                    <div class="event-title">${ev.eventName}</div>
-                    <div class="event-date">${ev.period}</div>
                 </a>
             `).join('');
         }

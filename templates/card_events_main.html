@@ -4,18 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>카드사 이벤트 통합 검색 | Oracle Dashboard</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;600;700&display=swap"
+    <title>카드사 이벤트 검색 | inbestlab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
         rel="stylesheet">
     <style>
         :root {
-            --apple-bg: #f5f5f7;
+            --apple-bg: #ffffff;
             --apple-text: #1d1d1f;
-            --apple-blue: #0071e3;
-            --nav-bg: rgba(255, 255, 255, 0.72);
-            --card-bg: #ffffff;
-            --border-color: rgba(0, 0, 0, 0.08);
+            --apple-blue: #0066cc;
+            --nav-bg: rgba(255, 255, 255, 0.8);
+            --card-bg: #f5f5f7;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --secondary-text: #86868b;
         }
 
         * {
@@ -27,87 +27,88 @@
         body {
             background-color: var(--apple-bg);
             color: var(--apple-text);
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro KR", "SF Pro Display", "Noto Sans KR", sans-serif;
             -webkit-font-smoothing: antialiased;
-            padding-bottom: 50px;
+            padding-bottom: 80px;
         }
 
-        /* Apple Glass Header */
         .nav-header {
             position: sticky;
             top: 0;
             background: var(--nav-bg);
             backdrop-filter: saturate(180%) blur(20px);
             z-index: 1000;
-            padding: 0.8rem 1.5rem;
+            padding: 0;
+            height: 44px;
             border-bottom: 1px solid var(--border-color);
         }
 
         .nav-content {
-            max-width: 980px;
+            max-width: 1024px;
             margin: 0 auto;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 14px;
-            font-weight: 500;
+            padding: 0 22px;
+            font-size: 12px;
         }
 
         .back-btn {
             text-decoration: none;
-            color: var(--apple-blue);
-            font-weight: 600;
-            font-size: 13px;
+            color: var(--apple-text);
+            font-weight: 400;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .back-btn:hover {
+            opacity: 1;
         }
 
         .main-content {
-            max-width: 980px;
-            margin: 4rem auto;
-            padding: 0 20px;
-            text-align: center;
+            max-width: 1024px;
+            margin: 0 auto;
+            padding: 80px 22px 0 22px;
         }
 
         .hero-section {
-            margin-bottom: 4rem;
+            text-align: center;
+            margin-bottom: 60px;
         }
 
         h1 {
-            font-family: 'Outfit';
             font-size: 48px;
             font-weight: 700;
             letter-spacing: -0.015em;
             line-height: 1.1;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
 
         .subtitle {
-            color: #86868b;
+            color: var(--secondary-text);
             font-size: 21px;
             font-weight: 400;
             letter-spacing: 0.011em;
-            line-height: 1.3;
+            margin-bottom: 30px;
         }
 
         .search-container {
             max-width: 600px;
-            margin: 0 auto 4rem auto;
+            margin: 0 auto 60px auto;
         }
 
         .search-box {
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 18px;
-            padding: 14px 22px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 12px 18px;
             display: flex;
             align-items: center;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
-            transition: all 0.3s ease;
+            transition: background 0.2s ease;
         }
 
         .search-box:focus-within {
-            background: #fff;
-            border-color: var(--apple-blue);
-            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+            background: #e8e8ed;
         }
 
         .search-box input {
@@ -116,134 +117,111 @@
             width: 100%;
             font-size: 17px;
             font-family: inherit;
-            margin-left: 12px;
+            margin-left: 10px;
             background: transparent;
+            color: var(--apple-text);
         }
 
         .card-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.2rem;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 22px;
         }
 
         .card-link {
             background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 2rem 1.5rem;
+            border-radius: 18px;
+            padding: 40px 20px;
             text-decoration: none;
             color: inherit;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.3s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            text-align: center;
         }
 
         .card-link:hover {
             transform: scale(1.02);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
         }
 
         .card-name {
             font-weight: 600;
             font-size: 17px;
-            color: #1d1d1f;
         }
 
         /* Result Cards */
         .event-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 22px;
+            margin-top: 40px;
         }
 
         .event-card {
-            background: white;
-            border-radius: 20px;
-            padding: 1.8rem;
+            background: #fff;
+            border-radius: 18px;
+            padding: 0;
             display: flex;
             flex-direction: column;
-            border: 1px solid var(--border-color);
             text-decoration: none;
             color: inherit;
-            transition: all 0.4s ease;
+            transition: transform 0.3s ease;
             height: 100%;
-            min-height: 220px;
-            box-sizing: border-box;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
         }
 
         .event-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+            transform: scale(1.01);
         }
 
         .event-image {
             width: 100%;
-            height: 140px;
+            height: 180px;
             object-fit: cover;
-            border-radius: 12px;
-            margin-bottom: 1.2rem;
             background: #f5f5f7;
+        }
+
+        .event-info {
+            padding: 24px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .tags-wrapper {
             display: flex;
-            flex-wrap: wrap;
             gap: 8px;
-            align-items: center;
-            margin-bottom: 1rem;
+            margin-bottom: 12px;
         }
 
-        .tag-company {
-            background: #1d1d1f;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-weight: 600;
+        .tag {
             font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.02em;
-        }
-
-        .tag-category {
-            background: #f5f5f7;
-            color: #86868b;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 4px;
             text-transform: uppercase;
         }
 
         .event-title {
             font-size: 19px;
             font-weight: 700;
-            color: #1d1d1f;
-            margin-bottom: 1.5rem;
+            margin-bottom: 15px;
             line-height: 1.3;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
             flex-grow: 1;
         }
 
         .event-date {
             font-size: 13px;
-            color: #86868b;
-            border-top: 1px solid #f2f2f2;
-            padding-top: 12px;
+            color: var(--secondary-text);
         }
 
         .loading {
             text-align: center;
-            padding: 6rem;
-            color: #86868b;
+            padding: 100px;
+            color: var(--secondary-text);
             grid-column: 1 / -1;
-            font-size: 19px;
         }
 
         @media (max-width: 734px) {
@@ -254,42 +232,46 @@
             .subtitle {
                 font-size: 17px;
             }
+
+            .card-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="nav-header">
+    <nav class="nav-header">
         <div class="nav-content">
-            <a href="/" class="back-btn">Dashboard</a>
-            <div style="font-family: 'Outfit'; font-weight: 700; color: #000;">Card Promotions</div>
-            <div style="width: 60px;"></div>
+            <a href="/" class="back-btn">
+                < 대시보드</a>
+                    <div style="font-weight: 600;">inbestlab</div>
+                    <div style="width: 60px;"></div>
         </div>
-    </div>
+    </nav>
 
     <div class="main-content">
         <div class="hero-section">
-            <h1>Integrated Search</h1>
-            <p class="subtitle">Explore curated benefits from leading financial institutions.</p>
+            <h1>통합 카드 혜택 검색</h1>
+            <p class="subtitle">모든 카드사의 주요 이벤트를 한곳에서 확인하세요.</p>
         </div>
 
         <div class="search-container">
             <div class="search-box">
-                <span style="color: #86868b;">🔍</span>
-                <input type="text" id="cardSearch" placeholder='Search by bank, benefit, or keyword (ex: Cashback)'
-                    onkeyup="filterCards()">
+                <span style="color: var(--secondary-text); font-size: 18px;">🔍</span>
+                <input type="text" id="cardSearch" placeholder='키워드 검색 (예: 캐시백, 신규가입, 여행)' onkeyup="filterCards()">
             </div>
         </div>
 
         <div class="card-grid" id="cardGrid">
-            <a href="/card-events/shinhan" class="card-link"><span class="card-name">Shinhan Card</span></a>
-            <a href="/card-events/kb" class="card-link"><span class="card-name">KB Kookmin Bank</span></a>
-            <a href="/card-events/samsung" class="card-link"><span class="card-name">Samsung Card</span></a>
-            <a href="/card-events/hyundai" class="card-link"><span class="card-name">Hyundai Card</span></a>
-            <a href="/card-events/lotte" class="card-link"><span class="card-name">Lotte Card</span></a>
-            <a href="/card-events/woori" class="card-link"><span class="card-name">Woori Card</span></a>
-            <a href="/card-events/hana" class="card-link"><span class="card-name">Hana Card</span></a>
-            <a href="/card-events/bc" class="card-link"><span class="card-name">BC Card</span></a>
+            <a href="/card-events/shinhan" class="card-link"><span class="card-name">신한카드</span></a>
+            <a href="/card-events/kb" class="card-link"><span class="card-name">KB국민카드</span></a>
+            <a href="/card-events/samsung" class="card-link"><span class="card-name">삼성카드</span></a>
+            <a href="/card-events/hyundai" class="card-link"><span class="card-name">현대카드</span></a>
+            <a href="/card-events/lotte" class="card-link"><span class="card-name">롯데카드</span></a>
+            <a href="/card-events/woori" class="card-link"><span class="card-name">우리카드</span></a>
+            <a href="/card-events/hana" class="card-link"><span class="card-name">하나카드</span></a>
+            <a href="/card-events/bc" class="card-link"><span class="card-name">BC카드</span></a>
         </div>
     </div>
 
@@ -361,19 +343,21 @@
             eventList.style.display = 'grid';
 
             if (filtered.length === 0) {
-                eventList.innerHTML = '<div class="loading">No matching promotions found.</div>';
+                eventList.innerHTML = '<div class="loading">검색 결과가 없습니다.</div>';
                 return;
             }
 
             eventList.innerHTML = filtered.map(ev => `
                 <a href="${ev.link}" target="_blank" class="event-card">
-                    ${ev.image ? `<img src="${ev.image}" class="event-image" loading="lazy" onerror="this.style.display='none'">` : ""}
-                    <div class="tags-wrapper">
-                        <span class="tag-company" style="background:${ev.color}">${ev.companyName}</span>
-                        <span class="tag-category">${ev.category}</span>
+                    ${ev.image ? `<img src="${ev.image}" class="event-image" loading="lazy">` : `<div class="event-image"></div>`}
+                    <div class="event-info">
+                        <div class="tags-wrapper">
+                            <span class="tag" style="background:var(--card-bg); color: ${ev.color}">${ev.companyName}</span>
+                            <span class="tag" style="background:var(--card-bg); color: var(--secondary-text)">${ev.category}</span>
+                        </div>
+                        <div class="event-title">${ev.eventName}</div>
+                        <div class="event-date">${ev.period}</div>
                     </div>
-                    <div class="event-title">${ev.eventName}</div>
-                    <div class="event-date">${ev.period}</div>
                 </a>
             `).join('');
         }

@@ -4,18 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>새마을금고 금리 트래커 | Oracle Dashboard</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;600;700&display=swap"
+    <title>새마을금고 금리 지표 | inbestlab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
         rel="stylesheet">
     <style>
         :root {
-            --apple-bg: #f5f5f7;
+            --apple-bg: #ffffff;
             --apple-text: #1d1d1f;
-            --apple-blue: #0071e3;
-            --nav-bg: rgba(255, 255, 255, 0.72);
-            --card-bg: #ffffff;
-            --border-color: rgba(0, 0, 0, 0.08);
+            --apple-blue: #0066cc;
+            --nav-bg: rgba(255, 255, 255, 0.8);
+            --card-bg: #f5f5f7;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --secondary-text: #86868b;
         }
 
         * {
@@ -27,229 +27,209 @@
         body {
             background-color: var(--apple-bg);
             color: var(--apple-text);
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro KR", "SF Pro Display", "Noto Sans KR", sans-serif;
             -webkit-font-smoothing: antialiased;
-            padding-bottom: 50px;
+            padding-bottom: 80px;
         }
 
-        /* Apple Glass Header */
         .nav-header {
             position: sticky;
             top: 0;
             background: var(--nav-bg);
             backdrop-filter: saturate(180%) blur(20px);
             z-index: 1000;
-            padding: 0.8rem 1.5rem;
+            padding: 0;
+            height: 44px;
             border-bottom: 1px solid var(--border-color);
         }
 
         .nav-content {
-            max-width: 980px;
+            max-width: 1024px;
             margin: 0 auto;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 14px;
-            font-weight: 500;
+            padding: 0 22px;
+            font-size: 12px;
         }
 
         .back-btn {
             text-decoration: none;
-            color: var(--apple-blue);
-            font-weight: 600;
-            font-size: 13px;
+            color: var(--apple-text);
+            font-weight: 400;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .back-btn:hover {
+            opacity: 1;
         }
 
         .main-content {
-            max-width: 980px;
-            margin: 4rem auto;
-            padding: 0 20px;
-            text-align: center;
+            max-width: 1024px;
+            margin: 0 auto;
+            padding: 80px 22px 0 22px;
         }
 
         .hero-section {
-            margin-bottom: 4rem;
+            text-align: center;
+            margin-bottom: 60px;
         }
 
         h1 {
-            font-family: 'Outfit';
             font-size: 48px;
             font-weight: 700;
             letter-spacing: -0.015em;
             line-height: 1.1;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
 
         .subtitle {
-            color: #86868b;
+            color: var(--secondary-text);
             font-size: 21px;
             font-weight: 400;
             letter-spacing: 0.011em;
-            line-height: 1.3;
+            margin-bottom: 30px;
         }
 
         .update-btn {
             background: var(--apple-blue);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
+            padding: 8px 16px;
+            border-radius: 980px;
             font-size: 14px;
-            margin-top: 1.5rem;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
         .update-btn:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
+            background: #0077ed;
+        }
+
+        .update-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
         }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            max-width: 980px;
-            margin: 2rem auto;
-            padding: 0 20px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+            margin-bottom: 60px;
         }
 
         .stat-card {
             background: var(--card-bg);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 30px;
             text-align: left;
         }
 
         .stat-label {
-            font-size: 12px;
-            color: #86868b;
-            text-transform: uppercase;
+            font-size: 14px;
+            color: var(--secondary-text);
             font-weight: 600;
-            letter-spacing: 0.05em;
+            margin-bottom: 10px;
         }
 
         .stat-value {
             font-size: 32px;
             font-weight: 700;
-            font-family: 'Outfit';
-            color: var(--apple-blue);
-            margin-top: 8px;
+            color: var(--apple-text);
+            letter-spacing: -0.02em;
         }
 
         .table-container {
-            max-width: 980px;
-            margin: 3rem auto;
-            padding: 0 20px;
+            margin-top: 40px;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
+
+        .table-title {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .table-hint {
+            font-size: 14px;
+            color: var(--secondary-text);
         }
 
         .data-table-wrapper {
-            background: var(--card-bg);
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
-            border: 1px solid var(--border-color);
+            background: #fff;
+            border-top: 1px solid var(--border-color);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            text-align: left;
         }
 
         th {
-            padding: 1.2rem;
-            background: #fafafa;
-            font-size: 0.85rem;
-            color: #86868b;
+            padding: 15px 10px;
+            font-size: 12px;
             font-weight: 600;
+            color: var(--secondary-text);
+            text-align: left;
             border-bottom: 1px solid var(--border-color);
             cursor: pointer;
-            transition: background 0.2s;
         }
 
         th:hover {
-            background: #f0f0f0;
+            color: var(--apple-text);
         }
 
         td {
-            padding: 1.2rem;
-            border-bottom: 1px solid #f2f2f2;
-            font-size: 0.95rem;
+            padding: 20px 10px;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border-color);
             vertical-align: middle;
         }
 
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        tr:hover td {
-            background: #fcfcfd;
-        }
-
         .rank-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 24px;
-            height: 24px;
-            border-radius: 6px;
-            font-size: 12px;
             font-weight: 700;
-            background: #e5e7eb;
-            color: #4b5563;
+            color: var(--secondary-text);
         }
 
-        .top-rank {
-            background: #f0f7ff;
+        .branch-name {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 4px;
         }
 
-        tr.top-rank:nth-child(1) .rank-badge {
-            background: #fbbf24;
-            color: white;
-        }
-
-        tr.top-rank:nth-child(2) .rank-badge {
-            background: #9ca3af;
-            color: white;
-        }
-
-        tr.top-rank:nth-child(3) .rank-badge {
-            background: #d97706;
-            color: white;
+        .branch-addr {
+            font-size: 12px;
+            color: var(--secondary-text);
         }
 
         .rate-cell {
-            font-family: 'Outfit';
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: #1d1d1f;
+            font-weight: 600;
+            font-size: 16px;
         }
 
         .rate-high {
-            color: #d32f2f;
+            color: #d70000;
         }
 
-        .location-cell {
-            color: #86868b;
-            font-size: 13px;
-            margin-top: 2px;
+        .date-cell {
+            font-size: 12px;
+            color: var(--secondary-text);
         }
 
         .loading {
-            padding: 5rem;
+            padding: 100px;
             text-align: center;
-            color: #86868b;
-            font-size: 17px;
-        }
-
-        .sort-icon {
-            font-size: 10px;
-            margin-left: 4px;
-            display: inline-block;
+            color: var(--secondary-text);
         }
 
         @media (max-width: 734px) {
@@ -257,8 +237,12 @@
                 font-size: 32px;
             }
 
-            .hero-section {
-                margin-bottom: 2rem;
+            .subtitle {
+                font-size: 17px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
             }
 
             th:nth-child(4),
@@ -272,61 +256,59 @@
 </head>
 
 <body>
-    <div class="nav-header">
+    <nav class="nav-header">
         <div class="nav-content">
-            <a href="/" class="back-btn">Dashboard</a>
-            <div style="font-family: 'Outfit'; font-weight: 700; color: #000;">KFCC Rates</div>
-            <div style="width: 60px;"></div>
+            <a href="/" class="back-btn">
+                < 대시보드</a>
+                    <div style="font-weight: 600;">inbestlab</div>
+                    <div style="width: 60px;"></div>
         </div>
-    </div>
+    </nav>
 
     <div class="main-content">
         <div class="hero-section">
-            <h1>12-Month Rates</h1>
-            <p class="subtitle" id="updateStatus">Updating intelligence...</p>
+            <h1>예적금 금리 현황</h1>
+            <p class="subtitle" id="updateStatus">데이터를 불러오는 중입니다...</p>
             <button id="manualUpdateBtn" class="update-btn" onclick="triggerUpdate()">
-                Update Intelligence
+                최신 데이터로 업데이트
             </button>
         </div>
 
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-label">Total Branches</div>
+                <div class="stat-label">분석 대상 금고</div>
                 <div class="stat-value" id="statCount">-</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Highest Deposit</div>
+                <div class="stat-label">최고 예금 금리</div>
                 <div class="stat-value" id="statBest">-</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Average Rate</div>
+                <div class="stat-label">평균 예금 금리</div>
                 <div class="stat-value" id="statAvg">-</div>
             </div>
         </div>
 
         <div class="table-container">
-            <div
-                style="text-align: left; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
-                <div style="font-size: 14px; font-weight: 500; color: #86868b;">Top 10 High-Yield Branches</div>
-                <div style="font-size: 12px; color: #86868b;">💡 Click headers to sort</div>
+            <div class="table-header">
+                <div class="table-title">수익률 TOP 10 금고</div>
+                <div class="table-hint">항목을 클릭하여 정렬할 수 있습니다.</div>
             </div>
             <div class="data-table-wrapper">
                 <table>
                     <thead>
                         <tr>
-                            <th onclick="setSort('rank')" style="width: 80px;">Rank<span class="sort-icon"
-                                    id="icon-rank"></span></th>
-                            <th>Branch Information</th>
-                            <th onclick="setSort('dep')">Fixed Deposit<span class="sort-icon" id="icon-dep"></span></th>
-                            <th onclick="setSort('sav')">Installment<span class="sort-icon" id="icon-sav"></span></th>
-                            <th onclick="setSort('free')">Free Savings<span class="sort-icon" id="icon-free"></span>
-                            </th>
-                            <th style="width: 120px;">Reference</th>
+                            <th onclick="setSort('rank')" style="width: 50px;">순위</th>
+                            <th>지점 정보</th>
+                            <th onclick="setSort('dep')">정기예금</th>
+                            <th onclick="setSort('sav')">정기적금</th>
+                            <th onclick="setSort('free')">자유적금</th>
+                            <th style="width: 100px;">기준일</th>
                         </tr>
                     </thead>
                     <tbody id="tbody">
                         <tr>
-                            <td colspan="6" class="loading">Analyzing market data...</td>
+                            <td colspan="6" class="loading">시장 데이터를 분석하고 있습니다...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -345,25 +327,25 @@
                 allData = json.data || [];
 
                 if (json.last_updated) {
-                    document.getElementById('updateStatus').innerText = `Market data updated at ${json.last_updated}`;
+                    document.getElementById('updateStatus').innerText = `최근 업데이트: ${json.last_updated}`;
                 }
 
                 updateStats();
                 render();
             } catch (e) {
-                document.getElementById('tbody').innerHTML = '<tr><td colspan="6" class="loading">Data link failed</td></tr>';
+                document.getElementById('tbody').innerHTML = '<tr><td colspan="6" class="loading">데이터 연결에 실패했습니다.</td></tr>';
             }
         }
 
         async function triggerUpdate() {
             const btn = document.getElementById('manualUpdateBtn');
-            if (!confirm("Start targeted 12-month rate collection?")) return;
+            if (!confirm("전국의 금리 데이터를 새로 수집하시겠습니까? (약 1~2분 소요)")) return;
             try {
                 btn.disabled = true;
-                btn.innerText = "Processing...";
+                btn.innerText = "업데이트 중...";
                 await fetch('/api/kfcc/update', { method: 'POST' });
-                alert("Collection started. Refresh in 2 minutes.");
-            } catch (e) { alert("Link failure"); btn.disabled = false; btn.innerText = "Update Intelligence"; }
+                alert("데이터 수집이 시작되었습니다. 잠시 후 새로고침 해주세요.");
+            } catch (e) { alert("연결 오류가 발생했습니다."); btn.disabled = false; btn.innerText = "최신 데이터로 업데이트"; }
         }
 
         function getVal(item, key) {
@@ -375,7 +357,7 @@
 
         function updateStats() {
             const rates = allData.map(d => getVal(d, 'dep')).filter(r => r > 0);
-            document.getElementById('statCount').innerText = allData.length.toLocaleString();
+            document.getElementById('statCount').innerText = allData.length.toLocaleString() + '개';
             document.getElementById('statBest').innerText = rates.length > 0 ? Math.max(...rates).toFixed(2) + '%' : '-';
             const avg = rates.length > 0 ? rates.reduce((a, b) => a + b, 0) / rates.length : 0;
             document.getElementById('statAvg').innerText = avg > 0 ? avg.toFixed(2) + '%' : '-';
@@ -393,22 +375,15 @@
 
         function render() {
             const list = [...allData];
-
-            // Sort logic
             list.sort((a, b) => {
                 let valA = getVal(a, currentSort.key);
                 let valB = getVal(b, currentSort.key);
                 return currentSort.order === 'desc' ? valB - valA : valA - valB;
             });
 
-            // Update icons
-            document.querySelectorAll('.sort-icon').forEach(span => span.innerText = '');
-            const activeIcon = document.getElementById(`icon-${currentSort.key}`);
-            if (activeIcon) activeIcon.innerText = currentSort.order === 'desc' ? '▼' : '▲';
-
             const tbody = document.getElementById('tbody');
             if (list.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="loading">No records found.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="loading">데이터가 존재하지 않습니다.</td></tr>';
                 return;
             }
 
@@ -420,19 +395,17 @@
                 const freeVal = getVal(d, 'free');
                 const free = freeVal > 0 ? freeVal.toFixed(2) + '%' : '-';
 
-                const isTop = i < 3 && dep !== '-';
-
                 return `
-                    <tr class="${isTop ? 'top-rank' : ''}">
+                    <tr>
                         <td><span class="rank-badge">${i + 1}</span></td>
                         <td>
-                            <div style="font-weight:700; color: #1d1d1f;">${d.gmgoNm}</div>
-                            <div class="location-cell">${d.location}</div>
+                            <div class="branch-name">${d.gmgoNm}</div>
+                            <div class="branch-addr">${d.location}</div>
                         </td>
                         <td class="rate-cell ${depVal >= 3.0 ? 'rate-high' : ''}">${dep}</td>
                         <td class="rate-cell">${sav}</td>
                         <td class="rate-cell">${free}</td>
-                        <td class="location-cell" style="font-size:11px;">${d["기준일"] || '-'}</td>
+                        <td class="date-cell">${d["기준일"] || '-'}</td>
                     </tr>
                 `;
             }).join('');
