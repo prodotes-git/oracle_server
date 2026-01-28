@@ -212,13 +212,22 @@ def read_root():
     return HTMLResponse(content=html_content)
 
 # --- 스케줄러 설정 ---
-scheduler = AsyncIOScheduler(timezone=seoul_tz)
+# misfire_grace_time=None 설정을 통해 서버 재시작 시점에 지난 작업이 자동 실행되는 것을 방지합니다.
+job_defaults = {
+    'misfire_grace_time': None,
+    'coalesce': True,
+    'max_instances': 1
+}
+scheduler = AsyncIOScheduler(timezone=seoul_tz, job_defaults=job_defaults)
 
 @app.on_event("startup")
 async def start_scheduler():
-    # 데이터베이스 초기화 (부팅 지연 방지를 위해 비동기적으로 실행 고려)
+    # 데이터베이스 초기화 (비동기 스레드 실행, 부팅 지연 최소화)
     import threading
     threading.Thread(target=local_currency.init_db, daemon=True).start()
+    
+    # [주의] 서버 부팅 시 즉시 데이터 수집을 시작하지 않습니다.
+    # 모든 수집은 지정된 크론 시간(새벽 4시) 또는 사용자의 수동 요청에 의해서만 실행됩니다.
     
     # 매일 새벽 4시부터 순차적 실행
     scheduler.add_job(kfcc.background_crawl_kfcc, 'cron', hour=4, minute=0)
@@ -230,5 +239,6 @@ async def start_scheduler():
     scheduler.add_job(card_events.crawl_samsung_bg, 'cron', hour=4, minute=30)
     scheduler.add_job(card_events.crawl_hyundai_bg, 'cron', hour=4, minute=35)
     scheduler.add_job(card_events.crawl_lotte_bg, 'cron', hour=4, minute=40)
+    
     scheduler.start()
-    print("Scheduler started. All tasks scheduled.")
+    print("Scheduler started. All tasks are scheduled for 04:00 AM. No immediate sync on startup.")
