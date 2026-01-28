@@ -54,6 +54,7 @@ def read_root():
                 --nav-bg: rgba(255, 255, 255, 0.8);
                 --card-bg: #f5f5f7;
                 --secondary-text: #86868b;
+                --border-color: rgba(0, 0, 0, 0.1);
             }}
 
             * {{ margin: 0; padding: 0; box-sizing: border-box; }}
