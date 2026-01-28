@@ -190,6 +190,25 @@
             text-transform: uppercase;
         }
 
+        .current-loc-btn {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
         @media (max-width: 734px) {
             .search-panel {
                 top: auto;
@@ -199,6 +218,21 @@
                 width: auto;
                 max-height: 40vh;
             }
+
+            .current-loc-btn {
+                bottom: calc(40vh + 30px);
+            }
+        }
+
+        .current-loc-btn:hover {
+            background: #fff;
+            transform: scale(1.05);
+        }
+
+        .current-loc-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--apple-blue);
         }
 
         /* Loading UI */
@@ -241,6 +275,13 @@
     </nav>
 
     <div id="map"></div>
+
+    <div class="current-loc-btn" onclick="moveToCurrentLocation()" title="내 위치로 이동">
+        <svg viewBox="0 0 24 24">
+            <path
+                d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z" />
+        </svg>
+    </div>
 
     <div class="search-panel">
         <div class="filter-tabs">
@@ -304,7 +345,40 @@
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
                     const locPosition = new kakao.maps.LatLng(lat, lon);
+
                     map.setCenter(locPosition);
+                    // 현재 위치 마커 표시 (옵션)
+                    const centerMarker = new kakao.maps.Marker({
+                        position: locPosition,
+                        image: new kakao.maps.MarkerImage(
+                            'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png',
+                            new kakao.maps.Size(24, 35)
+                        )
+                    });
+                    centerMarker.setMap(map);
+
+                    searchPlace(); // 중심 이동 후 즉시 검색
+                }, function (error) {
+                    console.error("Geolocation error: ", error);
+                    searchPlace(); // 실패하더라도 기본 위치 기반으로 검색
+                }, {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                });
+            } else {
+                searchPlace(); // Geolocation 미지원 시 기본 검색
+            }
+        }
+
+        function moveToCurrentLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const locPosition = new kakao.maps.LatLng(lat, lon);
+                    map.panTo(locPosition);
+                    searchPlace();
                 });
             }
         }
