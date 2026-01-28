@@ -261,10 +261,33 @@
                 transform: rotate(360deg);
             }
         }
+
+        /* Overlay */
+        #location-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            display: none;
+        }
     </style>
 </head>
 
 <body>
+    <div id="location-overlay">
+        <div class="loader" style="width:40px; height:40px; border-width:4px; margin-bottom:20px;"></div>
+        <div style="font-weight:600; font-size:17px;">현재 위치를 찾는 중...</div>
+        <div style="font-size:13px; color:var(--secondary-text); margin-top:8px;">권한 요청 시 '허용'을 눌러주세요.</div>
+    </div>
+
     <nav class="nav-header">
         <div class="nav-content">
             <a href="/" class="back-btn">
@@ -293,6 +316,12 @@
             <input type="text" id="keyword" placeholder="가맹점 이름 또는 지역 검색" onkeypress="handleEnter(event)">
             <button onclick="searchPlace()"
                 style="background: none; border: none; font-size: 13px; color: var(--apple-blue); cursor: pointer; font-weight: 600;">검색</button>
+        </div>
+        <div style="margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:11px; color:var(--secondary-text);">데이터가 안 보이나요?</span>
+            <button id="sync-btn" onclick="triggerSync()"
+                style="font-size:11px; color:var(--apple-blue); background:none; border:none; cursor:pointer; text-decoration:underline;">최신
+                데이터 동기화</button>
         </div>
         <div id="results" class="result-list">
             <div style="text-align: center; color: var(--secondary-text); padding: 40px 0;">
@@ -340,14 +369,15 @@
             });
 
             // 현재 위치 가져오기 시도
+            document.getElementById('location-overlay').style.display = 'flex';
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function (position) {
+                    document.getElementById('location-overlay').style.display = 'none';
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
                     const locPosition = new kakao.maps.LatLng(lat, lon);
 
                     map.setCenter(locPosition);
-                    // 현재 위치 마커 표시 (옵션)
                     const centerMarker = new kakao.maps.Marker({
                         position: locPosition,
                         image: new kakao.maps.MarkerImage(
@@ -356,18 +386,40 @@
                         )
                     });
                     centerMarker.setMap(map);
-
-                    searchPlace(); // 중심 이동 후 즉시 검색
+                    searchPlace();
                 }, function (error) {
+                    document.getElementById('location-overlay').style.display = 'none';
                     console.error("Geolocation error: ", error);
-                    searchPlace(); // 실패하더라도 기본 위치 기반으로 검색
+                    searchPlace();
                 }, {
                     enableHighAccuracy: true,
-                    timeout: 5000,
+                    timeout: 8000,
                     maximumAge: 0
                 });
             } else {
-                searchPlace(); // Geolocation 미지원 시 기본 검색
+                document.getElementById('location-overlay').style.display = 'none';
+                searchPlace();
+            }
+        }
+
+        async function triggerSync() {
+            const btn = document.getElementById('sync-btn');
+            if (!confirm("서버에서 가맹점 데이터를 새로 동기화하시겠습니까? (완료까지 약 30초~1분 소요)")) return;
+
+            try {
+                btn.innerText = "동기화 요청 중...";
+                btn.disabled = true;
+                const res = await fetch('/api/local-currency/sync', { method: 'POST' });
+                if (res.ok) {
+                    alert("동기화가 시작되었습니다. 잠시 후 지도를 움직여 데이터를 확인해 주세요.");
+                } else {
+                    alert("동기화 요청에 실패했습니다.");
+                }
+            } catch (e) {
+                alert("연결 오류가 발생했습니다.");
+            } finally {
+                btn.innerText = "최신 데이터 동기화";
+                btn.disabled = false;
             }
         }
 

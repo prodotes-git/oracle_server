@@ -15,7 +15,7 @@ class Merchant(Base):
     __tablename__ = "merchants"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
-    type = Column(String)  # 'onnuri' or 'gyeonggi'
+    type = Column(String)  # 'onnuri' or 'gg'
     address = Column(String)
     lat = Column(Float)
     lon = Column(Float)
@@ -71,9 +71,12 @@ async def get_merchants(lat: float, lon: float, radius: float = 2.0, type: str =
 
 @router.post("/api/local-currency/sync")
 async def start_sync_tasks(background_tasks: BackgroundTasks):
-    background_tasks.add_task(sync_gyeonggi_data)
-    # 온누리 데이터는 양이 방대하므로 별도 처리 필요
+    background_tasks.add_task(sync_all_data)
     return {"status": "sync_started"}
+
+async def sync_all_data():
+    await sync_gyeonggi_data()
+    await sync_onnuri_data()
 
 async def sync_gyeonggi_data():
     print("Starting Gyeonggi Local Currency sync...")
@@ -86,33 +89,36 @@ async def sync_gyeonggi_data():
     }
     
     async with httpx.AsyncClient(timeout=30.0) as client:
+        db = None
         try:
-            db = next(get_db())
-            if not db: return
+            from shared import SessionLocal
+            db = SessionLocal()
             
-            # 한 번에 1000개씩 가져와서 저장 (샘플로 5페이지 정도만 먼저 구현)
-            for i in range(1, 10):
+            for i in range(1, 11): # 10,000건 수집
                 params["pIndex"] = i
                 resp = await client.get(url, params=params)
                 data = resp.json()
                 
-                rows = data.get("RegionMnyFacltStus", [])
-                if len(rows) < 2: break
+                status_data = data.get("RegionMnyFacltStus", [])
+                if len(status_data) < 2: break
                 
-                items = rows[1].get("row", [])
+                items = status_data[1].get("row", [])
                 for item in items:
                     name = item.get("CMPNM_NM")
                     lat = item.get("REFINE_WGS84_LAT")
                     lon = item.get("REFINE_WGS84_LOGT")
-                    
                     if not lat or not lon: continue
                     
-                    # 중복 확인 및 저장
-                    existing = db.query(Merchant).filter(Merchant.name == name, Merchant.lat == float(lat)).first()
+                    existing = db.query(Merchant).filter(
+                        Merchant.name == name,
+                        Merchant.lat == float(lat),
+                        Merchant.lon == float(lon)
+                    ).first()
+                    
                     if not existing:
                         merchant = Merchant(
                             name=name,
-                            type="gyeonggi",
+                            type="gg",
                             address=item.get("REFINE_ROADNM_ADDR") or item.get("REFINE_LOTNO_ADDR"),
                             lat=float(lat),
                             lon=float(lon),
@@ -125,5 +131,60 @@ async def sync_gyeonggi_data():
                 print(f"Gyeonggi sync: Page {i} completed")
         except Exception as e:
             print(f"Gyeonggi sync error: {e}")
+        finally:
+            if db: db.close()
 
-# TODO: 온누리 데이터 싱크 로직 추가 (API 스펙에 맞춰 구현 필요)
+async def sync_onnuri_data():
+    print("Starting Onnuri Merchant sync...")
+    url = "http://api.data.go.kr/opensource/onnuri/merchants"
+    params = {
+        "serviceKey": PUBLIC_DATA_KEY,
+        "type": "json",
+        "numOfRows": 1000,
+        "pageNo": 1
+    }
+    
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        db = None
+        try:
+            from shared import SessionLocal
+            db = SessionLocal()
+            
+            for i in range(1, 6): # 5,000건 우선 수집
+                params["pageNo"] = i
+                resp = await client.get(url, params=params)
+                if resp.status_code != 200: break
+                
+                data = resp.json()
+                items = data.get("response", {}).get("body", {}).get("items", [])
+                if not items: break
+                
+                for item in items:
+                    name = item.get("mktNm") 
+                    lat = item.get("lat")
+                    lon = item.get("lng")
+                    if not lat or not lon: continue
+                    
+                    existing = db.query(Merchant).filter(
+                        Merchant.name == name,
+                        Merchant.lat == float(lat)
+                    ).first()
+                    
+                    if not existing:
+                        merchant = Merchant(
+                            name=name,
+                            type="onnuri",
+                            address=item.get("rdnmadr") or item.get("lnmadr"),
+                            lat=float(lat),
+                            lon=float(lon),
+                            category="전통시장",
+                            phone=item.get("phoneNumber"),
+                            last_updated=datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S')
+                        )
+                        db.add(merchant)
+                db.commit()
+                print(f"Onnuri sync: Page {i} completed")
+        except Exception as e:
+            print(f"Onnuri sync error: {e}")
+        finally:
+            if db: db.close()
