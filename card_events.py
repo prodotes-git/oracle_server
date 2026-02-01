@@ -148,7 +148,7 @@ async def crawl_kb_bg():
                         if not no or no in seen: continue
                         seen.add(no); cat = {"01":"포인트/캐시백","02":"할인/무이자","03":"경품","04":"기타"}.get(ev.get("evntBonContents"),"이벤트")
                         img = f"https://img1.kbcard.com/ST/img/cxc{ev.get('evtImgPath')}" if ev.get('evtImgPath') and not ev.get('evtImgPath').startswith('http') else ev.get('evtImgPath')
-                        all_events.append({"category":cat, "eventName":f"{ev.get('evtNm','')} {ev.get('evtSubNm','')}".strip(), "period":ev.get("evtYMD",""), "link":f"https://m.kbcard.com/BON/DVIEW/MBBMCXHIABNC0022?evntSerno={no}", "image":img, "bgColor":"#ffffff"})
+                        all_events.append({"category":cat, "eventName":f"{ev.get('evtNm','')} {ev.get('evtSubNm','')}".strip(), "period":ev.get("evtYMD",""), "link":f"https://m.kbcard.com/BON/DVIEW/MBBMCXHIABNC0026?evntSerno={no}", "image":img, "bgColor":"#ffffff"})
                     if page >= int(data.get("totalPageCount", 0)): break
                 except: break
         if all_events:
