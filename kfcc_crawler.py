@@ -157,19 +157,24 @@ async def run_crawler():
         print(f"[KFCC] Found {len(unique_banks)} unique banks.")
         
         # 2. 금리 정보 수집
-        rate_semaphore = asyncio.Semaphore(30) # 병렬성 증가
-        rate_tasks = [fetch_bank_rates(client, bank, rate_semaphore) for bank in unique_banks]
-        
+        rate_semaphore = asyncio.Semaphore(15) # 병렬성 약간 조절 (메모리 안정성)
         results = []
-        total = len(rate_tasks)
-        for i, coro in enumerate(asyncio.as_completed(rate_tasks)):
-            res = await coro
-            # 하나라도 금리가 있으면 포함
-            if res["rates"]:
-                results.append(res)
+        unique_banks_list = list(unique_banks)
+        total = len(unique_banks_list)
+        
+        # 전체 태스크를 한꺼번에 만들지 않고 배치 단위로 실행하여 메모리 절약
+        batch_size = 100
+        for i in range(0, total, batch_size):
+            batch = unique_banks_list[i : i + batch_size]
+            rate_tasks = [fetch_bank_rates(client, bank, rate_semaphore) for bank in batch]
             
-            if (i+1) % 100 == 0 or (i+1) == total:
-                print(f"[KFCC] Progress: {i+1}/{total} banks processed.")
+            batch_results = await asyncio.gather(*rate_tasks)
+            for res in batch_results:
+                if res and res.get("rates"):
+                    results.append(res)
+            
+            # 진행 상황 출력
+            print(f"[KFCC] Progress: {min(i + batch_size, total)}/{total} banks processed. (Found {len(results)} valid rates)")
         
         print(f"[KFCC] Crawl complete. {len(results)} banks with 12-month targeted rates collected.")
         return results

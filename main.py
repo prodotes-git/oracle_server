@@ -212,9 +212,9 @@ def read_root():
     return HTMLResponse(content=html_content)
 
 # --- 스케줄러 설정 ---
-# misfire_grace_time=None 설정을 통해 서버 재시작 시점에 지난 작업이 자동 실행되는 것을 방지합니다.
+# misfire_grace_time을 설정하여 서버 재시작 시점에 밀린 작업들이 한꺼번에 실행되어 메모리 부족(OOM)으로 크래시되는 것을 방지합니다.
 job_defaults = {
-    'misfire_grace_time': None,
+    'misfire_grace_time': 300, # 5분 이상 지연된 작업은 무시
     'coalesce': True,
     'max_instances': 1
 }
@@ -241,4 +241,9 @@ async def start_scheduler():
     scheduler.add_job(card_events.crawl_lotte_bg, 'cron', hour=4, minute=40)
     
     scheduler.start()
-    print("Scheduler started. All tasks are scheduled for 04:00 AM. No immediate sync on startup.")
+    
+    # 메모리 사용량 로깅
+    process = psutil.Process(os.getpid())
+    mem_mb = process.memory_info().rss / 1024 / 1024
+    print(f"Scheduler started. Current Memory Usage: {mem_mb:.2f} MB")
+    print("All tasks are scheduled for 04:00 AM. No immediate sync on startup.")
