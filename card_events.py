@@ -240,10 +240,12 @@ async def crawl_samsung_bg():
         from playwright.async_api import async_playwright
         all_events = []
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True); page = await browser.new_page(viewport={'width':375,'height':812})
+            browser = await p.chromium.launch(headless=True)
+            ctx = await browser.new_context(user_agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1")
+            page = await ctx.new_page()
             try:
-                await page.goto("https://m.samsungcard.com/personal/event/ing/UHPPBE1401M0.jsp", timeout=60000)
-                await page.wait_for_timeout(8000)
+                await page.goto("https://m.samsungcard.com/personal/event/ing/UHPPBE1401M0.jsp", timeout=90000, wait_until="domcontentloaded")
+                await page.wait_for_timeout(10000)
                 res = await page.evaluate('''() => {
                     return Array.from(document.querySelectorAll('li')).map(li => {
                         const img = li.querySelector('img'), a = li.querySelector('a');
@@ -271,10 +273,12 @@ async def crawl_hyundai_bg():
         from playwright.async_api import async_playwright
         all_events = []
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True); page = await browser.new_page()
+            browser = await p.chromium.launch(headless=True)
+            ctx = await browser.new_context(user_agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1")
+            page = await ctx.new_page()
             try:
-                await page.goto("https://www.hyundaicard.com/cpb/ev/CPBEV0101_01.hc", timeout=60000)
-                await page.wait_for_timeout(8000)
+                await page.goto("https://www.hyundaicard.com/cpb/ev/CPBEV0101_01.hc", timeout=90000, wait_until="domcontentloaded")
+                await page.wait_for_timeout(10000)
                 res = await page.evaluate('''() => {
                     return Array.from(document.querySelectorAll('li')).map(li => {
                         const img = li.querySelector('img'), a = li.querySelector('a');
@@ -301,9 +305,11 @@ async def crawl_lotte_bg():
         from playwright.async_api import async_playwright
         all_events = []
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True); page = await browser.new_page(viewport={'width':375,'height':812})
+            browser = await p.chromium.launch(headless=True)
+            ctx = await browser.new_context(user_agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1")
+            page = await ctx.new_page()
             try:
-                await page.goto("https://m.lottecard.co.kr/app/LPBNFDA_V100.lc", timeout=60000)
+                await page.goto("https://m.lottecard.co.kr/app/LPBNFDA_V100.lc", timeout=90000, wait_until="domcontentloaded")
                 await page.wait_for_timeout(10000)
                 res = await page.evaluate('''() => {
                     return Array.from(document.querySelectorAll('li')).map(li => {
