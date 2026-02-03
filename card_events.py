@@ -161,8 +161,8 @@ async def crawl_hana_bg():
     try:
         print(f"[{datetime.now(seoul_tz)}] Starting Hana background crawl...")
         all_events = []; base_url = "https://m.hanacard.co.kr"; api_url = f"{base_url}/MKEVT1000M.ajax"
-        ssl_ctx = ssl.create_default_context(); ssl_ctx.check_hostname = False; ssl_ctx.verify_mode = ssl.CERT_NONE; ssl_ctx.set_ciphers('DEFAULT@SECLEVEL=1')
-        async with httpx.AsyncClient(timeout=30.0, verify=ssl_ctx) as client:
+        # Hana Card server has SSL compatibility issues with some environments; using verify=False
+        async with httpx.AsyncClient(timeout=30.0, verify=False) as client:
             for page in range(1, 40):
                 try:
                     res = await client.post(api_url, data={"page":str(page)}, headers={"User-Agent":"Mozilla/5.0","Referer":f"{base_url}/MKEVT1000M.web"})
@@ -191,8 +191,10 @@ async def crawl_woori_bg():
             browser = await p.chromium.launch(headless=True)
             ctx = await browser.new_context(user_agent="Mozilla/5.0"); page = await ctx.new_page()
             try:
-                await page.goto(f"{base_url}/dcmw/yh1/bnf/bnf02/prgevnt/M1BNF202S00.do", timeout=60000)
-                res = await page.wait_for_response(lambda r: "getPrgEvntList.pwkjson" in r.url, timeout=30000)
+                # Use expect_response context manager for Woori Card
+                async with page.expect_response(lambda r: "getPrgEvntList.pwkjson" in r.url, timeout=30000) as resp_info:
+                    await page.goto(f"{base_url}/dcmw/yh1/bnf/bnf02/prgevnt/M1BNF202S00.do", timeout=60000)
+                res = await resp_info.value
                 data = await res.json(); events = data.get('prgEvntList', [])
                 for ev in events:
                     title = (ev.get('cardEvntNm') or ev.get('mblDocTitlTxt')).strip(); s, e = ev.get('evntSdt',''), ev.get('evntEdt','')
