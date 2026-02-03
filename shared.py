@@ -16,12 +16,14 @@ CACHE_EXPIRE = 3600
 
 # Redis 연결 설정 (환경 변수 지원)
 REDIS_HOST = os.getenv("REDIS_HOST", "redis")
-REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", None)
+REDIS_USERNAME = os.getenv("REDIS_USERNAME", "default")
+REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "2AplNlOnk1oW2FnH6mwVlO5i3MTXOIjyzF5HDoIQAF7k180NekGzpieGEE0yEOdW")
 
 try:
     r = redis.Redis(
         host=REDIS_HOST, 
         port=6379, 
+        username=REDIS_USERNAME,
         password=REDIS_PASSWORD,
         db=0, 
         decode_responses=True,
