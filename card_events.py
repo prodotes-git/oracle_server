@@ -154,6 +154,9 @@ async def crawl_shinhan_bg():
             file_path = os.path.join(os.getcwd(), "shinhan_data.json")
             with open(file_path,"w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
             if r: r.setex(SHINHAN_CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
+            print(f"[{datetime.now(seoul_tz)}] Shinhan crawl finished: {len(all_events)} events saved.")
+        else:
+            print(f"[{datetime.now(seoul_tz)}] Shinhan crawl finished: No events found.")
     except Exception as e: print(f"Shinhan crawl error: {e}")
 
 async def crawl_hana_bg():
@@ -203,7 +206,10 @@ async def crawl_kb_bg():
         from playwright.async_api import async_playwright
         all_events = []; seen = set()
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
+            browser = await p.chromium.launch(
+                headless=True,
+                args=['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
+            )
             ctx = await browser.new_context(user_agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1")
             page = await ctx.new_page()
             try:
@@ -293,6 +299,9 @@ async def crawl_woori_bg():
             file_path = os.path.join(os.getcwd(), "woori_data.json")
             with open(file_path,"w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
             if r: r.setex(WOORI_CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
+            print(f"[{datetime.now(seoul_tz)}] Woori crawl finished: {len(all_events)} events saved.")
+        else:
+            print(f"[{datetime.now(seoul_tz)}] Woori crawl finished: No events found.")
     except Exception as e: print(f"Woori crawl error: {e}")
 
 async def crawl_bc_bg():
@@ -317,6 +326,9 @@ async def crawl_bc_bg():
             file_path = os.path.join(os.getcwd(), "bc_data.json")
             with open(file_path,"w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
             if r: r.setex(BC_CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
+            print(f"[{datetime.now(seoul_tz)}] BC crawl finished: {len(all_events)} events saved.")
+        else:
+            print(f"[{datetime.now(seoul_tz)}] BC crawl finished: No events found.")
     except Exception as e: print(f"BC crawl error: {e}")
 
 async def crawl_samsung_bg():
@@ -325,7 +337,10 @@ async def crawl_samsung_bg():
         from playwright.async_api import async_playwright
         all_events = []
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
+            browser = await p.chromium.launch(
+                headless=True,
+                args=['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
+            )
             ctx = await browser.new_context(user_agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1")
             page = await ctx.new_page()
             try:
@@ -351,6 +366,9 @@ async def crawl_samsung_bg():
             file_path = os.path.join(os.getcwd(), "samsung_data.json")
             with open(file_path,"w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
             if r: r.setex(SAMSUNG_CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
+            print(f"[{datetime.now(seoul_tz)}] Samsung crawl finished: {len(all_events)} events saved.")
+        else:
+            print(f"[{datetime.now(seoul_tz)}] Samsung crawl finished: No events found.")
     except Exception as e: print(f"Samsung crawl error: {e}")
 
 async def crawl_hyundai_bg():
@@ -359,7 +377,10 @@ async def crawl_hyundai_bg():
         from playwright.async_api import async_playwright
         all_events = []
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
+            browser = await p.chromium.launch(
+                headless=True,
+                args=['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
+            )
             ctx = await browser.new_context(user_agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1")
             page = await ctx.new_page()
             try:
@@ -393,7 +414,10 @@ async def crawl_lotte_bg():
         from playwright.async_api import async_playwright
         all_events = []
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
+            browser = await p.chromium.launch(
+                headless=True,
+                args=['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
+            )
             ctx = await browser.new_context(user_agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1")
             page = await ctx.new_page()
             try:
