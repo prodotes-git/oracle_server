@@ -218,27 +218,52 @@ job_defaults = {
     'coalesce': True,
     'max_instances': 1
 }
+# 스케줄러 인스턴스 생성
 scheduler = AsyncIOScheduler(timezone=seoul_tz, job_defaults=job_defaults)
+    
+# --- 통합 순차 크롤링 태스크 ---
+async def daily_crawl_job():
+    process = psutil.Process(os.getpid())
+    start_mem = process.memory_info().rss / 1024 / 1024
+    print(f"[{datetime.now(seoul_tz)}] Starting sequential daily crawl. Initial memory: {start_mem:.2f} MB")
+    
+    # 1. 새마을금고 크롤링 (데이터량이 많으므로 가장 먼저 수행)
+    try:
+        await kfcc.background_crawl_kfcc()
+    except Exception as e: print(f"Sequential crawl - KFCC error: {e}")
+    
+    # 2. 카드사 크롤링 순차 실행
+    card_tasks = [
+        ("신한", card_events.crawl_shinhan_bg),
+        ("KB", card_events.crawl_kb_bg),
+        ("하나", card_events.crawl_hana_bg),
+        ("우리", card_events.crawl_woori_bg),
+        ("BC", card_events.crawl_bc_bg),
+        ("삼성", card_events.crawl_samsung_bg),
+        ("현대", card_events.crawl_hyundai_bg),
+        ("롯데", card_events.crawl_lotte_bg)
+    ]
+    
+    for name, func in card_tasks:
+        try:
+            print(f"[{datetime.now(seoul_tz)}] Sequential crawl - {name} starting...")
+            await func()
+            current_mem = process.memory_info().rss / 1024 / 1024
+            print(f"[{datetime.now(seoul_tz)}] Sequential crawl - {name} finished. Current memory: {current_mem:.2f} MB")
+        except Exception as e:
+            print(f"Sequential crawl - {name} error: {e}")
+    
+    end_mem = process.memory_info().rss / 1024 / 1024
+    print(f"[{datetime.now(seoul_tz)}] All daily crawl tasks finished. Final memory: {end_mem:.2f} MB")
 
 @app.on_event("startup")
 async def start_scheduler():
-    # 데이터베이스 초기화 (비동기 스레드 실행, 부팅 지연 최소화)
+    # 데이터베이스 초기화 (비동기 스레드 실행)
     import threading
     threading.Thread(target=local_currency.init_db, daemon=True).start()
     
-    # [주의] 서버 부팅 시 즉시 데이터 수집을 시작하지 않습니다.
-    # 모든 수집은 지정된 크론 시간(새벽 4시) 또는 사용자의 수동 요청에 의해서만 실행됩니다.
-    
-    # 매일 새벽 4시부터 순차적 실행
-    scheduler.add_job(kfcc.background_crawl_kfcc, 'cron', hour=4, minute=0)
-    scheduler.add_job(card_events.crawl_shinhan_bg, 'cron', hour=4, minute=5)
-    scheduler.add_job(card_events.crawl_kb_bg, 'cron', hour=4, minute=10)
-    scheduler.add_job(card_events.crawl_hana_bg, 'cron', hour=4, minute=15)
-    scheduler.add_job(card_events.crawl_woori_bg, 'cron', hour=4, minute=20)
-    scheduler.add_job(card_events.crawl_bc_bg, 'cron', hour=4, minute=25)
-    scheduler.add_job(card_events.crawl_samsung_bg, 'cron', hour=4, minute=30)
-    scheduler.add_job(card_events.crawl_hyundai_bg, 'cron', hour=4, minute=35)
-    scheduler.add_job(card_events.crawl_lotte_bg, 'cron', hour=4, minute=40)
+    # 매일 새벽 4시에 통합 태스크 실행
+    scheduler.add_job(daily_crawl_job, 'cron', hour=4, minute=0)
     
     scheduler.start()
     
@@ -246,4 +271,4 @@ async def start_scheduler():
     process = psutil.Process(os.getpid())
     mem_mb = process.memory_info().rss / 1024 / 1024
     print(f"Scheduler started. Current Memory Usage: {mem_mb:.2f} MB")
-    print("All tasks are scheduled for 04:00 AM. No immediate sync on startup.")
+    print("Daily crawl task scheduled for 04:00 AM (Sequential).")

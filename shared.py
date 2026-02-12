@@ -20,15 +20,20 @@ REDIS_USERNAME = os.getenv("REDIS_USERNAME", "default")
 REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "2AplNlOnk1oW2FnH6mwVlO5i3MTXOIjyzF5HDoIQAF7k180NekGzpieGEE0yEOdW")
 
 try:
-    r = redis.Redis(
-        host=REDIS_HOST, 
-        port=6379, 
-        username=REDIS_USERNAME,
-        password=REDIS_PASSWORD,
-        db=0, 
-        decode_responses=True,
-        socket_timeout=5
-    )
+    # Redis 6+의 ACL을 사용하는 경우 username이 필요하지만, 
+    # 일반적인 경우에는 password만 사용합니다. 'default' 유저인 경우 생략하여 호환성을 높입니다.
+    redis_args = {
+        "host": REDIS_HOST,
+        "port": 6379,
+        "password": REDIS_PASSWORD,
+        "db": 0,
+        "decode_responses": True,
+        "socket_timeout": 5
+    }
+    if REDIS_USERNAME and REDIS_USERNAME != "default":
+        redis_args["username"] = REDIS_USERNAME
+        
+    r = redis.Redis(**redis_args)
     r.ping() # 연결 테스트
     print(f"Connected to Redis at {REDIS_HOST}")
 except Exception as e:
