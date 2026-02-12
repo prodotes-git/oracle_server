@@ -87,23 +87,46 @@ async def get_hyundai_cards(): return get_cached_data("events:hyundai", "hyundai
 @router.get("/api/lotte-cards")
 async def get_lotte_cards(): return get_cached_data("events:lotte", "lotte_data.json")
 
-# --- Update Endpoints ---
+# --- 통합 업데이트 API (이름 기반) ---
+@router.post("/api/card-update/{card_name}")
+async def unified_card_update(card_name: str, bg_tasks: BackgroundTasks):
+    crawlers = {
+        "shinhan": crawl_shinhan_bg,
+        "kb": crawl_kb_bg,
+        "hana": crawl_hana_bg,
+        "woori": crawl_woori_bg,
+        "bc": crawl_bc_bg,
+        "samsung": crawl_samsung_bg,
+        "hyundai": crawl_hyundai_bg,
+        "lotte": crawl_lotte_bg
+    }
+    
+    card_name = card_name.lower().replace("-cards", "").replace("-card", "")
+    if card_name in crawlers:
+        print(f"[{datetime.now(seoul_tz)}] Manual update requested for: {card_name}")
+        bg_tasks.add_task(crawlers[card_name])
+        return {"status": "started", "card": card_name}
+    
+    print(f"[{datetime.now(seoul_tz)}] Update failed: Card '{card_name}' not found")
+    raise HTTPException(status_code=404, detail=f"Card '{card_name}' not found")
+
+# 구버전 호환성을 위한 개별 엔드포인트 유지
 @router.post("/api/shinhan/update")
-async def update_shinhan(bg_tasks: BackgroundTasks): bg_tasks.add_task(crawl_shinhan_bg); return {"status": "started"}
+async def update_shinhan(bg_tasks: BackgroundTasks): return await unified_card_update("shinhan", bg_tasks)
 @router.post("/api/kb/update")
-async def update_kb(bg_tasks: BackgroundTasks): bg_tasks.add_task(crawl_kb_bg); return {"status": "started"}
+async def update_kb(bg_tasks: BackgroundTasks): return await unified_card_update("kb", bg_tasks)
 @router.post("/api/hana/update")
-async def update_hana(bg_tasks: BackgroundTasks): bg_tasks.add_task(crawl_hana_bg); return {"status": "started"}
+async def update_hana(bg_tasks: BackgroundTasks): return await unified_card_update("hana", bg_tasks)
 @router.post("/api/woori/update")
-async def update_woori(bg_tasks: BackgroundTasks): bg_tasks.add_task(crawl_woori_bg); return {"status": "started"}
+async def update_woori(bg_tasks: BackgroundTasks): return await unified_card_update("woori", bg_tasks)
 @router.post("/api/bc/update")
-async def update_bc(bg_tasks: BackgroundTasks): bg_tasks.add_task(crawl_bc_bg); return {"status": "started"}
+async def update_bc(bg_tasks: BackgroundTasks): return await unified_card_update("bc", bg_tasks)
 @router.post("/api/samsung/update")
-async def update_samsung(bg_tasks: BackgroundTasks): bg_tasks.add_task(crawl_samsung_bg); return {"status": "started"}
+async def update_samsung(bg_tasks: BackgroundTasks): return await unified_card_update("samsung", bg_tasks)
 @router.post("/api/hyundai/update")
-async def update_hyundai(bg_tasks: BackgroundTasks): bg_tasks.add_task(crawl_hyundai_bg); return {"status": "started"}
+async def update_hyundai(bg_tasks: BackgroundTasks): return await unified_card_update("hyundai", bg_tasks)
 @router.post("/api/lotte/update")
-async def update_lotte(bg_tasks: BackgroundTasks): bg_tasks.add_task(crawl_lotte_bg); return {"status": "started"}
+async def update_lotte(bg_tasks: BackgroundTasks): return await unified_card_update("lotte", bg_tasks)
 
 # --- Crawl Background Tasks ---
 async def crawl_shinhan_bg():
@@ -128,7 +151,8 @@ async def crawl_shinhan_bg():
                 except: continue
         if all_events:
             data = {"last_updated":datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S'), "data":all_events}
-            with open("shinhan_data.json","w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
+            file_path = os.path.join(os.getcwd(), "shinhan_data.json")
+            with open(file_path,"w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
             if r: r.setex(SHINHAN_CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
     except Exception as e: print(f"Shinhan crawl error: {e}")
 
@@ -153,7 +177,8 @@ async def crawl_kb_bg():
                 except: break
         if all_events:
             data = {"last_updated":datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S'), "data":all_events}
-            with open("kb_data.json","w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
+            file_path = os.path.join(os.getcwd(), "kb_data.json")
+            with open(file_path,"w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
             if r: r.setex(KB_CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
     except Exception as e: print(f"KB crawl error: {e}")
 
@@ -178,7 +203,8 @@ async def crawl_hana_bg():
                 except: break
         if all_events:
             data = {"last_updated":datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S'), "data":all_events}
-            with open("hana_data.json","w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
+            file_path = os.path.join(os.getcwd(), "hana_data.json")
+            with open(file_path,"w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
             if r: r.setex(HANA_CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
     except Exception as e: print(f"Hana crawl error: {e}")
 
@@ -207,7 +233,8 @@ async def crawl_woori_bg():
             finally: await browser.close()
         if all_events:
             data = {"last_updated":datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S'), "data":all_events}
-            with open("woori_data.json","w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
+            file_path = os.path.join(os.getcwd(), "woori_data.json")
+            with open(file_path,"w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
             if r: r.setex(WOORI_CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
     except Exception as e: print(f"Woori crawl error: {e}")
 
@@ -230,7 +257,8 @@ async def crawl_bc_bg():
                 except: break
         if all_events:
             data = {"last_updated":datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S'), "data":all_events}
-            with open("bc_data.json","w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
+            file_path = os.path.join(os.getcwd(), "bc_data.json")
+            with open(file_path,"w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
             if r: r.setex(BC_CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
     except Exception as e: print(f"BC crawl error: {e}")
 
@@ -263,7 +291,8 @@ async def crawl_samsung_bg():
             finally: await browser.close()
         if all_events:
             data = {"last_updated":datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S'), "data":all_events}
-            with open("samsung_data.json","w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
+            file_path = os.path.join(os.getcwd(), "samsung_data.json")
+            with open(file_path,"w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
             if r: r.setex(SAMSUNG_CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
     except Exception as e: print(f"Samsung crawl error: {e}")
 
@@ -295,7 +324,8 @@ async def crawl_hyundai_bg():
             finally: await browser.close()
         if all_events:
             data = {"last_updated":datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S'), "data":all_events}
-            with open("hyundai_data.json","w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
+            file_path = os.path.join(os.getcwd(), "hyundai_data.json")
+            with open(file_path,"w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
             if r: r.setex("events:hyundai", CACHE_EXPIRE, json.dumps(data))
     except Exception as e: print(f"Hyundai crawl error: {e}")
 
@@ -327,7 +357,8 @@ async def crawl_lotte_bg():
             finally: await browser.close()
         if all_events:
             data = {"last_updated":datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S'), "data":all_events}
-            with open("lotte_data.json","w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
+            file_path = os.path.join(os.getcwd(), "lotte_data.json")
+            with open(file_path,"w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
             if r: r.setex("events:lotte", CACHE_EXPIRE, json.dumps(data))
     except Exception as e: print(f"Lotte crawl error: {e}")
 

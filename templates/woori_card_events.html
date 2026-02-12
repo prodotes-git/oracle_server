@@ -257,8 +257,10 @@
         async function updateData() {
             if (!confirm("최신 정보를 다시 수집하시겠습니까?")) return;
             try {
-                await fetch('/api/woori/update', { method: 'POST' });
-                alert('업데이트가 요청되었습니다. 잠시 후 새로고침 해주세요.');
+                const parts = window.location.pathname.split('/').filter(p => p);
+                const cardName = parts[parts.length - 1];
+                await fetch(`/api/card-update/${cardName}`, { method: 'POST' });
+                alert('업데이트가 요청되었습니다. 수집 완료까지 10~30초 정도 소요될 수 있습니다. 잠시 후 새로고침 해주세요.');
             } catch (e) { alert("연결 오류가 발생했습니다."); }
         }
 
