@@ -83,9 +83,9 @@ async def get_bc_cards(): return get_cached_data(BC_CACHE_KEY, 'bc_data.json')
 @router.get("/api/samsung-cards")
 async def get_samsung_cards(): return get_cached_data(SAMSUNG_CACHE_KEY, 'samsung_data.json')
 @router.get("/api/hyundai-cards")
-async def get_hyundai_cards(): return get_cached_data("events:hyundai", "hyundai_data.json")
+async def get_hyundai_cards(): return get_cached_data(HYUNDAI_CACHE_KEY, "hyundai_data.json")
 @router.get("/api/lotte-cards")
-async def get_lotte_cards(): return get_cached_data("events:lotte", "lotte_data.json")
+async def get_lotte_cards(): return get_cached_data(LOTTE_CACHE_KEY, "lotte_data.json")
 
 # --- 통합 업데이트 API (이름 기반) ---
 @router.post("/api/card-update/{card_name}")
@@ -101,13 +101,13 @@ async def unified_card_update(card_name: str, bg_tasks: BackgroundTasks):
         "lotte": crawl_lotte_bg
     }
     
-    card_name = card_name.lower().replace("-cards", "").replace("-card", "")
+    card_name = card_name.lower().strip().replace("-cards", "").replace("-card", "")
     if card_name in crawlers:
-        print(f"[{datetime.now(seoul_tz)}] Manual update requested for: {card_name}")
+        print(f"[{datetime.now(seoul_tz)}] Manual update STARTED for: {card_name}")
         bg_tasks.add_task(crawlers[card_name])
-        return {"status": "started", "card": card_name}
+        return {"status": "started", "card": card_name, "message": "Background task initiated."}
     
-    print(f"[{datetime.now(seoul_tz)}] Update failed: Card '{card_name}' not found")
+    print(f"[{datetime.now(seoul_tz)}] Manual update FAILED: Card '{card_name}' not found")
     raise HTTPException(status_code=404, detail=f"Card '{card_name}' not found")
 
 # 구버전 호환성을 위한 개별 엔드포인트 유지
@@ -156,38 +156,24 @@ async def crawl_shinhan_bg():
             if r: r.setex(SHINHAN_CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
     except Exception as e: print(f"Shinhan crawl error: {e}")
 
-async def crawl_kb_bg():
-    try:
-        print(f"[{datetime.now(seoul_tz)}] Starting KB background crawl...")
-        all_events = []; seen = set(); api_url = "https://m.kbcard.com/BON/API/MBBACXHIABNC0064"
-        async with httpx.AsyncClient(timeout=30.0, verify=False) as client:
-            for page in range(1, 50):
-                try:
-                    res = await client.post(api_url, data={"pageCount":page}, headers={"User-Agent":"Mozilla/5.0"})
-                    if res.status_code != 200: break
-                    data = res.json(); events = data.get("evntList",[])
-                    if not events: break
-                    for ev in events:
-                        no = ev.get('evtNo'); 
-                        if not no or no in seen: continue
-                        seen.add(no); cat = {"01":"포인트/캐시백","02":"할인/무이자","03":"경품","04":"기타"}.get(ev.get("evntBonContents"),"이벤트")
-                        img = f"https://img1.kbcard.com/ST/img/cxc{ev.get('evtImgPath')}" if ev.get('evtImgPath') and not ev.get('evtImgPath').startswith('http') else ev.get('evtImgPath')
-                        all_events.append({"category":cat, "eventName":f"{ev.get('evtNm','')} {ev.get('evtSubNm','')}".strip(), "period":ev.get("evtYMD",""), "link":f"https://m.kbcard.com/BON/DVIEW/MBBMCXHIABNC0026?evntSerno={no}", "image":img, "bgColor":"#ffffff"})
-                    if page >= int(data.get("totalPageCount", 0)): break
-                except: break
-        if all_events:
-            data = {"last_updated":datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S'), "data":all_events}
-            file_path = os.path.join(os.getcwd(), "kb_data.json")
-            with open(file_path,"w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
-            if r: r.setex(KB_CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
-    except Exception as e: print(f"KB crawl error: {e}")
-
 async def crawl_hana_bg():
     try:
         print(f"[{datetime.now(seoul_tz)}] Starting Hana background crawl...")
         all_events = []; base_url = "https://m.hanacard.co.kr"; api_url = f"{base_url}/MKEVT1000M.ajax"
-        # Hana Card server has SSL compatibility issues with some environments; using verify=False
-        async with httpx.AsyncClient(timeout=30.0, verify=False) as client:
+        
+        # Hana Card server has SSL compatibility issues (DH_KEY_TOO_SMALL).
+        # We use a custom SSL context with lower security level to allow the connection.
+        ctx = ssl.create_default_context()
+        try:
+            ctx.set_ciphers('DEFAULT@SECLEVEL=1')
+        except:
+            # Fallback for systems where SECLEVEL might not be supported exactly like this
+            ctx.set_ciphers('HIGH:!DH:!aNULL')
+            
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        
+        async with httpx.AsyncClient(timeout=30.0, verify=ctx) as client:
             for page in range(1, 40):
                 try:
                     res = await client.post(api_url, data={"page":str(page)}, headers={"User-Agent":"Mozilla/5.0","Referer":f"{base_url}/MKEVT1000M.web"})
@@ -200,13 +186,84 @@ async def crawl_hana_bg():
                         img = f"{base_url}{ev.get('APN_FILE_NM')}" if ev.get('APN_FILE_NM') and not ev.get('APN_FILE_NM').startswith('http') else ev.get('APN_FILE_NM')
                         all_events.append({"category":ev.get("ITG_APP_EVN_MC_NM","이벤트"), "eventName":ev.get("EVN_TIT_NM","").strip(), "period":f"{ev.get('EVN_SDT','')} ~ {ev.get('EVN_EDT','')}", "link":f"{base_url}/MKEVT1010M.web?EVN_SEQ={ev.get('EVN_SEQ')}", "image":img, "bgColor":"#ffffff"})
                     if page >= int(emap.get("totalPage", 0)): break
-                except: break
+                except Exception as e: 
+                    print(f"Hana crawl page {page} error: {e}")
+                    break
         if all_events:
             data = {"last_updated":datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S'), "data":all_events}
             file_path = os.path.join(os.getcwd(), "hana_data.json")
             with open(file_path,"w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
             if r: r.setex(HANA_CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
+            print(f"[{datetime.now(seoul_tz)}] Hana crawl finished: {len(all_events)} events saved.")
     except Exception as e: print(f"Hana crawl error: {e}")
+
+async def crawl_kb_bg():
+    try:
+        print(f"[{datetime.now(seoul_tz)}] Starting KB background crawl (Playwright)...")
+        from playwright.async_api import async_playwright
+        all_events = []; seen = set()
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            ctx = await browser.new_context(user_agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1")
+            page = await ctx.new_page()
+            try:
+                # KB Card event list page - FIXED URL
+                print(f"[{datetime.now(seoul_tz)}] KB - Navigating to CORRECT list page: https://m.kbcard.com/BON/DVIEW/MBBV0002")
+                try:
+                    await page.goto("https://m.kbcard.com/BON/DVIEW/MBBV0002", timeout=60000, wait_until="load")
+                except Exception as e:
+                    print(f"KB goto error: {e}")
+                
+                await page.wait_for_timeout(10000)
+                
+                # Check for popups (Common on KB site)
+                try:
+                    await page.click('button:has-text("확인"), .btn_confirm, #pop_confirm', timeout=3000)
+                    print(f"[{datetime.now(seoul_tz)}] KB - Popup/Confirm clicked.")
+                except: pass
+
+                # Extracting with refined selectors for the MBBV0002 page
+                res = await page.evaluate('''() => {
+                    const items = document.querySelectorAll('.event-list__item, li.event-list__item, a[href^="javascript:goDetail"], .list_type2 li, .event_list li');
+                    return Array.from(items).map(el => {
+                        let li = el.closest('li') || el;
+                        const titleEl = li.querySelector('.tit, dt, strong, .event-list__title, h2, h3, p');
+                        const periodEl = li.querySelector('.date, .period, dd, .event-list__date, .time');
+                        const imgEl = li.querySelector('img');
+                        const linkEl = li.querySelector('a');
+                        if(!titleEl || titleEl.innerText.length < 2) return null;
+                        return {
+                            title: titleEl.innerText.trim(),
+                            period: periodEl ? periodEl.innerText.trim() : "",
+                            image: imgEl ? imgEl.src : "",
+                            link: linkEl ? linkEl.href : ""
+                        };
+                    }).filter(x => x && x.title && x.title.length > 2);
+                }''')
+                
+                print(f"[{datetime.now(seoul_tz)}] KB - Extracted {len(res)} candidate events.")
+                
+                for ev in res:
+                    if ev['title'] in seen: continue
+                    seen.add(ev['title'])
+                    all_events.append({
+                        "category": "KB국민카드",
+                        "eventName": ev['title'],
+                        "period": ev['period'],
+                        "link": ev['link'],
+                        "image": ev['image'],
+                        "bgColor": "#ffffff"
+                    })
+            except Exception as e: print(f"KB PW error: {e}")
+            finally: await browser.close()
+            
+        if all_events:
+            data = {"last_updated":datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S'), "data":all_events}
+            file_path = os.path.join(os.getcwd(), "kb_data.json")
+            with open(file_path,"w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
+            if r: r.setex(KB_CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
+            print(f"[{datetime.now(seoul_tz)}] KB crawl finished: {len(all_events)} events saved.")
+    except Exception as e: print(f"KB crawl error: {e}")
 
 async def crawl_woori_bg():
     try:
@@ -326,7 +383,8 @@ async def crawl_hyundai_bg():
             data = {"last_updated":datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S'), "data":all_events}
             file_path = os.path.join(os.getcwd(), "hyundai_data.json")
             with open(file_path,"w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
-            if r: r.setex("events:hyundai", CACHE_EXPIRE, json.dumps(data))
+            if r: r.setex(HYUNDAI_CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
+            print(f"[{datetime.now(seoul_tz)}] Hyundai crawl finished: {len(all_events)} events saved.")
     except Exception as e: print(f"Hyundai crawl error: {e}")
 
 async def crawl_lotte_bg():
@@ -359,7 +417,8 @@ async def crawl_lotte_bg():
             data = {"last_updated":datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S'), "data":all_events}
             file_path = os.path.join(os.getcwd(), "lotte_data.json")
             with open(file_path,"w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False)
-            if r: r.setex("events:lotte", CACHE_EXPIRE, json.dumps(data))
+            if r: r.setex(LOTTE_CACHE_KEY, CACHE_EXPIRE, json.dumps(data))
+            print(f"[{datetime.now(seoul_tz)}] Lotte crawl finished: {len(all_events)} events saved.")
     except Exception as e: print(f"Lotte crawl error: {e}")
 
 # --- HTML Handlers ---
