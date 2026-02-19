@@ -221,6 +221,30 @@ job_defaults = {
 # 스케줄러 인스턴스 생성
 scheduler = AsyncIOScheduler(timezone=seoul_tz, job_defaults=job_defaults)
     
+# --- Coolify 프록시 재시작 태스크 ---
+async def restart_coolify_proxy():
+    api_key = os.getenv("COOLIFY_API_KEY")
+    api_base = os.getenv("COOLIFY_API_URL", "https://app.coolify.io/api/v1")
+    server_uuid = os.getenv("COOLIFY_SERVER_UUID")
+
+    if not api_key or not server_uuid:
+        print(f"[{datetime.now(seoul_tz)}] Coolify proxy restart skipped: Environment variables (COOLIFY_API_KEY, COOLIFY_SERVER_UUID) not set.")
+        return
+
+    headers = {"Authorization": f"Bearer {api_key}"}
+    url = f"{api_base.rstrip('/')}/servers/{server_uuid}/proxy/restart"
+
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            # Coolify API - 서버 프록시 재시작은 보통 GET 호출로 처리됨
+            resp = await client.get(url, headers=headers)
+            if resp.status_code == 200:
+                print(f"[{datetime.now(seoul_tz)}] Coolify proxy restart SUCCESS.")
+            else:
+                print(f"[{datetime.now(seoul_tz)}] Coolify proxy restart FAILED: {resp.status_code} - {resp.text}")
+    except Exception as e:
+        print(f"[{datetime.now(seoul_tz)}] Coolify proxy restart EXCEPTION: {e}")
+
 # --- 통합 순차 크롤링 태스크 ---
 async def daily_crawl_job():
     process = psutil.Process(os.getpid())
@@ -240,7 +264,7 @@ async def daily_crawl_job():
         ("우리", card_events.crawl_woori_bg),
         ("BC", card_events.crawl_bc_bg),
         ("삼성", card_events.crawl_samsung_bg),
-        ("현대", card_events.crawl_hyundai_bg),
+        ("현대", card_events.crawl_hyundaicard_bg if hasattr(card_events, 'crawl_hyundaicard_bg') else card_events.crawl_hyundai_bg),
         ("롯데", card_events.crawl_lotte_bg)
     ]
     
@@ -255,6 +279,9 @@ async def daily_crawl_job():
     
     end_mem = process.memory_info().rss / 1024 / 1024
     print(f"[{datetime.now(seoul_tz)}] All daily crawl tasks finished. Final memory: {end_mem:.2f} MB")
+    
+    # 3. Coolify 프록시 재시작 (요청 시)
+    await restart_coolify_proxy()
 
 @app.on_event("startup")
 async def start_scheduler():
