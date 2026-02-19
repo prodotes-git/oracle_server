@@ -14,6 +14,7 @@ from shared import r, seoul_tz, CACHE_EXPIRE, boot_time, get_cached_data
 import card_events
 import kfcc
 import local_currency
+import dart
 
 app = FastAPI()
 
@@ -21,6 +22,7 @@ app = FastAPI()
 app.include_router(card_events.router)
 app.include_router(kfcc.router)
 app.include_router(local_currency.router)
+app.include_router(dart.router)
 
 # --- 공통 라우터 (대시보드, 헬스체크) ---
 
@@ -204,6 +206,15 @@ def read_root():
                     <div class="card-desc">내 주변의 온누리상품권 및 경기지역화폐 가맹점을 지도로 쉽고 빠르게 찾아보세요.</div>
                 </div>
                 <div class="explore">지도에서 찾기 <span>></span></div>
+            </a>
+
+            <a href="/dart" class="bento-card" style="background: linear-gradient(135deg, #0b0e14 0%, #161b22 100%); color: #fff; border: 1px solid #30363d;">
+                <div>
+                    <div class="card-label" style="color: #58a6ff;">기업 분석</div>
+                    <div class="card-value">DART 임직원 추이</div>
+                    <div class="card-desc" style="color: #adbac7;">공시 데이터를 바탕으로 국내 상장사들의 임원 및 직원 수 변동 추이를 시각화하여 분석합니다.</div>
+                </div>
+                <div class="explore" style="color: #58a6ff;">데이터 분석하기 <span>></span></div>
             </a>
         </div>
     </body>
