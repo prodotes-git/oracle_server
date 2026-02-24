@@ -4,7 +4,7 @@ import json
 import asyncio
 from fastapi import APIRouter, Depends, BackgroundTasks, Query
 from fastapi.responses import HTMLResponse
-from sqlalchemy import Column, Integer, String, Float, Index, text
+from sqlalchemy import Column, Integer, String, Float, text
 from sqlalchemy.orm import Session
 from shared import Base, engine, get_db, seoul_tz
 from datetime import datetime
@@ -30,6 +30,13 @@ def init_db():
     if engine is not None:
         try:
             Base.metadata.create_all(bind=engine)
+            # 기존 테이블에 road_address 컬럼이 없으면 추가
+            try:
+                with engine.connect() as conn:
+                    conn.execute(text("ALTER TABLE merchants ADD COLUMN IF NOT EXISTS road_address VARCHAR"))
+                    conn.commit()
+            except Exception:
+                pass  # 이미 존재하거나 지원하지 않는 DB면 무시
             print("PostgreSQL tables created successfully")
         except Exception as e:
             print(f"Failed to create tables: {e}")
@@ -81,7 +88,7 @@ async def get_merchants(
                 "id": m.id,
                 "place_name": m.name,
                 "address_name": m.address or "",
-                "road_address_name": m.road_address or m.address or "",
+                "road_address_name": getattr(m, 'road_address', None) or m.address or "",
                 "y": m.lat,
                 "x": m.lon,
                 "phone": m.phone or "",
