@@ -554,7 +554,10 @@
         }
 
         function moveToCurrentLocation() {
-            if (!navigator.geolocation) return;
+            if (!navigator.geolocation) {
+                showLocationHelp("이 브라우저는 위치 서비스를 지원하지 않습니다.");
+                return;
+            }
 
             navigator.geolocation.getCurrentPosition(function (position) {
                 myLat = position.coords.latitude;
@@ -562,13 +565,33 @@
                 const locPosition = new kakao.maps.LatLng(myLat, myLon);
                 addMyLocationMarker(locPosition);
                 map.panTo(locPosition);
-            }, function(err) {
-                alert("위치를 가져올 수 없습니다.\n브라우저 설정에서 위치 권한을 확인해주세요.");
+            }, function (err) {
+                if (err.code === 1) {
+                    // PERMISSION_DENIED
+                    showLocationHelp(
+                        "📍 위치 권한이 차단되어 있습니다.\n\n" +
+                        "【iPhone Safari】\n" +
+                        "설정 → Safari → 위치 → '허용'\n\n" +
+                        "【Chrome】\n" +
+                        "주소창 왼쪽 🔒 아이콘 → 위치 → '허용'\n\n" +
+                        "설정 변경 후 페이지를 새로고침 해주세요."
+                    );
+                } else if (err.code === 2) {
+                    showLocationHelp("위치 정보를 가져올 수 없습니다.\nWi-Fi 또는 GPS를 확인해주세요.");
+                } else {
+                    showLocationHelp("위치 요청 시간이 초과되었습니다.\n다시 시도해주세요.");
+                }
             }, {
                 enableHighAccuracy: true,
                 timeout: 10000,
                 maximumAge: 60000
+
+
             });
+        }
+
+        function showLocationHelp(message) {
+            alert(message);
         }
 
         function setMode(mode) {

@@ -233,6 +233,9 @@ async def sync_onnuri_data():
         db = None
         total_added = 0
         geocode_fail = 0
+        # 시장명별 좌표 캐시 (같은 시장의 가맹점들은 같은 좌표 사용)
+        market_coords_cache = {}
+        
         try:
             from shared import SessionLocal
             if not SessionLocal: return
@@ -243,8 +246,8 @@ async def sync_onnuri_data():
             db.commit()
             print(f"  Cleared {deleted} existing Onnuri records.")
             
-            # 전체 건수 확인
-            params = {"serviceKey": PUBLIC_DATA_KEY, "page": 1, "perPage": 100}
+            # 전체 건수 확인 (perPage=1000으로 빠르게 수집)
+            params = {"serviceKey": PUBLIC_DATA_KEY, "page": 1, "perPage": 1000}
             resp = await client.get(url, params=params)
             if resp.status_code != 200:
                 print(f"  Onnuri API error: {resp.status_code} - {resp.text[:200]}")
@@ -252,7 +255,7 @@ async def sync_onnuri_data():
             
             first_data = resp.json()
             total_count = first_data.get("totalCount", 0)
-            max_pages = min(100, (total_count // 100) + 1)  # 최대 10,000건
+            max_pages = min(50, (total_count // 1000) + 1)  # 최대 50,000건
             print(f"  Total Onnuri merchants from API: {total_count} ({max_pages} pages)")
             
             for page in range(1, max_pages + 1):
@@ -261,6 +264,7 @@ async def sync_onnuri_data():
                         params["page"] = page
                         resp = await client.get(url, params=params)
                         if resp.status_code != 200:
+                            print(f"  Onnuri API page {page} error: {resp.status_code}")
                             break
                         page_data = resp.json()
                     else:
@@ -273,30 +277,43 @@ async def sync_onnuri_data():
                     batch = []
                     for item in items:
                         name = item.get("가맹점명") or item.get("점포명") or item.get("상호")
-                        address = item.get("소재지") or item.get("주소") or item.get("가맹점주소")
-                        if not name or not address:
+                        region = item.get("소재지") or ""  # "경기", "광주" 등 시/도만 있음
+                        market = item.get("소속 시장명(또는 상점가)") or item.get("시장명") or item.get("시장_상가명") or ""
+                        if not name:
                             continue
                         
-                        # 지오코딩 수행
-                        lat, lon = await geocode_address(client, address)
+                        # 시장명+지역으로 좌표를 구함 (캐시 활용)
+                        cache_key = f"{market}|{region}"
+                        if cache_key in market_coords_cache:
+                            lat, lon = market_coords_cache[cache_key]
+                        else:
+                            lat, lon = None, None
+                            # 1차: "시장명 지역" 으로 검색
+                            if market:
+                                search_query = f"{market} {region}" if region else market
+                                lat, lon = await geocode_address(client, search_query)
+                            # 2차: "가맹점명 지역" 으로 검색
+                            if lat is None and region:
+                                lat, lon = await geocode_address(client, f"{name} {region}")
+                            
+                            market_coords_cache[cache_key] = (lat, lon)
+                            # API 부하 방지
+                            await asyncio.sleep(0.05)
+                        
                         if lat is None or lon is None:
                             geocode_fail += 1
-                            # 시장명으로 재시도
-                            market = item.get("시장명") or item.get("시장_상가명")
-                            if market:
-                                lat, lon = await geocode_address(client, market)
-                            if lat is None or lon is None:
-                                continue
+                            continue
                         
+                        address_str = f"{region} {market}".strip() if region or market else name
                         batch.append(Merchant(
                             name=name,
                             type="onnuri",
-                            address=address,
-                            road_address=address,
+                            address=address_str,
+                            road_address=address_str,
                             lat=lat,
                             lon=lon,
-                            category=item.get("취급품목") or item.get("업종") or "전통시장",
-                            phone=item.get("전화번호") or "",
+                            category=item.get("취급품목") or "",
+                            phone="",
                             last_updated=datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S')
                         ))
                     
@@ -306,16 +323,14 @@ async def sync_onnuri_data():
                         total_added += len(batch)
                     
                     if page % 5 == 0 or page == max_pages:
-                        print(f"  Onnuri: Page {page}/{max_pages} | Added: {total_added} | Geocode fails: {geocode_fail}")
-                    
-                    # API 부하 방지
-                    await asyncio.sleep(0.3)
+                        print(f"  Onnuri: Page {page}/{max_pages} | Added: {total_added} | Geocode fails: {geocode_fail} | Cached markets: {len(market_coords_cache)}")
                     
                 except Exception as e:
                     print(f"  Onnuri page {page} error: {e}")
                     continue
             
-            print(f"[{datetime.now(seoul_tz)}] Onnuri sync complete: {total_added} merchants added, {geocode_fail} geocode failures.")
+            print(f"[{datetime.now(seoul_tz)}] Onnuri sync complete: {total_added} merchants added, {geocode_fail} geocode failures, {len(market_coords_cache)} markets cached.")
+
             
         except Exception as e:
             print(f"Onnuri sync error: {e}")
