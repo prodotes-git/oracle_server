@@ -474,11 +474,45 @@
 
         function onLocationError(error, isInitial) {
             console.warn("Geolocation error:", error.code, error.message);
-            const overlay = document.getElementById('location-overlay');
-            overlay.classList.add('hidden');
 
             if (isInitial && !locationFound) {
-                // 초기 로딩 시 실패하면 기본 위치로
+                // 브라우저 위치 실패 → IP 기반 위치 추정 시도
+                fetchIPLocation(true);
+            } else {
+                document.getElementById('location-overlay').classList.add('hidden');
+            }
+        }
+
+        async function fetchIPLocation(centerMap) {
+            try {
+                // IP 기반 위치 추정 (무료 API)
+                const res = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(5000) });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.latitude && data.longitude) {
+                        myLat = data.latitude;
+                        myLon = data.longitude;
+                        locationFound = true;
+                        const locPosition = new kakao.maps.LatLng(myLat, myLon);
+                        addMyLocationMarker(locPosition);
+
+                        document.getElementById('location-overlay').classList.add('hidden');
+                        if (centerMap) {
+                            map.setCenter(locPosition);
+                            map.setLevel(5);
+                            searchPlace();
+                        }
+                        console.log("IP-based location:", data.city, data.region, myLat, myLon);
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.warn("IP location failed:", e);
+            }
+
+            // IP 위치도 실패하면 기본 위치
+            document.getElementById('location-overlay').classList.add('hidden');
+            if (centerMap) {
                 map.setCenter(new kakao.maps.LatLng(37.2636, 127.0286));
                 map.setLevel(5);
                 searchPlace();
@@ -486,15 +520,14 @@
         }
 
         function requestLocation(centerMap) {
-            if (!navigator.geolocation) {
-                document.getElementById('location-overlay').classList.add('hidden');
-                map.setCenter(new kakao.maps.LatLng(37.2636, 127.0286));
-                searchPlace();
-                return;
-            }
-
             const overlay = document.getElementById('location-overlay');
             if (centerMap) overlay.classList.remove('hidden');
+
+            if (!navigator.geolocation) {
+                // 브라우저 지원 안함 → IP 기반 시도
+                fetchIPLocation(centerMap);
+                return;
+            }
 
             // 기존 watchPosition 정리
             if (watchId !== null) {
@@ -506,7 +539,6 @@
             navigator.geolocation.getCurrentPosition(
                 function (pos) {
                     onLocationSuccess(pos, centerMap);
-                    // 성공 후 실시간 추적 시작
                     startWatching();
                 },
                 function (err) {
@@ -558,11 +590,6 @@
         }
 
         function moveToCurrentLocation() {
-            if (!navigator.geolocation) {
-                alert("이 브라우저는 위치 서비스를 지원하지 않습니다.");
-                return;
-            }
-
             // 이미 위치를 알고 있으면 바로 이동
             if (myLat && myLon) {
                 const locPosition = new kakao.maps.LatLng(myLat, myLon);
