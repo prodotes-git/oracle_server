@@ -497,14 +497,9 @@
             if (myLocationMarker) myLocationMarker.setMap(null);
 
             const markerImage = new kakao.maps.MarkerImage(
-                'data:image/svg+xml;base64,' + btoa(`
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
-                        <circle cx="14" cy="14" r="12" fill="#007AFF" fill-opacity="0.2" stroke="#007AFF" stroke-width="2"/>
-                        <circle cx="14" cy="14" r="5" fill="#007AFF"/>
-                    </svg>
-                `),
-                new kakao.maps.Size(28, 28),
-                { offset: new kakao.maps.Point(14, 14) }
+                'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png',
+                new kakao.maps.Size(24, 35),
+                { offset: new kakao.maps.Point(12, 35) }
             );
 
             myLocationMarker = new kakao.maps.Marker({
@@ -565,6 +560,7 @@
                 const locPosition = new kakao.maps.LatLng(myLat, myLon);
                 addMyLocationMarker(locPosition);
                 map.panTo(locPosition);
+                setTimeout(searchPlace, 500);  // 이동 후 주변 가맹점 검색
             }, function (err) {
                 if (err.code === 1) {
                     // PERMISSION_DENIED
