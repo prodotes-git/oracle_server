@@ -79,7 +79,7 @@
             top: 64px;
             left: 20px;
             width: 360px;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(20px);
             border-radius: 18px;
             padding: 20px;
@@ -109,7 +109,7 @@
         .filter-tabs {
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .tab {
@@ -151,15 +151,29 @@
             color: white;
         }
 
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 12px;
+            color: var(--secondary-text);
+        }
+
+        .stats-bar .count {
+            font-weight: 600;
+            color: var(--apple-text);
+        }
+
         .result-list {
-            max-height: calc(100vh - 300px);
+            max-height: calc(100vh - 340px);
             overflow-y: auto;
         }
 
         .merchant-item {
-            padding: 15px;
+            padding: 12px 15px;
             border-radius: 12px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             cursor: pointer;
             transition: background 0.2s;
             border: 1px solid transparent;
@@ -171,14 +185,20 @@
 
         .merchant-name {
             font-weight: 700;
-            font-size: 16px;
-            margin-bottom: 4px;
+            font-size: 15px;
+            margin-bottom: 3px;
         }
 
         .merchant-addr {
-            font-size: 13px;
+            font-size: 12px;
             color: var(--secondary-text);
-            margin-bottom: 8px;
+            margin-bottom: 6px;
+        }
+
+        .merchant-meta {
+            display: flex;
+            gap: 6px;
+            align-items: center;
         }
 
         .merchant-tag {
@@ -187,7 +207,11 @@
             padding: 2px 6px;
             border-radius: 4px;
             font-weight: 700;
-            text-transform: uppercase;
+        }
+
+        .merchant-category {
+            font-size: 11px;
+            color: var(--secondary-text);
         }
 
         .current-loc-btn {
@@ -219,6 +243,10 @@
                 max-height: 40vh;
             }
 
+            .result-list {
+                max-height: calc(40vh - 200px);
+            }
+
             .current-loc-btn {
                 bottom: calc(40vh + 30px);
             }
@@ -235,7 +263,6 @@
             fill: var(--apple-blue);
         }
 
-        /* Loading UI */
         .loader-container {
             display: none;
             text-align: center;
@@ -262,21 +289,61 @@
             }
         }
 
-        /* Overlay */
         #location-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(5px);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 10000;
+        }
+
+        #location-overlay.hidden {
             display: none;
+        }
+
+        .sync-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .sync-btn {
+            font-size: 11px;
+            color: var(--apple-blue);
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-decoration: underline;
+            font-weight: 500;
+        }
+
+        .sync-btn:disabled {
+            color: var(--secondary-text);
+            cursor: not-allowed;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--secondary-text);
+            padding: 40px 0;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        .empty-state small {
+            font-size: 12px;
+            margin-top: 8px;
+            display: block;
         }
     </style>
 </head>
@@ -308,25 +375,30 @@
 
     <div class="search-panel">
         <div class="filter-tabs">
-            <div class="tab tab-onnuri active" onclick="setMode('onnuri')">온누리상품권</div>
-            <div class="tab tab-gg" onclick="setMode('gg')">경기지역화폐</div>
+            <div class="tab tab-onnuri active" onclick="setMode('onnuri')">🏪 온누리상품권</div>
+            <div class="tab tab-gg" onclick="setMode('gg')">💳 경기지역화폐</div>
         </div>
         <div class="search-box">
             <span style="color: var(--secondary-text);">🔍</span>
             <input type="text" id="keyword" placeholder="가맹점 이름 또는 지역 검색" onkeypress="handleEnter(event)">
             <button onclick="searchPlace()"
-                style="background: none; border: none; font-size: 13px; color: var(--apple-blue); cursor: pointer; font-weight: 600;">검색</button>
+                style="background: none; border: none; font-size: 13px; color: var(--apple-blue); cursor: pointer; font-weight: 600; white-space: nowrap;">검색</button>
         </div>
-        <div style="margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-size:11px; color:var(--secondary-text);">데이터가 안 보이나요?</span>
-            <button id="sync-btn" onclick="triggerSync()"
-                style="font-size:11px; color:var(--apple-blue); background:none; border:none; cursor:pointer; text-decoration:underline;">최신
-                데이터 동기화</button>
+
+        <div class="sync-row">
+            <span id="stats-text" style="font-size:11px; color:var(--secondary-text);">DB 현황 확인 중...</span>
+            <button id="sync-btn" class="sync-btn" onclick="triggerSync()">🔄 데이터 동기화</button>
         </div>
+
+        <div class="stats-bar">
+            <span id="result-count"></span>
+            <span id="radius-info" style="font-size:11px;">반경 3km</span>
+        </div>
+
         <div id="results" class="result-list">
-            <div style="text-align: center; color: var(--secondary-text); padding: 40px 0;">
-                <p style="font-size: 14px;">궁금한 곳을 검색해보세요.</p>
-                <p style="font-size: 12px; margin-top: 8px;">예: 수원 전통시장, 온누리 약국 등</p>
+            <div class="empty-state">
+                <p>지도를 움직이면 자동으로 검색됩니다.</p>
+                <small>데이터가 없으면 '데이터 동기화' 버튼을 눌러주세요.</small>
             </div>
         </div>
         <div id="loader" class="loader-container">
@@ -339,100 +411,164 @@
         src="//dapi.kakao.com/v2/maps/sdk.js?appkey=8220fce5d491da93dda89d8cf3682514&libraries=services,clusterer"></script>
     <script>
         let map;
-        let ps;
         let infowindow;
         let markers = [];
         let clusterer;
         let currentMode = 'onnuri';
+        let myLocationMarker = null;
+        let searchDebounce = null;
+        let myLat = null, myLon = null;
 
         function initMap() {
             const container = document.getElementById('map');
             const options = {
-                center: new kakao.maps.LatLng(37.566826, 126.9786567), // 서울시청 기준
-                level: 3
+                center: new kakao.maps.LatLng(37.4, 127.0), // 경기도 중심
+                level: 5
             };
 
             map = new kakao.maps.Map(container, options);
-            ps = new kakao.maps.services.Places();
             infowindow = new kakao.maps.InfoWindow({ zIndex: 1 });
 
             // 클러스터러 초기화
             clusterer = new kakao.maps.MarkerClusterer({
                 map: map,
                 averageCenter: true,
-                minLevel: 6
+                minLevel: 5,
+                gridSize: 60,
+                styles: [{
+                    width: '50px', height: '50px',
+                    background: currentMode === 'onnuri' ? 'rgba(230,126,34,0.8)' : 'rgba(39,174,96,0.8)',
+                    borderRadius: '25px', color: '#fff',
+                    textAlign: 'center', lineHeight: '50px',
+                    fontSize: '14px', fontWeight: '700'
+                }]
             });
 
-            // 지도 이동 시 데이터 재검색
+            // 지도 이동/줌 시 검색 (debounce)
             kakao.maps.event.addListener(map, 'idle', function () {
-                searchPlace();
+                clearTimeout(searchDebounce);
+                searchDebounce = setTimeout(searchPlace, 400);
             });
 
-            // 현재 위치 가져오기 시도
-            document.getElementById('location-overlay').style.display = 'flex';
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function (position) {
-                    document.getElementById('location-overlay').style.display = 'none';
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    const locPosition = new kakao.maps.LatLng(lat, lon);
+            // 현재 위치로 시작
+            requestLocation();
+            loadStats();
+        }
+
+        function requestLocation() {
+            const overlay = document.getElementById('location-overlay');
+            overlay.classList.remove('hidden');
+
+            if (!navigator.geolocation) {
+                overlay.classList.add('hidden');
+                searchPlace();
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    overlay.classList.add('hidden');
+                    myLat = position.coords.latitude;
+                    myLon = position.coords.longitude;
+                    const locPosition = new kakao.maps.LatLng(myLat, myLon);
 
                     map.setCenter(locPosition);
-                    const centerMarker = new kakao.maps.Marker({
-                        position: locPosition,
-                        image: new kakao.maps.MarkerImage(
-                            'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png',
-                            new kakao.maps.Size(24, 35)
-                        )
-                    });
-                    centerMarker.setMap(map);
+                    map.setLevel(4);
+                    addMyLocationMarker(locPosition);
                     searchPlace();
-                }, function (error) {
-                    document.getElementById('location-overlay').style.display = 'none';
-                    console.error("Geolocation error: ", error);
+                },
+                function (error) {
+                    overlay.classList.add('hidden');
+                    console.warn("Geolocation error:", error.code, error.message);
+                    // 실패 시 기본 위치 (수원시청)로
+                    map.setCenter(new kakao.maps.LatLng(37.2636, 127.0286));
+                    map.setLevel(5);
                     searchPlace();
-                }, {
+                },
+                {
                     enableHighAccuracy: true,
-                    timeout: 8000,
-                    maximumAge: 0
-                });
-            } else {
-                document.getElementById('location-overlay').style.display = 'none';
-                searchPlace();
+                    timeout: 10000,
+                    maximumAge: 60000  // 1분간 캐시 허용
+                }
+            );
+        }
+
+        function addMyLocationMarker(position) {
+            if (myLocationMarker) myLocationMarker.setMap(null);
+
+            const markerImage = new kakao.maps.MarkerImage(
+                'data:image/svg+xml;base64,' + btoa(`
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
+                        <circle cx="14" cy="14" r="12" fill="#007AFF" fill-opacity="0.2" stroke="#007AFF" stroke-width="2"/>
+                        <circle cx="14" cy="14" r="5" fill="#007AFF"/>
+                    </svg>
+                `),
+                new kakao.maps.Size(28, 28),
+                { offset: new kakao.maps.Point(14, 14) }
+            );
+
+            myLocationMarker = new kakao.maps.Marker({
+                position: position,
+                image: markerImage,
+                map: map,
+                zIndex: 999
+            });
+        }
+
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/local-currency/stats');
+                const data = await res.json();
+                const el = document.getElementById('stats-text');
+                if (data.onnuri + data.gg > 0) {
+                    el.textContent = `DB: 온누리 ${data.onnuri.toLocaleString()}건 | 경기 ${data.gg.toLocaleString()}건`;
+                } else {
+                    el.innerHTML = `<span style="color:#e74c3c;">⚠ DB에 데이터 없음 - 동기화 필요</span>`;
+                }
+            } catch (e) {
+                document.getElementById('stats-text').textContent = 'DB 연결 확인 중...';
             }
         }
 
         async function triggerSync() {
             const btn = document.getElementById('sync-btn');
-            if (!confirm("서버에서 가맹점 데이터를 새로 동기화하시겠습니까? (완료까지 약 30초~1분 소요)")) return;
+            if (!confirm("서버에서 가맹점 데이터를 새로 동기화할까요?\n(경기지역화폐: 약 1-2분, 온누리: 약 3-5분 소요)")) return;
 
             try {
-                btn.innerText = "동기화 요청 중...";
+                btn.textContent = "⏳ 동기화 중...";
                 btn.disabled = true;
                 const res = await fetch('/api/local-currency/sync', { method: 'POST' });
                 if (res.ok) {
-                    alert("동기화가 시작되었습니다. 잠시 후 지도를 움직여 데이터를 확인해 주세요.");
+                    alert("동기화가 시작되었습니다.\n약 3~5분 후 지도를 움직여서 데이터를 확인해주세요.");
+                    // 30초 후 stats 새로고침
+                    setTimeout(loadStats, 30000);
                 } else {
                     alert("동기화 요청에 실패했습니다.");
                 }
             } catch (e) {
                 alert("연결 오류가 발생했습니다.");
             } finally {
-                btn.innerText = "최신 데이터 동기화";
+                btn.textContent = "🔄 데이터 동기화";
                 btn.disabled = false;
             }
         }
 
         function moveToCurrentLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function (position) {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    const locPosition = new kakao.maps.LatLng(lat, lon);
-                    map.panTo(locPosition);
-                    searchPlace();
-                });
-            }
+            if (!navigator.geolocation) return;
+
+            navigator.geolocation.getCurrentPosition(function (position) {
+                myLat = position.coords.latitude;
+                myLon = position.coords.longitude;
+                const locPosition = new kakao.maps.LatLng(myLat, myLon);
+                addMyLocationMarker(locPosition);
+                map.panTo(locPosition);
+            }, function(err) {
+                alert("위치를 가져올 수 없습니다.\n브라우저 설정에서 위치 권한을 확인해주세요.");
+            }, {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 60000
+            });
         }
 
         function setMode(mode) {
@@ -445,6 +581,16 @@
                 document.querySelector('.tab-gg').classList.add('active');
                 document.getElementById('keyword').placeholder = "경기지역화폐 가맹점 검색";
             }
+
+            // 클러스터러 스타일 변경
+            clusterer.setStyles([{
+                width: '50px', height: '50px',
+                background: mode === 'onnuri' ? 'rgba(230,126,34,0.8)' : 'rgba(39,174,96,0.8)',
+                borderRadius: '25px', color: '#fff',
+                textAlign: 'center', lineHeight: '50px',
+                fontSize: '14px', fontWeight: '700'
+            }]);
+
             searchPlace();
         }
 
@@ -454,33 +600,47 @@
 
         function searchPlace() {
             const keyword = document.getElementById('keyword').value.trim();
-
-            // 로딩 표시
-            document.getElementById('results').style.display = 'none';
-            document.getElementById('loader').style.display = 'block';
-
             const center = map.getCenter();
             const lat = center.getLat();
             const lon = center.getLng();
 
-            // 백엔드 API 호출
-            fetch(`/api/local-currency/merchants?lat=${lat}&lon=${lon}&type=${currentMode}`)
+            // 줌 레벨에 따라 반경 조정
+            const level = map.getLevel();
+            let radius = 1;
+            if (level <= 3) radius = 1;
+            else if (level <= 5) radius = 3;
+            else if (level <= 7) radius = 7;
+            else radius = 15;
+
+            document.getElementById('radius-info').textContent = `반경 ${radius}km`;
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('loader').style.display = 'block';
+
+            let url = `/api/local-currency/merchants?lat=${lat}&lon=${lon}&type=${currentMode}&radius=${radius}`;
+            if (keyword) url += `&keyword=${encodeURIComponent(keyword)}`;
+
+            fetch(url)
                 .then(res => res.json())
                 .then(res => {
                     document.getElementById('loader').style.display = 'none';
                     document.getElementById('results').style.display = 'block';
 
-                    let data = res.data || [];
+                    const data = res.data || [];
+                    const total = res.total || data.length;
 
-                    // 키워드가 있으면 추가 필터링
-                    if (keyword) {
-                        data = data.filter(p => p.place_name.includes(keyword) || p.address_name.includes(keyword));
-                    }
+                    document.getElementById('result-count').innerHTML =
+                        data.length > 0
+                            ? `<span class="count">${data.length}개</span> 가맹점 발견`
+                            : '';
 
                     if (data.length > 0) {
                         displayPlaces(data);
                     } else {
-                        document.getElementById('results').innerHTML = '<div style="text-align: center; padding: 40px 0; color: var(--secondary-text);">주변에 가맹점이 없습니다.<br><small>(데이터 동기화가 필요할 수 있습니다)</small></div>';
+                        document.getElementById('results').innerHTML = `
+                            <div class="empty-state">
+                                <p>주변에 가맹점이 없습니다.</p>
+                                <small>지도를 다른 곳으로 이동하거나,<br>'데이터 동기화' 버튼을 눌러보세요.</small>
+                            </div>`;
                         removeMarkers();
                     }
                 })
@@ -488,30 +648,54 @@
                     console.error(err);
                     document.getElementById('loader').style.display = 'none';
                     document.getElementById('results').style.display = 'block';
+                    document.getElementById('results').innerHTML = `
+                        <div class="empty-state">
+                            <p>데이터를 불러올 수 없습니다.</p>
+                            <small>${err.message}</small>
+                        </div>`;
                 });
         }
 
         function displayPlaces(places) {
             const listEl = document.getElementById('results');
-            const bounds = new kakao.maps.LatLngBounds();
-
             listEl.innerHTML = '';
             removeMarkers();
 
             const newMarkers = [];
-            places.forEach((place, i) => {
-                const placePosition = new kakao.maps.LatLng(place.y, place.x);
-                const marker = addMarker(placePosition, i);
-                const itemEl = getListItem(place, i);
+            const color = currentMode === 'onnuri' ? '#e67e22' : '#27ae60';
 
+            places.forEach((place, i) => {
+                if (!place.y || !place.x) return;
+
+                const placePosition = new kakao.maps.LatLng(place.y, place.x);
+
+                // 커스텀 마커 이미지
+                const markerImage = new kakao.maps.MarkerImage(
+                    'data:image/svg+xml;base64,' + btoa(`
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="32" viewBox="0 0 24 32">
+                            <path d="M12 0C5.4 0 0 5.4 0 12c0 8.4 12 20 12 20s12-11.6 12-20C24 5.4 18.6 0 12 0z" fill="${color}"/>
+                            <circle cx="12" cy="12" r="5" fill="white"/>
+                        </svg>
+                    `),
+                    new kakao.maps.Size(24, 32),
+                    { offset: new kakao.maps.Point(12, 32) }
+                );
+
+                const marker = new kakao.maps.Marker({
+                    position: placePosition,
+                    map: map,
+                    image: markerImage
+                });
+
+                markers.push(marker);
                 newMarkers.push(marker);
-                bounds.extend(placePosition);
+
+                const itemEl = getListItem(place, i);
 
                 (function (marker, title, place) {
                     kakao.maps.event.addListener(marker, 'click', function () {
                         displayInfowindow(marker, title, place);
                     });
-
                     itemEl.onclick = function () {
                         displayInfowindow(marker, title, place);
                         map.panTo(placePosition);
@@ -522,7 +706,6 @@
             });
 
             clusterer.addMarkers(newMarkers);
-            // map.setBounds(bounds); // 매번 bounds를 조절하면 지도가 튀므로 생략하거나 조건부 실행
         }
 
         function getListItem(place, i) {
@@ -531,22 +714,18 @@
 
             const color = currentMode === 'onnuri' ? 'var(--onnuri-color)' : 'var(--gyeonggi-color)';
             const label = currentMode === 'onnuri' ? '온누리' : '경기지역';
+            const category = place.category_name ? `<span class="merchant-category">${place.category_name}</span>` : '';
 
             el.innerHTML = `
                 <div class="merchant-name">${place.place_name}</div>
-                <div class="merchant-addr">${place.address_name}</div>
-                <div class="merchant-tag" style="background: ${color}20; color: ${color}">${label} 가맹점</div>
+                <div class="merchant-addr">${place.road_address_name || place.address_name}</div>
+                <div class="merchant-meta">
+                    <div class="merchant-tag" style="background: ${color}15; color: ${color}">${label}</div>
+                    ${category}
+                    ${place.phone ? `<span style="font-size:11px; color:var(--apple-blue);">${place.phone}</span>` : ''}
+                </div>
             `;
             return el;
-        }
-
-        function addMarker(position, i) {
-            const marker = new kakao.maps.Marker({
-                position: position,
-                map: map
-            });
-            markers.push(marker);
-            return marker;
         }
 
         function removeMarkers() {
@@ -556,12 +735,17 @@
         }
 
         function displayInfowindow(marker, title, place) {
+            const addr = place.road_address_name || place.address_name;
             const content = `
-                <div style="padding:15px; min-width:200px;">
-                    <strong style="display:block;margin-bottom:5px;font-size:14px;">${title}</strong>
-                    <span style="font-size:12px;color:#666;">${place.road_address_name || place.address_name}</span><br>
-                    <span style="font-size:12px;color:var(--apple-blue);">${place.phone || ''}</span>
-                    <a href="https://map.kakao.com/link/map/${place.id}" target="_blank" style="display:block;margin-top:10px;font-size:12px;color:var(--apple-blue);text-decoration:none;">길찾기 ></a>
+                <div style="padding:15px; min-width:220px; max-width:300px;">
+                    <strong style="display:block;margin-bottom:5px;font-size:15px;">${title}</strong>
+                    <span style="font-size:12px;color:#666;">${addr}</span><br>
+                    ${place.category_name ? `<span style="font-size:11px;color:#999;">${place.category_name}</span><br>` : ''}
+                    ${place.phone ? `<span style="font-size:12px;color:var(--apple-blue);">📞 ${place.phone}</span><br>` : ''}
+                    <a href="https://map.kakao.com/link/search/${encodeURIComponent(title + ' ' + addr)}" target="_blank" 
+                       style="display:inline-block;margin-top:8px;font-size:12px;color:var(--apple-blue);text-decoration:none;font-weight:600;">
+                       카카오맵에서 보기 ›
+                    </a>
                 </div>
             `;
             infowindow.setContent(content);
