@@ -37,7 +37,7 @@ def init_db():
 # API Keys
 GG_KEY = os.getenv("GG_API_KEY", "54450ac8d7d048f8b26d5cba3b983663")
 PUBLIC_DATA_KEY = os.getenv("PUBLIC_DATA_KEY", "af1495f8d5985b1ba537c92f59f43f0454398cd2207b752cbfc11defe011f86f")
-KAKAO_REST_KEY = os.getenv("KAKAO_REST_KEY", "")  # REST API Key (JS Key와 다름!)
+KAKAO_REST_KEY = os.getenv("KAKAO_REST_KEY", "83bb425cae47ad6f7f1015aee1993d0f")
 
 @router.get("/local-currency", response_class=HTMLResponse)
 def local_currency_page():
