@@ -418,18 +418,19 @@
         let myLocationMarker = null;
         let searchDebounce = null;
         let myLat = null, myLon = null;
+        let watchId = null;
+        let locationFound = false;
 
         function initMap() {
             const container = document.getElementById('map');
             const options = {
-                center: new kakao.maps.LatLng(37.4, 127.0), // 경기도 중심
+                center: new kakao.maps.LatLng(37.4, 127.0),
                 level: 5
             };
 
             map = new kakao.maps.Map(container, options);
             infowindow = new kakao.maps.InfoWindow({ zIndex: 1 });
 
-            // 클러스터러 초기화
             clusterer = new kakao.maps.MarkerClusterer({
                 map: map,
                 averageCenter: true,
@@ -444,52 +445,98 @@
                 }]
             });
 
-            // 지도 이동/줌 시 검색 (debounce)
             kakao.maps.event.addListener(map, 'idle', function () {
                 clearTimeout(searchDebounce);
                 searchDebounce = setTimeout(searchPlace, 400);
             });
 
-            // 현재 위치로 시작
-            requestLocation();
+            requestLocation(true);
             loadStats();
         }
 
-        function requestLocation() {
+        function onLocationSuccess(position, centerMap) {
             const overlay = document.getElementById('location-overlay');
-            overlay.classList.remove('hidden');
+            overlay.classList.add('hidden');
+            locationFound = true;
 
+            myLat = position.coords.latitude;
+            myLon = position.coords.longitude;
+            const locPosition = new kakao.maps.LatLng(myLat, myLon);
+
+            addMyLocationMarker(locPosition);
+
+            if (centerMap) {
+                map.setCenter(locPosition);
+                map.setLevel(4);
+                searchPlace();
+            }
+        }
+
+        function onLocationError(error, isInitial) {
+            console.warn("Geolocation error:", error.code, error.message);
+            const overlay = document.getElementById('location-overlay');
+            overlay.classList.add('hidden');
+
+            if (isInitial && !locationFound) {
+                // 초기 로딩 시 실패하면 기본 위치로
+                map.setCenter(new kakao.maps.LatLng(37.2636, 127.0286));
+                map.setLevel(5);
+                searchPlace();
+            }
+        }
+
+        function requestLocation(centerMap) {
             if (!navigator.geolocation) {
-                overlay.classList.add('hidden');
+                document.getElementById('location-overlay').classList.add('hidden');
+                map.setCenter(new kakao.maps.LatLng(37.2636, 127.0286));
                 searchPlace();
                 return;
             }
 
-            navigator.geolocation.getCurrentPosition(
-                function (position) {
-                    overlay.classList.add('hidden');
-                    myLat = position.coords.latitude;
-                    myLon = position.coords.longitude;
-                    const locPosition = new kakao.maps.LatLng(myLat, myLon);
+            const overlay = document.getElementById('location-overlay');
+            if (centerMap) overlay.classList.remove('hidden');
 
-                    map.setCenter(locPosition);
-                    map.setLevel(4);
-                    addMyLocationMarker(locPosition);
-                    searchPlace();
+            // 기존 watchPosition 정리
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+
+            // 1차 시도: 빠른 응답 (캐시 허용, 저정밀)
+            navigator.geolocation.getCurrentPosition(
+                function (pos) {
+                    onLocationSuccess(pos, centerMap);
+                    // 성공 후 실시간 추적 시작
+                    startWatching();
                 },
-                function (error) {
-                    overlay.classList.add('hidden');
-                    console.warn("Geolocation error:", error.code, error.message);
-                    // 실패 시 기본 위치 (수원시청)로
-                    map.setCenter(new kakao.maps.LatLng(37.2636, 127.0286));
-                    map.setLevel(5);
-                    searchPlace();
+                function (err) {
+                    console.warn("Low accuracy attempt failed:", err.code, err.message);
+                    // 2차 시도: 고정밀
+                    navigator.geolocation.getCurrentPosition(
+                        function (pos) {
+                            onLocationSuccess(pos, centerMap);
+                            startWatching();
+                        },
+                        function (err2) {
+                            onLocationError(err2, centerMap);
+                        },
+                        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+                    );
                 },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 60000  // 1분간 캐시 허용
-                }
+                { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
+            );
+        }
+
+        function startWatching() {
+            if (watchId !== null) return;
+            watchId = navigator.geolocation.watchPosition(
+                function (pos) {
+                    onLocationSuccess(pos, false); // 실시간 업데이트는 지도 중심 이동 안함
+                },
+                function (err) {
+                    // watchPosition 에러는 조용히 무시 (이미 위치를 한번은 잡았으므로)
+                },
+                { enableHighAccuracy: false, timeout: 30000, maximumAge: 10000 }
             );
         }
 
@@ -508,6 +555,28 @@
                 map: map,
                 zIndex: 999
             });
+        }
+
+        function moveToCurrentLocation() {
+            if (!navigator.geolocation) {
+                alert("이 브라우저는 위치 서비스를 지원하지 않습니다.");
+                return;
+            }
+
+            // 이미 위치를 알고 있으면 바로 이동
+            if (myLat && myLon) {
+                const locPosition = new kakao.maps.LatLng(myLat, myLon);
+                addMyLocationMarker(locPosition);
+                map.panTo(locPosition);
+                map.setLevel(4);
+                setTimeout(searchPlace, 500);
+                // 최신 위치로 갱신 요청
+                requestLocation(false);
+                return;
+            }
+
+            // 위치를 모르면 새로 요청
+            requestLocation(true);
         }
 
         async function loadStats() {
@@ -535,7 +604,6 @@
                 const res = await fetch('/api/local-currency/sync', { method: 'POST' });
                 if (res.ok) {
                     alert("동기화가 시작되었습니다.\n약 3~5분 후 지도를 움직여서 데이터를 확인해주세요.");
-                    // 30초 후 stats 새로고침
                     setTimeout(loadStats, 30000);
                 } else {
                     alert("동기화 요청에 실패했습니다.");
@@ -546,48 +614,6 @@
                 btn.textContent = "🔄 데이터 동기화";
                 btn.disabled = false;
             }
-        }
-
-        function moveToCurrentLocation() {
-            if (!navigator.geolocation) {
-                showLocationHelp("이 브라우저는 위치 서비스를 지원하지 않습니다.");
-                return;
-            }
-
-            navigator.geolocation.getCurrentPosition(function (position) {
-                myLat = position.coords.latitude;
-                myLon = position.coords.longitude;
-                const locPosition = new kakao.maps.LatLng(myLat, myLon);
-                addMyLocationMarker(locPosition);
-                map.panTo(locPosition);
-                setTimeout(searchPlace, 500);  // 이동 후 주변 가맹점 검색
-            }, function (err) {
-                if (err.code === 1) {
-                    // PERMISSION_DENIED
-                    showLocationHelp(
-                        "📍 위치 권한이 차단되어 있습니다.\n\n" +
-                        "【iPhone Safari】\n" +
-                        "설정 → Safari → 위치 → '허용'\n\n" +
-                        "【Chrome】\n" +
-                        "주소창 왼쪽 🔒 아이콘 → 위치 → '허용'\n\n" +
-                        "설정 변경 후 페이지를 새로고침 해주세요."
-                    );
-                } else if (err.code === 2) {
-                    showLocationHelp("위치 정보를 가져올 수 없습니다.\nWi-Fi 또는 GPS를 확인해주세요.");
-                } else {
-                    showLocationHelp("위치 요청 시간이 초과되었습니다.\n다시 시도해주세요.");
-                }
-            }, {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 60000
-
-
-            });
-        }
-
-        function showLocationHelp(message) {
-            alert(message);
         }
 
         function setMode(mode) {
