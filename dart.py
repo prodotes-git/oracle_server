@@ -172,7 +172,9 @@ async def fetch_dividend_data(corp_code: str, year: str, reprt_code: str):
 async def fetch_finance_data(corp_code: str, year: str, reprt_code: str):
     """특정 연도/분기의 자산, 부채, 자본 및 매출, 영업이익, 당기순이익 조회"""
     url = f"https://opendart.fss.or.kr/api/fnlttSinglAcnt.json?crtfc_key={DART_API_KEY}&corp_code={corp_code}&bsns_year={year}&reprt_code={reprt_code}"
-    res_data = {"revenue": 0, "op_income": 0, "net_income": 0, "assets": 0, "liabilities": 0, "equity": 0}
+    res_data = {"revenue": 0, "op_income": 0, "net_income": 0, 
+                "cum_revenue": 0, "cum_op_income": 0, "cum_net_income": 0,
+                "assets": 0, "liabilities": 0, "equity": 0}
     
     async with httpx.AsyncClient() as client:
         try:
@@ -186,6 +188,7 @@ async def fetch_finance_data(corp_code: str, year: str, reprt_code: str):
                     target_list = cfs_list if len(cfs_list) > 0 else ofs_list
                     
                     revenue, op_income, net_income = 0, 0, 0
+                    cum_rev, cum_op, cum_net = 0, 0, 0
                     assets, liabilities, equity = 0, 0, 0
                     
                     for item in target_list:
@@ -198,6 +201,12 @@ async def fetch_finance_data(corp_code: str, year: str, reprt_code: str):
                         try: amount = int(amount_str)
                         except: amount = 0
                         
+                        add_amount_str = item.get("thstrm_add_amount", "")
+                        add_amount = amount # 기본적으로 당기금액으로 초기화 (Q1, Q4는 누적=당기)
+                        if add_amount_str:
+                            try: add_amount = int(add_amount_str.replace(",", ""))
+                            except: pass
+                        
                         # 재무상태표 항목
                         if sj_div == "BS":
                             if "자산총계" in acc_nm: assets = amount
@@ -208,14 +217,20 @@ async def fetch_finance_data(corp_code: str, year: str, reprt_code: str):
                         if sj_div in ["IS", "CIS"]:
                             if acc_nm in ["매출액", "수익(매출액)"]:
                                 revenue = amount
+                                cum_rev = add_amount
                             elif acc_nm in ["영업이익", "영업이익(손실)"]:
                                 op_income = amount
+                                cum_op = add_amount
                             elif acc_nm in ["당기순이익", "당기순이익(손실)"]:
                                 net_income = amount
+                                cum_net = add_amount
                                 
                     res_data["revenue"] = revenue
                     res_data["op_income"] = op_income
                     res_data["net_income"] = net_income
+                    res_data["cum_revenue"] = cum_rev
+                    res_data["cum_op_income"] = cum_op
+                    res_data["cum_net_income"] = cum_net
                     res_data["assets"] = assets
                     res_data["liabilities"] = liabilities
                     res_data["equity"] = equity
@@ -232,7 +247,9 @@ async def get_stats(corp_code: str):
     current_year = now.year
     
     # 보고서 코드: 1분기(11013), 반기(11012), 3분기(11014), 사업보고서(11011)
+    # 최근 12개 분기 (3년)
     reprts = [
+        ("2024", "11011", "2024 4Q"),
         ("2024", "11014", "2024 3Q"),
         ("2024", "11012", "2024 2Q"),
         ("2024", "11013", "2024 1Q"),
@@ -241,43 +258,55 @@ async def get_stats(corp_code: str):
         ("2023", "11012", "2023 2Q"),
         ("2023", "11013", "2023 1Q"),
         ("2022", "11011", "2022 4Q"),
+        ("2022", "11014", "2022 3Q"),
+        ("2022", "11012", "2022 2Q"),
+        ("2022", "11013", "2022 1Q"),
     ]
     
-    results = []
-    
-    # 4분기결산의 경우, 1~4분기가 모두 합친 누적 금액임.
-    # 각 분기별 독자적인 실적을 계산하기 위해 누적 금액을 사용할 수도 있지만, 
-    # DART 당해 분기 실적(thstrm_amount)은 해당 3개월치(1Q, 2Q, 3Q)를 정확히 보여줍니다.
-    # 결산(4Q)는 전체 누적만 나오기 때문에, 1~3분기의 합을 뺀 계산이 필요할 수 있으나
-    # 단순히 누적 그대로 혹은 분기 그대로를 차트에 올리기엔 단위 이슈가 있음
-    # 여기서는 "해당 보고서의 실적"을 일단 그대로 전달하고 프론트에서 표시
-    
+    # 비동기 데이터 묶음 가져오기
     import asyncio
     
-    for year, code, label in reprts:
-        cache_key = f"dart_stats_v3:{corp_code}:{year}:{code}"
-        if r:
-            cached = r.get(cache_key)
-            if cached:
-                results.append({"label": label, **json.loads(cached)})
-                continue
-        
-        # 비동기 병렬 호출 최적화
-        emp_task = fetch_dart_data(corp_code, year, code)
-        fin_task = fetch_finance_data(corp_code, year, code)
-        div_task = fetch_dividend_data(corp_code, year, code)
-        
-        emp_data, fin_data, div_data = await asyncio.gather(emp_task, fin_task, div_task)
-        
-        combined = {**emp_data, **fin_data, **div_data}
-        
-        if r and (combined["employees"] > 0 or combined["revenue"] > 0 or combined["assets"] > 0):
-            r.setex(cache_key, 86400 * 30, json.dumps(combined)) # 한달 캐시
-        
-        results.append({"label": label, **combined})
+    raw_results = []
     
-    # 4분기 단독 실적 (4Q = 결산 - 1Q, 2Q, 3Q) 추정 등 추가적인 가공이 필요할 수 있으나
-    # 일단 직관적으로 그대로 반환 (프론트 차트에서 누적일지 분기일지 유의)
+    for year, code, label in reprts:
+        cache_key = f"dart_stats_v5:{corp_code}:{year}:{code}"
+        cached = r.get(cache_key) if r else None
+        
+        if cached:
+            raw_results.append({"label": label, "year": year, "code": code, **json.loads(cached)})
+        else:
+            emp_task = fetch_dart_data(corp_code, year, code)
+            fin_task = fetch_finance_data(corp_code, year, code)
+            div_task = fetch_dividend_data(corp_code, year, code)
+            
+            emp_data, fin_data, div_data = await asyncio.gather(emp_task, fin_task, div_task)
+            combined = {**emp_data, **fin_data, **div_data}
+            
+            if r and (combined["employees"] > 0 or combined["revenue"] > 0 or combined["assets"] > 0):
+                r.setex(cache_key, 86400 * 30, json.dumps(combined)) # 한달 캐시
+                
+            raw_results.append({"label": label, "year": year, "code": code, **combined})
+            
+    # 4분기 실적(11011) 단독 분리 처리: (4Q = 1년간 누적결산 - 3분기 누적)
+    # raw_results는 순서대로 들어있으므로 year로 접근하기 편하게 mapping을 만듬
+    # 3분기(11014)의 cum_revenue (누적액)을 4분기(11011) 총액에서 뺌
+    
+    by_year_code = { f"{rv['year']}_{rv['code']}": rv for rv in raw_results }
+    
+    results = []
+    for rv in raw_results:
+        # 4분기인 경우, 3분기(11014) 누적 데이터가 조회 가능한지 확인 후 차감
+        if rv["code"] == "11011":
+            q3_key = f"{rv['year']}_11014"
+            if q3_key in by_year_code:
+                q3_data = by_year_code[q3_key]
+                if rv["revenue"] > 0 and q3_data["cum_revenue"] > 0:
+                    rv["revenue"] = rv["revenue"] - q3_data["cum_revenue"]
+                    rv["op_income"] = rv["op_income"] - q3_data["cum_op_income"]
+                    rv["net_income"] = rv["net_income"] - q3_data["cum_net_income"]
+        
+        results.append(rv)
+
     return results[::-1] # 시간순 정렬
 
 @router.get("/api/data")
