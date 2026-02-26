@@ -139,6 +139,52 @@ async def fetch_dart_data(corp_code: str, year: str, reprt_code: str):
         
     return data
 
+async def fetch_finance_data(corp_code: str, year: str, reprt_code: str):
+    """특정 연도/분기의 매출액, 영업이익, 당기순이익 조회"""
+    url = f"https://opendart.fss.or.kr/api/fnlttSinglAcnt.json?crtfc_key={DART_API_KEY}&corp_code={corp_code}&bsns_year={year}&reprt_code={reprt_code}"
+    res_data = {"revenue": 0, "op_income": 0, "net_income": 0}
+    
+    async with httpx.AsyncClient() as client:
+        try:
+            res = await client.get(url, timeout=10.0)
+            if res.status_code == 200:
+                data = res.json()
+                if data.get("status") == "000":
+                    lst = data.get("list", [])
+                    cfs_list = [item for item in lst if item.get("fs_div") == "CFS"]
+                    ofs_list = [item for item in lst if item.get("fs_div") == "OFS"]
+                    target_list = cfs_list if len(cfs_list) > 0 else ofs_list
+                    
+                    revenue = 0
+                    op_income = 0
+                    net_income = 0
+                    
+                    for item in target_list:
+                        acc_nm = item.get("account_nm", "")
+                        sj_div = item.get("sj_div", "")
+                        
+                        amount_str = item.get("thstrm_amount", "0")
+                        if not amount_str: continue
+                        amount_str = amount_str.replace(",", "")
+                        try: amount = int(amount_str)
+                        except: amount = 0
+                        
+                        if sj_div in ["IS", "CIS"]:
+                            if acc_nm in ["매출액", "수익(매출액)"]:
+                                revenue = amount
+                            elif acc_nm in ["영업이익", "영업이익(손실)"]:
+                                op_income = amount
+                            elif acc_nm in ["당기순이익", "당기순이익(손실)"]:
+                                net_income = amount
+                                
+                    res_data["revenue"] = revenue
+                    res_data["op_income"] = op_income
+                    res_data["net_income"] = net_income
+        except:
+            pass
+            
+    return res_data
+
 @router.get("/stats/{corp_code}")
 async def get_stats(corp_code: str):
     # 최근 8분기 데이터 조회
@@ -159,20 +205,34 @@ async def get_stats(corp_code: str):
     ]
     
     results = []
+    
+    # 4분기결산의 경우, 1~4분기가 모두 합친 누적 금액임.
+    # 각 분기별 독자적인 실적을 계산하기 위해 누적 금액을 사용할 수도 있지만, 
+    # DART 당해 분기 실적(thstrm_amount)은 해당 3개월치(1Q, 2Q, 3Q)를 정확히 보여줍니다.
+    # 결산(4Q)는 전체 누적만 나오기 때문에, 1~3분기의 합을 뺀 계산이 필요할 수 있으나
+    # 단순히 누적 그대로 혹은 분기 그대로를 차트에 올리기엔 단위 이슈가 있음
+    # 여기서는 "해당 보고서의 실적"을 일단 그대로 전달하고 프론트에서 표시
+    
     for year, code, label in reprts:
-        cache_key = f"dart_stats:{corp_code}:{year}:{code}"
+        cache_key = f"dart_stats_v2:{corp_code}:{year}:{code}"
         if r:
             cached = r.get(cache_key)
             if cached:
                 results.append({"label": label, **json.loads(cached)})
                 continue
         
-        data = await fetch_dart_data(corp_code, year, code)
-        if r and (data["employees"] > 0 or data["executives"] > 0):
-            r.setex(cache_key, 86400 * 30, json.dumps(data)) # 한달 캐시
+        emp_data = await fetch_dart_data(corp_code, year, code)
+        fin_data = await fetch_finance_data(corp_code, year, code)
         
-        results.append({"label": label, **data})
+        combined = {**emp_data, **fin_data}
+        
+        if r and (combined["employees"] > 0 or combined["revenue"] > 0):
+            r.setex(cache_key, 86400 * 30, json.dumps(combined)) # 한달 캐시
+        
+        results.append({"label": label, **combined})
     
+    # 4분기 단독 실적 (4Q = 결산 - 1Q, 2Q, 3Q) 추정 등 추가적인 가공이 필요할 수 있으나
+    # 일단 직관적으로 그대로 반환 (프론트 차트에서 누적일지 분기일지 유의)
     return results[::-1] # 시간순 정렬
 
 @router.get("/api/data")

@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DART 데이터 터미널 - inbestlab</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -24,7 +27,7 @@
 
         body {
             background-color: var(--bg);
-            background-image: 
+            background-image:
                 radial-gradient(ellipse at top left, rgba(47, 129, 247, 0.05), transparent 40%),
                 radial-gradient(ellipse at bottom right, rgba(188, 140, 255, 0.05), transparent 40%);
             color: var(--text-main);
@@ -49,6 +52,7 @@
             align-items: center;
             justify-content: space-between;
         }
+
         .back-link {
             color: var(--text-muted);
             text-decoration: none;
@@ -58,8 +62,17 @@
             gap: 8px;
             transition: color 0.3s;
         }
-        .back-link:hover { color: var(--title); }
-        .logo { font-size: 20px; font-weight: 700; color: var(--title); letter-spacing: 1px; }
+
+        .back-link:hover {
+            color: var(--title);
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--title);
+            letter-spacing: 1px;
+        }
 
         /* Container */
         .container {
@@ -69,141 +82,363 @@
         }
 
         /* Header */
-        header { text-align: center; margin-bottom: 50px; }
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
         h1 {
             font-size: 48px;
             color: var(--title);
             margin-bottom: 15px;
             background: linear-gradient(90deg, #58a6ff, #bc8cff);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             font-weight: 700;
             letter-spacing: -1px;
         }
-        header p { color: var(--text-muted); font-size: 18px; margin: 0; }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 18px;
+            margin: 0;
+        }
 
         /* Search Box */
-        .search-wrapper { position: relative; max-width: 600px; margin: 0 auto 50px; }
+        .search-wrapper {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto 50px;
+        }
+
         .search-icon {
-            position: absolute; left: 20px; top: 16px;
-            color: var(--text-muted); font-size: 18px;
+            position: absolute;
+            left: 20px;
+            top: 16px;
+            color: var(--text-muted);
+            font-size: 18px;
         }
+
         input[type="text"] {
-            width: 100%; padding: 16px 20px 16px 50px;
-            border-radius: 30px; border: 1px solid var(--card-border);
-            background: var(--card-bg); color: var(--title);
-            font-size: 18px; box-sizing: border-box;
-            backdrop-filter: blur(10px); transition: all 0.3s;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            width: 100%;
+            padding: 16px 20px 16px 50px;
+            border-radius: 30px;
+            border: 1px solid var(--card-border);
+            background: var(--card-bg);
+            color: var(--title);
+            font-size: 18px;
+            box-sizing: border-box;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
+
         input[type="text"]:focus {
             border-color: var(--accent);
             box-shadow: 0 0 20px var(--accent-glow);
             outline: none;
         }
+
         .suggestions {
-            position: absolute; top: calc(100% + 10px); left: 0; width: 100%;
-            background: rgba(22, 27, 34, 0.95); backdrop-filter: blur(20px);
-            border: 1px solid var(--card-border); border-radius: 15px;
-            z-index: 100; display: none; overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 0;
+            width: 100%;
+            background: rgba(22, 27, 34, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 15px;
+            z-index: 100;
+            display: none;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
+
         .suggestion-item {
-            padding: 15px 20px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05);
-            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             transition: background 0.2s;
         }
-        .suggestion-item:last-child { border-bottom: none; }
-        .suggestion-item:hover { background: rgba(255,255,255,0.05); }
-        .s-name { font-weight: 500; font-size: 16px; }
-        .s-code { color: var(--accent-purple); font-size: 13px; font-family: monospace; background: rgba(188, 140, 255, 0.1); padding: 3px 8px; border-radius: 10px; }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .s-name {
+            font-weight: 500;
+            font-size: 16px;
+        }
+
+        .s-code {
+            color: var(--accent-purple);
+            font-size: 13px;
+            font-family: monospace;
+            background: rgba(188, 140, 255, 0.1);
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
 
         /* Company Dashboard */
-        .dashboard { display: none; animation: fadeIn 0.5s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .dashboard {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
         .company-header {
-            display: flex; align-items: flex-end; gap: 15px; margin-bottom: 30px;
+            display: flex;
+            align-items: flex-end;
+            gap: 15px;
+            margin-bottom: 30px;
         }
-        .c-name { font-size: 36px; font-weight: 700; color: var(--title); margin: 0; }
-        .c-code { font-size: 18px; color: var(--accent-purple); font-family: monospace; padding-bottom: 6px; }
-        
+
+        .c-name {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--title);
+            margin: 0;
+        }
+
+        .c-code {
+            font-size: 18px;
+            color: var(--accent-purple);
+            font-family: monospace;
+            padding-bottom: 6px;
+        }
+
         /* Tabs */
         .tabs {
-            display: flex; gap: 10px; margin-bottom: 30px;
-            border-bottom: 1px solid var(--card-border); padding-bottom: 10px;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 10px;
         }
+
         .tab {
-            padding: 10px 20px; color: var(--text-muted); cursor: pointer;
-            border-radius: 8px; transition: all 0.3s; font-size: 16px; font-weight: 500;
+            padding: 10px 20px;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-size: 16px;
+            font-weight: 500;
         }
-        .tab:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
-        .tab.active { color: var(--title); background: rgba(47, 129, 247, 0.15); border: 1px solid rgba(47, 129, 247, 0.3); }
+
+        .tab:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab.active {
+            color: var(--title);
+            background: rgba(47, 129, 247, 0.15);
+            border: 1px solid rgba(47, 129, 247, 0.3);
+        }
 
         /* Overview Tab */
-        .overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .stat-card {
-            background: var(--card-bg); border: 1px solid var(--card-border);
-            border-radius: 20px; padding: 25px; backdrop-filter: blur(10px);
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
         }
-        .stat-label { font-size: 14px; color: var(--text-muted); margin-bottom: 10px; }
-        .stat-value { font-size: 36px; font-weight: 700; color: var(--title); }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--title);
+        }
+
         .chart-box {
-            background: var(--card-bg); border: 1px solid var(--card-border);
-            border-radius: 20px; padding: 25px; backdrop-filter: blur(10px);
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
         }
 
         /* Detail Data Tab (Dynamic Table) */
         .data-controls {
-            display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 25px;
-            background: var(--card-bg); border: 1px solid var(--card-border);
-            border-radius: 15px; padding: 20px; backdrop-filter: blur(10px);
-            align-items: center; justify-content: space-between;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            align-items: center;
+            justify-content: space-between;
         }
-        .control-group { display: flex; gap: 10px; align-items: center; }
+
+        .control-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
         select {
-            background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: var(--text-main);
-            padding: 10px 35px 10px 15px; border-radius: 8px; font-size: 14px; outline: none;
-            appearance: none; cursor: pointer; transition: border 0.3s;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 10px 35px 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+            transition: border 0.3s;
             background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23c9d1d9%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-            background-repeat: no-repeat; background-position: right 12px top 50%; background-size: 10px auto;
+            background-repeat: no-repeat;
+            background-position: right 12px top 50%;
+            background-size: 10px auto;
         }
-        select:focus, select:hover { border-color: var(--accent); }
-        
+
+        select:focus,
+        select:hover {
+            border-color: var(--accent);
+        }
+
         .btn-lookup {
-            background: var(--accent); color: white; border: none; padding: 10px 25px;
-            border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
             transition: all 0.3s;
         }
-        .btn-lookup:hover { background: #3b8ef7; box-shadow: 0 0 15px var(--accent-glow); transform: translateY(-1px); }
+
+        .btn-lookup:hover {
+            background: #3b8ef7;
+            box-shadow: 0 0 15px var(--accent-glow);
+            transform: translateY(-1px);
+        }
 
         .table-responsive {
-            background: var(--card-bg); border: 1px solid var(--card-border);
-            border-radius: 15px; overflow-x: auto; backdrop-filter: blur(10px);
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 15px;
+            overflow-x: auto;
+            backdrop-filter: blur(10px);
         }
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th, td { padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); white-space: nowrap; }
-        th { background: rgba(0,0,0,0.2); color: var(--title); font-weight: 500; font-size: 14px; }
-        td { font-size: 14px; color: var(--text-main); }
-        tr:last-child td { border-bottom: none; }
-        tr:hover td { background: rgba(255,255,255,0.03); }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th,
+        td {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            white-space: nowrap;
+        }
+
+        th {
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--title);
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        td {
+            font-size: 14px;
+            color: var(--text-main);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.03);
+        }
 
         /* Loader */
-        .loading { display: none; text-align: center; padding: 50px 0; }
-        .spinner {
-            width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1); border-left-color: var(--accent);
-            border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px;
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 50px 0;
         }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
         /* Error */
-        .error-msg { background: rgba(218, 54, 51, 0.1); color: #ff7b72; padding: 20px; border-radius: 10px; border: 1px solid rgba(218, 54, 51, 0.3); text-align: center; margin-top: 20px; display: none; }
+        .error-msg {
+            background: rgba(218, 54, 51, 0.1);
+            color: #ff7b72;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(218, 54, 51, 0.3);
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
     </style>
 </head>
+
 <body>
     <nav>
         <a href="/" class="back-link">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
             홈으로
         </a>
         <div class="logo">inbestlab</div>
@@ -240,18 +475,36 @@
 
             <!-- Overview 영역 -->
             <div id="tabOverview">
-                <div class="overview-grid">
+                <div class="overview-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
                     <div class="stat-card">
-                        <div class="stat-label">최근 보고서 기준 직원 수</div>
+                        <div class="stat-label">최근 분기 매출액</div>
+                        <div class="stat-value" id="revValue" style="color: #58a6ff;">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">최근 분기 영업이익</div>
+                        <div class="stat-value" id="opValue" style="color: #3fb950;">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">최근 분기 당기순이익</div>
+                        <div class="stat-value" id="netValue" style="color: #bc8cff;">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">최근 총 직원 수</div>
                         <div class="stat-value" id="empValue">-</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-label">최근 보고서 기준 임원 수</div>
-                        <div class="stat-value" id="exctvValue">-</div>
-                    </div>
                 </div>
-                <div class="chart-box">
-                    <canvas id="dartChart"></canvas>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                    <div class="chart-box">
+                        <h3 style="margin-top:0; color:var(--text-muted); font-size:16px; font-weight:500;">분기별 실적 추이
+                            (매출, 영업/순이익)</h3>
+                        <canvas id="financeChart"></canvas>
+                    </div>
+                    <div class="chart-box">
+                        <h3 style="margin-top:0; color:var(--text-muted); font-size:16px; font-weight:500;">임직원 수 추이
+                        </h3>
+                        <canvas id="dartChart"></canvas>
+                    </div>
                 </div>
             </div>
 
@@ -309,8 +562,9 @@
         const suggestions = document.getElementById('suggestions');
         const dashboard = document.getElementById('companyDashboard');
         const loading = document.getElementById('commonLoading');
-        
-        let overviewChart = null;
+
+        let empChart = null;
+        let finChart = null;
 
         // Autocomplete
         searchInput.addEventListener('input', async (e) => {
@@ -320,7 +574,7 @@
             try {
                 const res = await fetch(`/dart/search?q=${encodeURIComponent(q)}`);
                 const data = await res.json();
-                
+
                 if (data.length > 0) {
                     suggestions.innerHTML = data.map(item => `
                         <div class="suggestion-item" onclick="selectCompany('${item.corp_code}', '${item.name}', '${item.stock_code}')">
@@ -346,15 +600,15 @@
             searchInput.value = name;
             suggestions.style.display = 'none';
             dashboard.style.display = 'none';
-            
+
             document.getElementById('cName').innerText = name;
             document.getElementById('cCode').innerText = stockCode;
 
             await loadOverview();
-            
+
             dashboard.style.display = 'block';
             switchTab('overview');
-            
+
             // 첫 항목 자동 조회
             fetchDetailData();
         }
@@ -372,18 +626,43 @@
             }
         }
 
+        function formatKoreanCurrency(numStr) {
+            const num = Number(String(numStr).replace(/,/g, ''));
+            if (isNaN(num)) return '-';
+
+            if (num === 0) return '0원';
+
+            let sign = '';
+            let absNum = Math.abs(num);
+            if (num < 0) {
+                sign = '-';
+            }
+
+            if (absNum >= 1000000000000) {
+                return sign + (absNum / 1000000000000).toFixed(1) + '조';
+            } else if (absNum >= 100000000) {
+                return sign + (absNum / 100000000).toFixed(1) + '억';
+            } else if (absNum >= 10000) {
+                return sign + (absNum / 10000).toFixed(1) + '만';
+            } else {
+                return sign + absNum.toLocaleString() + '원';
+            }
+        }
+
         async function loadOverview() {
             loading.style.display = 'block';
-            document.getElementById('loadingText').innerText = '최근 임직원 동향을 수집 중입니다...';
+            document.getElementById('loadingText').innerText = '최근 임직원 동향 및 실적 데이터를 수집 중입니다...';
             try {
                 const res = await fetch(`/dart/stats/${currentCorpCode}`);
                 const data = await res.json();
-                
+
                 if (data && data.length > 0) {
                     const last = data[data.length - 1];
-                    document.getElementById('empValue').innerText = (last.employees || 0).toLocaleString();
-                    document.getElementById('exctvValue').innerText = (last.executives || 0).toLocaleString();
-                    
+                    document.getElementById('empValue').innerText = (last.employees || 0).toLocaleString() + '명';
+                    document.getElementById('revValue').innerText = formatKoreanCurrency(last.revenue || 0);
+                    document.getElementById('opValue').innerText = formatKoreanCurrency(last.op_income || 0);
+                    document.getElementById('netValue').innerText = formatKoreanCurrency(last.net_income || 0);
+
                     renderChart(data);
                 }
             } catch (err) {
@@ -393,17 +672,21 @@
         }
 
         function renderChart(data) {
-            const ctx = document.getElementById('dartChart').getContext('2d');
-            if (overviewChart) overviewChart.destroy();
+            const ctxEmp = document.getElementById('dartChart').getContext('2d');
+            const ctxFin = document.getElementById('financeChart').getContext('2d');
 
-            overviewChart = new Chart(ctx, {
+            if (empChart) empChart.destroy();
+            if (finChart) finChart.destroy();
+
+            // Employee Chart
+            empChart = new Chart(ctxEmp, {
                 type: 'line',
                 data: {
                     labels: data.map(d => d.label),
                     datasets: [
                         {
                             label: '직원 수', data: data.map(d => d.employees),
-                            borderColor: '#2f81f7', backgroundColor: 'rgba(47, 129, 247, 0.1)',
+                            borderColor: '#8b949e', backgroundColor: 'rgba(139, 148, 158, 0.1)',
                             tension: 0.4, fill: true, yAxisID: 'y', pointRadius: 4, pointHoverRadius: 6
                         },
                         {
@@ -424,21 +707,86 @@
                     }
                 }
             });
+
+            // Finance Chart
+            finChart = new Chart(ctxFin, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.label),
+                    datasets: [
+                        {
+                            label: '매출액', data: data.map(d => d.revenue),
+                            backgroundColor: 'rgba(47, 129, 247, 0.6)',
+                            borderColor: '#2f81f7',
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: '영업이익', data: data.map(d => d.op_income),
+                            type: 'line',
+                            backgroundColor: 'rgba(63, 185, 80, 0.2)',
+                            borderColor: '#3fb950',
+                            tension: 0.3, fill: true, pointRadius: 4, pointHoverRadius: 6,
+                            yAxisID: 'y1'
+                        },
+                        {
+                            label: '당기순이익', data: data.map(d => d.net_income),
+                            type: 'line',
+                            backgroundColor: 'rgba(188, 140, 255, 0.1)',
+                            borderColor: '#bc8cff',
+                            borderDash: [5, 5],
+                            tension: 0.3, fill: false, pointRadius: 4, pointHoverRadius: 6,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { labels: { color: '#c9d1d9', font: { family: 'Outfit' } } } },
+                    scales: {
+                        y: {
+                            type: 'linear', position: 'left',
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: {
+                                color: '#c9d1d9',
+                                callback: function (value) {
+                                    if (value === 0) return 0;
+                                    return (value / 1000000000000) + '조';
+                                }
+                            }
+                        },
+                        y1: {
+                            type: 'linear', position: 'right',
+                            grid: { drawOnChartArea: false },
+                            ticks: {
+                                color: '#c9d1d9',
+                                callback: function (value) {
+                                    if (value === 0) return 0;
+                                    return (value / 100000000000) + '천억';
+                                }
+                            }
+                        },
+                        x: { grid: { display: false }, ticks: { color: '#c9d1d9' } }
+                    }
+                }
+            });
         }
 
         async function fetchDetailData() {
             if (!currentCorpCode) return;
-            
+
             const year = document.getElementById('bsnsYear').value;
             const reprtCode = document.getElementById('reprtCode').value;
             const apiName = document.getElementById('apiName').value;
 
             const errBlock = document.getElementById('detailError');
             const tbContainer = document.getElementById('dataTableContainer');
-            
+
             errBlock.style.display = 'none';
             tbContainer.style.display = 'none';
-            
+
             loading.style.display = 'block';
             document.getElementById('loadingText').innerText = 'DART API 에서 데이터를 가져오는 중...';
 
@@ -477,7 +825,7 @@
             const keysToSkip = ['rcept_no', 'corp_cls', 'corp_code', 'corp_name']; // 공통 제거
             const head = document.getElementById('dataHead');
             const body = document.getElementById('dataBody');
-            
+
             head.innerHTML = '';
             body.innerHTML = '';
 
@@ -506,4 +854,5 @@
         }
     </script>
 </body>
+
 </html>
