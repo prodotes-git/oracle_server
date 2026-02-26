@@ -475,17 +475,21 @@
 
             <!-- Overview 영역 -->
             <div id="tabOverview">
-                <div class="overview-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                <!-- 1. 주요 손익 / 임직원 -->
+                <h3 style="margin-top:0; color:var(--text-muted); font-size:15px; margin-bottom: 10px;">주요 손익 및 임직원 (최근
+                    주요 보고서 기준)</h3>
+                <div class="overview-grid"
+                    style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 25px;">
                     <div class="stat-card">
-                        <div class="stat-label">최근 분기 매출액</div>
+                        <div class="stat-label">최근 매출액</div>
                         <div class="stat-value" id="revValue" style="color: #58a6ff;">-</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-label">최근 분기 영업이익</div>
+                        <div class="stat-label">최근 영업이익</div>
                         <div class="stat-value" id="opValue" style="color: #3fb950;">-</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-label">최근 분기 당기순이익</div>
+                        <div class="stat-label">최근 당기순이익</div>
                         <div class="stat-value" id="netValue" style="color: #bc8cff;">-</div>
                     </div>
                     <div class="stat-card">
@@ -494,11 +498,49 @@
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                <!-- 2. 재무상태 및 배당 -->
+                <h3 style="margin-top:0; color:var(--text-muted); font-size:15px; margin-bottom: 10px;">재무상태 및 배당 (최근 결산
+                    보고서 기준)</h3>
+                <div class="overview-grid"
+                    style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 30px;">
+                    <div class="stat-card">
+                        <div class="stat-label">자산총계</div>
+                        <div class="stat-value" id="assetValue">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">부채총계</div>
+                        <div class="stat-value" id="liabValue">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">자본총계</div>
+                        <div class="stat-value" id="eqValue">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">배당수익률</div>
+                        <div class="stat-value" id="divYieldValue" style="color: #e3b341;">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">현금배당성향</div>
+                        <div class="stat-value" id="divPayoutValue" style="color: #e3b341;">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">주당배당금</div>
+                        <div class="stat-value" id="divPerShareValue" style="color: #e3b341;">-</div>
+                    </div>
+                </div>
+
+                <!-- 3. 차트 그룹 -->
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 30px;">
                     <div class="chart-box">
                         <h3 style="margin-top:0; color:var(--text-muted); font-size:16px; font-weight:500;">분기별 실적 추이
                             (매출, 영업/순이익)</h3>
                         <canvas id="financeChart"></canvas>
+                    </div>
+                    <div class="chart-box">
+                        <h3 style="margin-top:0; color:var(--text-muted); font-size:16px; font-weight:500;">재무상태 추이
+                            (자산/부채/자본)</h3>
+                        <canvas id="balanceChart"></canvas>
                     </div>
                     <div class="chart-box">
                         <h3 style="margin-top:0; color:var(--text-muted); font-size:16px; font-weight:500;">임직원 수 추이
@@ -565,6 +607,7 @@
 
         let empChart = null;
         let finChart = null;
+        let balChart = null;
 
         // Autocomplete
         searchInput.addEventListener('input', async (e) => {
@@ -651,17 +694,30 @@
 
         async function loadOverview() {
             loading.style.display = 'block';
-            document.getElementById('loadingText').innerText = '최근 임직원 동향 및 실적 데이터를 수집 중입니다...';
+            document.getElementById('loadingText').innerText = '최근 임직원 동향 및 재무, 배당 실적을 수집 중입니다...';
             try {
                 const res = await fetch(`/dart/stats/${currentCorpCode}`);
                 const data = await res.json();
 
                 if (data && data.length > 0) {
-                    const last = data[data.length - 1];
+                    const last = data[data.length - 1]; // 가장 최신 데이터
+
                     document.getElementById('empValue').innerText = (last.employees || 0).toLocaleString() + '명';
                     document.getElementById('revValue').innerText = formatKoreanCurrency(last.revenue || 0);
                     document.getElementById('opValue').innerText = formatKoreanCurrency(last.op_income || 0);
                     document.getElementById('netValue').innerText = formatKoreanCurrency(last.net_income || 0);
+
+                    document.getElementById('assetValue').innerText = formatKoreanCurrency(last.assets || 0);
+                    document.getElementById('liabValue').innerText = formatKoreanCurrency(last.liabilities || 0);
+                    document.getElementById('eqValue').innerText = formatKoreanCurrency(last.equity || 0);
+
+                    // 배당 지표 갱신 (보통 4Q/결산 등에서만 값이 나올 수 있음, 가장 최근 보고서에 값이 없다면 이전 1~2개에서 찾 기)
+                    let lastDiv = [...data].reverse().find(d => d.dividend_yield > 0 || d.dividend_per_share > 0);
+                    if (!lastDiv) lastDiv = last;
+
+                    document.getElementById('divYieldValue').innerText = lastDiv.dividend_yield > 0 ? lastDiv.dividend_yield + '%' : '-';
+                    document.getElementById('divPayoutValue').innerText = lastDiv.dividend_payout > 0 ? lastDiv.dividend_payout + '%' : '-';
+                    document.getElementById('divPerShareValue').innerText = lastDiv.dividend_per_share > 0 ? lastDiv.dividend_per_share.toLocaleString() + '원' : '-';
 
                     renderChart(data);
                 }
@@ -674,9 +730,40 @@
         function renderChart(data) {
             const ctxEmp = document.getElementById('dartChart').getContext('2d');
             const ctxFin = document.getElementById('financeChart').getContext('2d');
+            const ctxBal = document.getElementById('balanceChart').getContext('2d');
 
             if (empChart) empChart.destroy();
             if (finChart) finChart.destroy();
+            if (balChart) balChart.destroy();
+
+            // Balance Chart
+            balChart = new Chart(ctxBal, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.label),
+                    datasets: [
+                        { label: '부채총계', data: data.map(d => d.liabilities), backgroundColor: 'rgba(255, 123, 114, 0.6)', stack: 'Stack 0' },
+                        { label: '자본총계', data: data.map(d => d.equity), backgroundColor: 'rgba(63, 185, 80, 0.6)', stack: 'Stack 0' },
+                        { label: '자산총계 (선)', data: data.map(d => d.assets), type: 'line', borderColor: '#58a6ff', backgroundColor: 'transparent', pointRadius: 4, tension: 0.3 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { labels: { color: '#c9d1d9', font: { family: 'Outfit' } } } },
+                    scales: {
+                        y: {
+                            type: 'linear', position: 'left',
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: {
+                                color: '#c9d1d9',
+                                callback: function (value) { if (value === 0) return 0; return (value / 1000000000000) + '조'; }
+                            }
+                        },
+                        x: { grid: { display: false }, ticks: { color: '#c9d1d9' } }
+                    }
+                }
+            });
 
             // Employee Chart
             empChart = new Chart(ctxEmp, {

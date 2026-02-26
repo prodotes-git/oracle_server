@@ -139,10 +139,40 @@ async def fetch_dart_data(corp_code: str, year: str, reprt_code: str):
         
     return data
 
+async def fetch_dividend_data(corp_code: str, year: str, reprt_code: str):
+    """특정 연도/분기의 배당 지표 조회"""
+    url = f"https://opendart.fss.or.kr/api/alotMatter.json?crtfc_key={DART_API_KEY}&corp_code={corp_code}&bsns_year={year}&reprt_code={reprt_code}"
+    res_data = {"dividend_yield": 0.0, "dividend_payout": 0.0, "dividend_per_share": 0}
+    
+    async with httpx.AsyncClient() as client:
+        try:
+            res = await client.get(url, timeout=10.0)
+            if res.status_code == 200:
+                data = res.json()
+                if data.get("status") == "000":
+                    for item in data.get("list", []):
+                        se = item.get("se", "")
+                        thstrm = str(item.get("thstrm", "")).replace(",", "")
+                        stock_knd = item.get("stock_knd", "")
+                        
+                        try: val = float(thstrm) if thstrm != "-" else 0.0
+                        except: val = 0.0
+                        
+                        if "현금배당수익률" in se and "보통주" in stock_knd:
+                            res_data["dividend_yield"] = val
+                        elif "현금배당성향" in se:
+                            res_data["dividend_payout"] = val
+                        elif "현금배당금" in se and "보통주" in stock_knd:
+                            res_data["dividend_per_share"] = int(val)
+        except:
+            pass
+            
+    return res_data
+
 async def fetch_finance_data(corp_code: str, year: str, reprt_code: str):
-    """특정 연도/분기의 매출액, 영업이익, 당기순이익 조회"""
+    """특정 연도/분기의 자산, 부채, 자본 및 매출, 영업이익, 당기순이익 조회"""
     url = f"https://opendart.fss.or.kr/api/fnlttSinglAcnt.json?crtfc_key={DART_API_KEY}&corp_code={corp_code}&bsns_year={year}&reprt_code={reprt_code}"
-    res_data = {"revenue": 0, "op_income": 0, "net_income": 0}
+    res_data = {"revenue": 0, "op_income": 0, "net_income": 0, "assets": 0, "liabilities": 0, "equity": 0}
     
     async with httpx.AsyncClient() as client:
         try:
@@ -155,9 +185,8 @@ async def fetch_finance_data(corp_code: str, year: str, reprt_code: str):
                     ofs_list = [item for item in lst if item.get("fs_div") == "OFS"]
                     target_list = cfs_list if len(cfs_list) > 0 else ofs_list
                     
-                    revenue = 0
-                    op_income = 0
-                    net_income = 0
+                    revenue, op_income, net_income = 0, 0, 0
+                    assets, liabilities, equity = 0, 0, 0
                     
                     for item in target_list:
                         acc_nm = item.get("account_nm", "")
@@ -169,6 +198,13 @@ async def fetch_finance_data(corp_code: str, year: str, reprt_code: str):
                         try: amount = int(amount_str)
                         except: amount = 0
                         
+                        # 재무상태표 항목
+                        if sj_div == "BS":
+                            if "자산총계" in acc_nm: assets = amount
+                            elif "부채총계" in acc_nm: liabilities = amount
+                            elif "자본총계" in acc_nm: equity = amount
+                        
+                        # 손익계산서 항목
                         if sj_div in ["IS", "CIS"]:
                             if acc_nm in ["매출액", "수익(매출액)"]:
                                 revenue = amount
@@ -180,6 +216,9 @@ async def fetch_finance_data(corp_code: str, year: str, reprt_code: str):
                     res_data["revenue"] = revenue
                     res_data["op_income"] = op_income
                     res_data["net_income"] = net_income
+                    res_data["assets"] = assets
+                    res_data["liabilities"] = liabilities
+                    res_data["equity"] = equity
         except:
             pass
             
@@ -213,20 +252,26 @@ async def get_stats(corp_code: str):
     # 단순히 누적 그대로 혹은 분기 그대로를 차트에 올리기엔 단위 이슈가 있음
     # 여기서는 "해당 보고서의 실적"을 일단 그대로 전달하고 프론트에서 표시
     
+    import asyncio
+    
     for year, code, label in reprts:
-        cache_key = f"dart_stats_v2:{corp_code}:{year}:{code}"
+        cache_key = f"dart_stats_v3:{corp_code}:{year}:{code}"
         if r:
             cached = r.get(cache_key)
             if cached:
                 results.append({"label": label, **json.loads(cached)})
                 continue
         
-        emp_data = await fetch_dart_data(corp_code, year, code)
-        fin_data = await fetch_finance_data(corp_code, year, code)
+        # 비동기 병렬 호출 최적화
+        emp_task = fetch_dart_data(corp_code, year, code)
+        fin_task = fetch_finance_data(corp_code, year, code)
+        div_task = fetch_dividend_data(corp_code, year, code)
         
-        combined = {**emp_data, **fin_data}
+        emp_data, fin_data, div_data = await asyncio.gather(emp_task, fin_task, div_task)
         
-        if r and (combined["employees"] > 0 or combined["revenue"] > 0):
+        combined = {**emp_data, **fin_data, **div_data}
+        
+        if r and (combined["employees"] > 0 or combined["revenue"] > 0 or combined["assets"] > 0):
             r.setex(cache_key, 86400 * 30, json.dumps(combined)) # 한달 캐시
         
         results.append({"label": label, **combined})
