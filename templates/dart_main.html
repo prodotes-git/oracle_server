@@ -810,12 +810,16 @@
 
         function formatValue(key, val) {
             if (val === null || val === undefined) return '-';
-            // 숫자로 변환 가능하고 엄청 긴 문자열이 아니면 콤마 포맷 시도
-            const numVal = Number(val.replace(/,/g, ''));
-            if (!isNaN(numVal) && String(val).trim() !== '' && key.includes('amount') || key.includes('co') || key.includes('qy') || key.includes('sm')) {
-                // If it looks like a number, but wait, some are codes. Just format large numeric values.
-                if (!isNaN(parseFloat(val)) && isFinite(String(val).replace(/,/g, ''))) {
-                    return Number(String(val).replace(/,/g, '')).toLocaleString();
+            const strVal = String(val);
+            const cleanStr = strVal.replace(/,/g, '');
+            const numVal = Number(cleanStr);
+
+            // 코드성 데이터 제외
+            if (key.includes('code') || key.includes('no')) return val;
+
+            if (!isNaN(numVal) && strVal.trim() !== '' && (key.includes('amount') || key.includes('co') || key.includes('qy') || key.includes('sm'))) {
+                if (isFinite(numVal)) {
+                    return numVal.toLocaleString();
                 }
             }
             return val;
