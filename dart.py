@@ -327,6 +327,245 @@ async def get_raw_data(corp_code: str, year: str, reprt_code: str, api_name: str
         return {"status": "error", "message": str(e)}
     return {"status": "error", "message": "API 요청 중 오류가 발생했습니다."}
 
+# ─── 수주 잔고 추이 ─────────────────────────────────────────────
+from bs4 import BeautifulSoup
+import re
+
+async def find_rcept_no(client, corp_code: str, year: str, reprt_code: str):
+    """list.json API로 정기보고서의 rcept_no 조회"""
+    # reprt_code → pblntf_detail_ty 매핑
+    detail_map = {
+        "11011": "A001",  # 사업보고서
+        "11012": "A002",  # 반기보고서
+        "11013": "A003",  # 1분기보고서
+        "11014": "A003",  # 3분기보고서
+    }
+    pblntf_detail_ty = detail_map.get(reprt_code, "A001")
+    
+    # 해당 연도의 보고서 검색
+    bgn_de = f"{year}0101"
+    end_de = f"{int(year)+1}1231"
+    
+    url = (f"https://opendart.fss.or.kr/api/list.json?"
+           f"crtfc_key={DART_API_KEY}&corp_code={corp_code}"
+           f"&bgn_de={bgn_de}&end_de={end_de}"
+           f"&pblntf_ty=A&pblntf_detail_ty={pblntf_detail_ty}"
+           f"&page_count=30")
+    
+    try:
+        res = await client.get(url, timeout=15.0)
+        if res.status_code == 200:
+            data = res.json()
+            if data.get("status") == "000":
+                lst = data.get("list", [])
+                # reprt_code에 맞는 보고서 찾기
+                reprt_nm_map = {
+                    "11011": "사업보고서",
+                    "11012": "반기보고서",
+                    "11013": "분기보고서",  # 1Q
+                    "11014": "분기보고서",  # 3Q
+                }
+                target_nm = reprt_nm_map.get(reprt_code, "사업보고서")
+                
+                for item in lst:
+                    report_nm = item.get("report_nm", "")
+                    # 1Q/3Q 구분: 1분기 → report_nm에 "1분기" 확인, 3분기 → "3분기"
+                    if reprt_code == "11013" and "1분기" not in report_nm:
+                        continue
+                    if reprt_code == "11014" and "3분기" not in report_nm:
+                        continue
+                    if target_nm in report_nm or report_nm.startswith("["):
+                        return item.get("rcept_no")
+                
+                # 정확한 매칭 실패 시 첫 결과 반환
+                if lst:
+                    return lst[0].get("rcept_no")
+    except Exception as e:
+        print(f"find_rcept_no error: {e}")
+    return None
+
+async def download_and_parse_order_backlog(client, rcept_no: str):
+    """보고서 원문 ZIP 다운로드 후 수주상황 테이블 파싱"""
+    url = f"https://opendart.fss.or.kr/api/document.xml?crtfc_key={DART_API_KEY}&rcept_no={rcept_no}"
+    
+    try:
+        res = await client.get(url, timeout=30.0)
+        if res.status_code != 200:
+            return []
+        
+        # ZIP 파일 처리
+        with zipfile.ZipFile(io.BytesIO(res.content)) as z:
+            for fname in z.namelist():
+                if not fname.endswith(('.xml', '.html', '.htm')):
+                    continue
+                
+                with z.open(fname) as f:
+                    content = f.read()
+                    # 인코딩 감지
+                    try:
+                        text = content.decode('utf-8')
+                    except:
+                        try:
+                            text = content.decode('euc-kr')
+                        except:
+                            text = content.decode('cp949', errors='ignore')
+                    
+                    # '수주' 키워드가 포함된 파일만 처리
+                    if '수주' not in text:
+                        continue
+                    
+                    tables = parse_order_tables(text)
+                    if tables:
+                        return tables
+    except Exception as e:
+        print(f"download_and_parse error: {e}")
+    return []
+
+def parse_order_tables(html_text: str):
+    """HTML에서 수주상황 관련 테이블 파싱"""
+    soup = BeautifulSoup(html_text, 'lxml')
+    results = []
+    
+    # 1) "수주상황" 또는 "수주 현황" 키워드 근처의 테이블 찾기
+    order_keywords = ['수주상황', '수주현황', '수주 상황', '수주 현황', '매출 및 수주', '매출및수주']
+    
+    target_tables = []
+    
+    # 방법 1: 텍스트에서 키워드를 포함하는 요소 찾기
+    for keyword in order_keywords:
+        # 헤딩, span, p, td 등에서 키워드 검색
+        for tag in soup.find_all(string=re.compile(keyword)):
+            parent = tag.parent
+            # 해당 요소 이후의 table 찾기
+            for sibling in parent.find_all_next('table'):
+                if sibling not in target_tables:
+                    target_tables.append(sibling)
+                if len(target_tables) >= 5:
+                    break
+            if target_tables:
+                break
+        if target_tables:
+            break
+    
+    if not target_tables:
+        return []
+    
+    # 각 테이블에서 데이터 추출
+    for table in target_tables:
+        rows = table.find_all('tr')
+        if len(rows) < 2:
+            continue
+        
+        # 헤더 행 찾기
+        header_row = None
+        header_idx = 0
+        for i, row in enumerate(rows):
+            cells = row.find_all(['th', 'td'])
+            cell_texts = [c.get_text(strip=True) for c in cells]
+            # 수주잔고 관련 키워드가 헤더에 있는지 확인
+            header_text = ' '.join(cell_texts)
+            if any(kw in header_text for kw in ['수주잔고', '잔고', '수주총액', '품목', '제품', '수주일자', '납기']):
+                header_row = cell_texts
+                header_idx = i
+                break
+        
+        if not header_row:
+            # 첫 행을 헤더로 사용
+            cells = rows[0].find_all(['th', 'td'])
+            header_row = [c.get_text(strip=True) for c in cells]
+            header_idx = 0
+        
+        if len(header_row) < 2:
+            continue
+        
+        # 데이터 행 추출
+        for row in rows[header_idx + 1:]:
+            cells = row.find_all(['td', 'th'])
+            cell_texts = [c.get_text(strip=True) for c in cells]
+            
+            if len(cell_texts) < 2:
+                continue
+            
+            # 빈 행 건너뛰기
+            if all(not t or t == '-' for t in cell_texts):
+                continue
+            
+            # 헤더에 맞춰 dict 생성
+            row_data = {}
+            for j, header in enumerate(header_row):
+                if j < len(cell_texts):
+                    row_data[header] = cell_texts[j]
+            
+            if row_data:
+                results.append(row_data)
+        
+        # 유의미한 데이터를 찾았으면 첫 번째 테이블만 사용
+        if results:
+            break
+    
+    return results
+
+@router.get("/order-backlog/{corp_code}")
+async def get_order_backlog(corp_code: str):
+    """수주 잔고 추이 조회 - 여러 보고서에서 수주상황 테이블 파싱"""
+    import asyncio
+    
+    # 조회할 보고서 목록 (최근 3년 × 사업/반기/분기 보고서)
+    reprts = [
+        ("2025", "11013", "2025 1Q"),
+        ("2024", "11011", "2024년 사업보고서"),
+        ("2024", "11014", "2024 3Q"),
+        ("2024", "11012", "2024 2Q"),
+        ("2024", "11013", "2024 1Q"),
+        ("2023", "11011", "2023년 사업보고서"),
+        ("2023", "11014", "2023 3Q"),
+        ("2023", "11012", "2023 2Q"),
+        ("2023", "11013", "2023 1Q"),
+        ("2022", "11011", "2022년 사업보고서"),
+    ]
+    
+    all_results = []
+    
+    async with httpx.AsyncClient() as client:
+        for year, code, label in reprts:
+            cache_key = f"dart_order_backlog_v2:{corp_code}:{year}:{code}"
+            cached = r.get(cache_key) if r else None
+            
+            if cached:
+                cached_data = json.loads(cached)
+                if cached_data:  # 빈 리스트가 아닌 경우만
+                    all_results.append({
+                        "label": label,
+                        "year": year,
+                        "code": code,
+                        "data": cached_data
+                    })
+                continue
+            
+            # 1. rcept_no 조회
+            rcept_no = await find_rcept_no(client, corp_code, year, code)
+            if not rcept_no:
+                if r:
+                    r.setex(cache_key, 86400 * 7, json.dumps([]))  # 없는 경우 7일 캐시
+                continue
+            
+            # 2. 보고서 다운로드 및 파싱
+            tables = await download_and_parse_order_backlog(client, rcept_no)
+            
+            if r:
+                cache_ttl = 86400 * 30 if tables else 86400 * 7
+                r.setex(cache_key, cache_ttl, json.dumps(tables))
+            
+            if tables:
+                all_results.append({
+                    "label": label,
+                    "year": year,
+                    "code": code,
+                    "data": tables
+                })
+    
+    return all_results[::-1]  # 시간순 정렬
+
 @router.get("/", response_class=HTMLResponse)
 async def dart_ui():
     path = os.path.join(os.getcwd(), "templates", "dart_main.html")
