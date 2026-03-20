@@ -708,7 +708,9 @@
                 const data = await res.json();
 
                 if (data && data.length > 0) {
-                    const last = data[data.length - 1]; // 가장 최신 데이터
+                    // 가장 최신 유효 데이터 찾기 (매출이나 자산이 있는 가장 최근 보고서)
+                    let last = [...data].reverse().find(d => d.revenue > 0 || d.assets > 0);
+                    if (!last) last = data[data.length - 1]; // fallback
 
                     document.getElementById('empValue').innerText = (last.employees || 0).toLocaleString() + '명';
                     document.getElementById('revValue').innerText = formatKoreanCurrency(last.revenue || 0);
@@ -718,6 +720,15 @@
                     document.getElementById('assetValue').innerText = formatKoreanCurrency(last.assets || 0);
                     document.getElementById('liabValue').innerText = formatKoreanCurrency(last.liabilities || 0);
                     document.getElementById('eqValue').innerText = formatKoreanCurrency(last.equity || 0);
+
+                    // Overview 제목들에 기준 보고서 라벨 표시
+                    document.getElementById('revValue').previousElementSibling.innerText = `최근 매출액 (${last.label})`;
+                    document.getElementById('opValue').previousElementSibling.innerText = `최근 영업이익 (${last.label})`;
+                    document.getElementById('netValue').previousElementSibling.innerText = `최근 당기순이익 (${last.label})`;
+                    document.getElementById('empValue').previousElementSibling.innerText = `최근 총 직원 수 (${last.label})`;
+                    document.getElementById('assetValue').previousElementSibling.innerText = `자산총계 (${last.label})`;
+                    document.getElementById('liabValue').previousElementSibling.innerText = `부채총계 (${last.label})`;
+                    document.getElementById('eqValue').previousElementSibling.innerText = `자본총계 (${last.label})`;
 
                     // 배당 지표 갱신 (보통 4Q/결산 등에서만 값이 나올 수 있음, 가장 최근 보고서에 값이 없다면 이전 1~2개에서 찾 기)
                     let lastDiv = [...data].reverse().find(d => d.dividend_yield > 0 || d.dividend_per_share > 0);
