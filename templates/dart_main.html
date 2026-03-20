@@ -549,7 +549,7 @@
                     </div>
                     <div class="chart-box" id="orderBacklogChartBox" style="display:none;">
                         <h3 style="margin-top:0; color:var(--text-muted); font-size:16px; font-weight:500;">📦 수주 잔고 추이
-                            (계약자산/부채)
+                            (정기보고서 원문 기준)
                         </h3>
                         <canvas id="orderBacklogChart"></canvas>
                     </div>
@@ -960,9 +960,9 @@
             
             // 수주잔고 데이터가 있는지 확인
             const hasData = data.some(d => 
-                (d.contract_asset && d.contract_asset !== 0) || 
-                (d.contract_liability && d.contract_liability !== 0) || 
-                (d.order_backlog && d.order_backlog !== 0)
+                (d.order_backlog && d.order_backlog > 0) || 
+                (d.order_total && d.order_total > 0) || 
+                (d.order_delivered && d.order_delivered > 0)
             );
             
             if (!hasData) {
@@ -976,12 +976,12 @@
             
             const datasets = [];
             
-            // 계약자산
-            const contractAssets = data.map(d => d.contract_asset || 0);
-            if (contractAssets.some(v => v !== 0)) {
+            // 수주잔고 (Bar)
+            const orderBacklogs = data.map(d => d.order_backlog || 0);
+            if (orderBacklogs.some(v => v !== 0)) {
                 datasets.push({
-                    label: '계약자산 (수주잔고)',
-                    data: contractAssets,
+                    label: '수주잔고',
+                    data: orderBacklogs,
                     backgroundColor: 'rgba(47, 129, 247, 0.6)',
                     borderColor: '#2f81f7',
                     borderWidth: 1,
@@ -990,33 +990,37 @@
                 });
             }
             
-            // 계약부채
-            const contractLiabs = data.map(d => d.contract_liability || 0);
-            if (contractLiabs.some(v => v !== 0)) {
+            // 수주총액 (Line)
+            const orderTotals = data.map(d => d.order_total || 0);
+            if (orderTotals.some(v => v !== 0)) {
                 datasets.push({
-                    label: '계약부채 (선수금)',
-                    data: contractLiabs,
-                    backgroundColor: 'rgba(227, 179, 65, 0.6)',
-                    borderColor: '#e3b341',
-                    borderWidth: 1,
-                    borderRadius: 4,
-                    yAxisID: 'y'
-                });
-            }
-            
-            // 수주잔고 직접 키워드
-            const orderBacklogs = data.map(d => d.order_backlog || 0);
-            if (orderBacklogs.some(v => v !== 0)) {
-                datasets.push({
-                    label: '수주잔고',
-                    data: orderBacklogs,
+                    label: '수주총액',
+                    data: orderTotals,
                     type: 'line',
                     borderColor: '#bc8cff',
                     backgroundColor: 'rgba(188,140,255,0.1)',
                     tension: 0.3,
-                    fill: true,
+                    fill: false,
                     pointRadius: 5,
                     pointHoverRadius: 7,
+                    yAxisID: 'y'
+                });
+            }
+            
+            // 기납품액 (Line)
+            const orderDelivereds = data.map(d => d.order_delivered || 0);
+            if (orderDelivereds.some(v => v !== 0)) {
+                datasets.push({
+                    label: '기납품액',
+                    data: orderDelivereds,
+                    type: 'line',
+                    borderColor: '#3fb950',
+                    backgroundColor: 'rgba(63,185,80,0.1)',
+                    tension: 0.3,
+                    borderDash: [5, 5],
+                    fill: false,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
                     yAxisID: 'y'
                 });
             }
