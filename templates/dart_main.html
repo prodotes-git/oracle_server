@@ -469,9 +469,8 @@
             </div>
 
             <div class="tabs">
-                <div class="tab active" onclick="switchTab('overview')">Overview (임직원 추이)</div>
+                <div class="tab active" onclick="switchTab('overview')">Overview</div>
                 <div class="tab" onclick="switchTab('detail')">공시 데이터 상세 조회</div>
-                <div class="tab" onclick="switchTab('orderBacklog')">📦 수주 잔고 추이</div>
             </div>
 
             <!-- Overview 영역 -->
@@ -548,6 +547,12 @@
                         </h3>
                         <canvas id="dartChart"></canvas>
                     </div>
+                    <div class="chart-box" id="orderBacklogChartBox" style="display:none;">
+                        <h3 style="margin-top:0; color:var(--text-muted); font-size:16px; font-weight:500;">📦 수주 잔고 추이
+                            (계약자산/부채)
+                        </h3>
+                        <canvas id="orderBacklogChart"></canvas>
+                    </div>
                 </div>
             </div>
 
@@ -587,33 +592,6 @@
                     </table>
                 </div>
             </div>
-
-            <!-- 수주 잔고 추이 영역 -->
-            <div id="tabOrderBacklog" style="display: none;">
-                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
-                    <h3 style="margin:0; color:var(--text-muted); font-size:16px; font-weight:500;">📦 수주 잔고 추이 (최근 3년 정기보고서 기준)</h3>
-                    <button class="btn-lookup" onclick="loadOrderBacklog()" style="font-size:13px; padding:8px 18px;">🔄 새로고침</button>
-                </div>
-
-                <div id="orderBacklogLoading" class="loading" style="display:none;">
-                    <div class="spinner"></div>
-                    <p>DART 보고서 원문에서 수주상황 데이터를 파싱 중입니다...<br><span style="font-size:13px; color:var(--text-muted);">보고서 원문을 다운로드하므로 다소 시간이 걸릴 수 있습니다.</span></p>
-                </div>
-
-                <div id="orderBacklogError" class="error-msg" style="display:none;"></div>
-
-                <!-- 수주잔고 요약 카드 -->
-                <div id="obSummaryCards" class="overview-grid" style="display:none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom:25px;"></div>
-
-                <!-- 수주잔고 차트 -->
-                <div id="obChartContainer" class="chart-box" style="display:none; margin-bottom:25px;">
-                    <h3 style="margin-top:0; color:var(--text-muted); font-size:16px; font-weight:500;">보고서별 수주 잔고 추이</h3>
-                    <canvas id="orderBacklogChart"></canvas>
-                </div>
-
-                <!-- 보고서별 상세 테이블 -->
-                <div id="obTablesContainer"></div>
-            </div>
         </div>
     </div>
 
@@ -628,7 +606,6 @@
         }
 
         let currentCorpCode = '';
-        let orderBacklogLoaded = false;
         const searchInput = document.getElementById('searchInput');
         const suggestions = document.getElementById('suggestions');
         const dashboard = document.getElementById('companyDashboard');
@@ -637,6 +614,7 @@
         let empChart = null;
         let finChart = null;
         let balChart = null;
+        let obChart = null;
 
         // Autocomplete
         searchInput.addEventListener('input', async (e) => {
@@ -669,7 +647,6 @@
 
         async function selectCompany(corpCode, name, stockCode) {
             currentCorpCode = corpCode;
-            orderBacklogLoaded = false;
             searchInput.value = name;
             suggestions.style.display = 'none';
             dashboard.style.display = 'none';
@@ -690,7 +667,6 @@
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.getElementById('tabOverview').style.display = 'none';
             document.getElementById('tabDetail').style.display = 'none';
-            document.getElementById('tabOrderBacklog').style.display = 'none';
 
             if (tabId === 'overview') {
                 document.querySelectorAll('.tab')[0].classList.add('active');
@@ -698,13 +674,6 @@
             } else if (tabId === 'detail') {
                 document.querySelectorAll('.tab')[1].classList.add('active');
                 document.getElementById('tabDetail').style.display = 'block';
-            } else if (tabId === 'orderBacklog') {
-                document.querySelectorAll('.tab')[2].classList.add('active');
-                document.getElementById('tabOrderBacklog').style.display = 'block';
-                // 첫 로딩 시 자동 조회
-                if (!orderBacklogLoaded) {
-                    loadOrderBacklog();
-                }
             }
         }
 
@@ -759,6 +728,7 @@
                     document.getElementById('divPerShareValue').innerText = lastDiv.dividend_per_share > 0 ? lastDiv.dividend_per_share.toLocaleString() + '원' : '-';
 
                     renderChart(data);
+                    renderOrderBacklogChart(data);
                 }
             } catch (err) {
                 console.error(err);
@@ -774,6 +744,7 @@
             if (empChart) empChart.destroy();
             if (finChart) finChart.destroy();
             if (balChart) balChart.destroy();
+            if (obChart) obChart.destroy();
 
             // Balance Chart
             balChart = new Chart(ctxBal, {
@@ -983,254 +954,111 @@
             });
         }
 
-        // ─── 수주 잔고 추이 ──────────────────────────────────
-        let obChart = null;
-
-        async function loadOrderBacklog() {
-            if (!currentCorpCode) return;
-
-            const obLoading = document.getElementById('orderBacklogLoading');
-            const obError = document.getElementById('orderBacklogError');
-            const obSummary = document.getElementById('obSummaryCards');
-            const obChartCont = document.getElementById('obChartContainer');
-            const obTables = document.getElementById('obTablesContainer');
-
-            obLoading.style.display = 'block';
-            obError.style.display = 'none';
-            obSummary.style.display = 'none';
-            obChartCont.style.display = 'none';
-            obTables.innerHTML = '';
-
-            try {
-                const res = await fetch(`/dart/order-backlog/${currentCorpCode}`);
-                const data = await res.json();
-
-                if (!data || data.length === 0) {
-                    obError.innerHTML = '📭 해당 기업의 수주상황 데이터를 찾을 수 없습니다.<br><span style="font-size:13px;">수주 관련 공시가 포함되지 않은 기업이거나, 보고서에 수주상황 테이블이 없을 수 있습니다.</span>';
-                    obError.style.display = 'block';
-                    obLoading.style.display = 'none';
-                    orderBacklogLoaded = true;
-                    return;
-                }
-
-                orderBacklogLoaded = true;
-                renderOrderBacklog(data);
-            } catch (err) {
-                console.error(err);
-                obError.innerText = '서버 통신 오류가 발생했습니다.';
-                obError.style.display = 'block';
+        // ─── 수주 잔고 추이 차트 (Overview 탭 내) ─────────────────
+        function renderOrderBacklogChart(data) {
+            const chartBox = document.getElementById('orderBacklogChartBox');
+            
+            // 수주잔고 데이터가 있는지 확인
+            const hasData = data.some(d => 
+                (d.contract_asset && d.contract_asset !== 0) || 
+                (d.contract_liability && d.contract_liability !== 0) || 
+                (d.order_backlog && d.order_backlog !== 0)
+            );
+            
+            if (!hasData) {
+                chartBox.style.display = 'none';
+                return;
             }
-            obLoading.style.display = 'none';
-        }
-
-        function parseAmountStr(str) {
-            if (!str) return 0;
-            const cleaned = String(str).replace(/[^\d.-]/g, '');
-            const num = parseFloat(cleaned);
-            return isNaN(num) ? 0 : num;
-        }
-
-        function renderOrderBacklog(allData) {
-            const obSummary = document.getElementById('obSummaryCards');
-            const obChartCont = document.getElementById('obChartContainer');
-            const obTables = document.getElementById('obTablesContainer');
-
-            // 1. 수주잔고 합계 추출 시도 (차트 데이터 구성)
-            const chartLabels = [];
-            const chartBacklog = [];
-            const chartTotal = [];
-            const chartDelivered = [];
-
-            allData.forEach(report => {
-                const label = report.label;
-                const rows = report.data || [];
-                
-                // 수주잔고 수치 찾기
-                let backlog = 0, total = 0, delivered = 0;
-                let hasBacklogCol = false;
-
-                // 합계 행 또는 전체 합산
-                rows.forEach(row => {
-                    const keys = Object.keys(row);
-                    keys.forEach(k => {
-                        const kl = k.toLowerCase();
-                        if (kl.includes('잔고') || kl.includes('잔액')) {
-                            hasBacklogCol = true;
-                            backlog += parseAmountStr(row[k]);
-                        }
-                        if (kl.includes('수주총액') || kl.includes('총액')) {
-                            total += parseAmountStr(row[k]);
-                        }
-                        if (kl.includes('납품') || kl.includes('기납')) {
-                            delivered += parseAmountStr(row[k]);
-                        }
-                    });
+            
+            chartBox.style.display = 'block';
+            const ctx = document.getElementById('orderBacklogChart').getContext('2d');
+            if (obChart) obChart.destroy();
+            
+            const datasets = [];
+            
+            // 계약자산
+            const contractAssets = data.map(d => d.contract_asset || 0);
+            if (contractAssets.some(v => v !== 0)) {
+                datasets.push({
+                    label: '계약자산 (수주잔고)',
+                    data: contractAssets,
+                    backgroundColor: 'rgba(47, 129, 247, 0.6)',
+                    borderColor: '#2f81f7',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    yAxisID: 'y'
                 });
-
-                if (hasBacklogCol && backlog > 0) {
-                    chartLabels.push(label);
-                    chartBacklog.push(backlog);
-                    chartTotal.push(total);
-                    chartDelivered.push(delivered);
-                }
-            });
-
-            // 2. 요약 카드 (가장 최근 데이터 기준)
-            if (chartBacklog.length > 0) {
-                const lastIdx = chartBacklog.length - 1;
-                const latestBacklog = chartBacklog[lastIdx];
-                const latestTotal = chartTotal[lastIdx];
-                const prevBacklog = lastIdx > 0 ? chartBacklog[lastIdx - 1] : 0;
-                const changeRate = prevBacklog > 0 ? ((latestBacklog - prevBacklog) / prevBacklog * 100).toFixed(1) : 0;
-                const changeColor = changeRate > 0 ? '#3fb950' : changeRate < 0 ? '#da3633' : '#8b949e';
-                const changeSign = changeRate > 0 ? '+' : '';
-
-                obSummary.innerHTML = `
-                    <div class="stat-card">
-                        <div class="stat-label">📊 최신 수주잔고 (${chartLabels[lastIdx]})</div>
-                        <div class="stat-value" style="color: #58a6ff; font-size:28px;">${formatKoreanCurrency(latestBacklog)}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">📈 수주총액 누적</div>
-                        <div class="stat-value" style="color: #bc8cff; font-size:28px;">${formatKoreanCurrency(latestTotal)}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">📦 전 분기 대비 증감</div>
-                        <div class="stat-value" style="color: ${changeColor}; font-size:28px;">${changeSign}${changeRate}%</div>
-                    </div>
-                `;
-                obSummary.style.display = 'grid';
             }
-
-            // 3. 차트 렌더링
-            if (chartLabels.length > 0) {
-                const ctxOb = document.getElementById('orderBacklogChart').getContext('2d');
-                if (obChart) obChart.destroy();
-
-                const datasets = [
-                    {
-                        label: '수주잔고',
-                        data: chartBacklog,
-                        backgroundColor: 'rgba(47, 129, 247, 0.6)',
-                        borderColor: '#2f81f7',
-                        borderWidth: 1,
-                        borderRadius: 6,
-                        yAxisID: 'y'
-                    }
-                ];
-
-                // 수주총액이 있으면 라인으로 추가
-                if (chartTotal.some(v => v > 0)) {
-                    datasets.push({
-                        label: '수주총액',
-                        data: chartTotal,
-                        type: 'line',
-                        borderColor: '#bc8cff',
-                        backgroundColor: 'rgba(188,140,255,0.1)',
-                        tension: 0.3,
-                        fill: false,
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
-                        yAxisID: 'y'
-                    });
-                }
-                if (chartDelivered.some(v => v > 0)) {
-                    datasets.push({
-                        label: '기납품액',
-                        data: chartDelivered,
-                        type: 'line',
-                        borderColor: '#3fb950',
-                        backgroundColor: 'rgba(63,185,80,0.1)',
-                        tension: 0.3,
-                        fill: false,
-                        borderDash: [5, 5],
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
-                        yAxisID: 'y'
-                    });
-                }
-
-                obChart = new Chart(ctxOb, {
-                    type: 'bar',
-                    data: { labels: chartLabels, datasets },
-                    options: {
-                        responsive: true,
-                        interaction: { mode: 'index', intersect: false },
-                        plugins: {
-                            legend: { labels: { color: '#c9d1d9', font: { family: 'Outfit' } } },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(ctx) {
-                                        return ctx.dataset.label + ': ' + formatKoreanCurrency(ctx.raw);
-                                    }
+            
+            // 계약부채
+            const contractLiabs = data.map(d => d.contract_liability || 0);
+            if (contractLiabs.some(v => v !== 0)) {
+                datasets.push({
+                    label: '계약부채 (선수금)',
+                    data: contractLiabs,
+                    backgroundColor: 'rgba(227, 179, 65, 0.6)',
+                    borderColor: '#e3b341',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    yAxisID: 'y'
+                });
+            }
+            
+            // 수주잔고 직접 키워드
+            const orderBacklogs = data.map(d => d.order_backlog || 0);
+            if (orderBacklogs.some(v => v !== 0)) {
+                datasets.push({
+                    label: '수주잔고',
+                    data: orderBacklogs,
+                    type: 'line',
+                    borderColor: '#bc8cff',
+                    backgroundColor: 'rgba(188,140,255,0.1)',
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    yAxisID: 'y'
+                });
+            }
+            
+            if (datasets.length === 0) {
+                chartBox.style.display = 'none';
+                return;
+            }
+            
+            obChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.label),
+                    datasets
+                },
+                options: {
+                    responsive: true,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { labels: { color: '#c9d1d9', font: { family: 'Outfit' } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    return ctx.dataset.label + ': ' + formatKoreanCurrency(ctx.raw);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear', position: 'left',
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: {
+                                color: '#c9d1d9',
+                                callback: function(value) {
+                                    return formatKoreanCurrency(value);
                                 }
                             }
                         },
-                        scales: {
-                            y: {
-                                type: 'linear', position: 'left',
-                                grid: { color: 'rgba(255,255,255,0.05)' },
-                                ticks: {
-                                    color: '#c9d1d9',
-                                    callback: function(value) {
-                                        return formatKoreanCurrency(value);
-                                    }
-                                }
-                            },
-                            x: { grid: { display: false }, ticks: { color: '#c9d1d9' } }
-                        }
+                        x: { grid: { display: false }, ticks: { color: '#c9d1d9' } }
                     }
-                });
-
-                obChartCont.style.display = 'block';
-            }
-
-            // 4. 보고서별 상세 테이블
-            allData.forEach(report => {
-                const rows = report.data || [];
-                if (rows.length === 0) return;
-
-                const wrapper = document.createElement('div');
-                wrapper.style.marginBottom = '25px';
-                wrapper.innerHTML = `
-                    <h4 style="color:var(--accent-purple); font-size:15px; margin-bottom:10px; display:flex; align-items:center; gap:8px;">
-                        <span style="background:rgba(188,140,255,0.15); padding:4px 12px; border-radius:8px; font-size:13px;">${report.label}</span>
-                    </h4>
-                `;
-
-                const tableResp = document.createElement('div');
-                tableResp.className = 'table-responsive';
-
-                const tbl = document.createElement('table');
-                const thead = document.createElement('thead');
-                const tbody = document.createElement('tbody');
-
-                // 헤더
-                const headers = Object.keys(rows[0]);
-                const trh = document.createElement('tr');
-                headers.forEach(h => {
-                    const th = document.createElement('th');
-                    th.innerText = h;
-                    trh.appendChild(th);
-                });
-                thead.appendChild(trh);
-
-                // 행
-                rows.forEach(row => {
-                    const tr = document.createElement('tr');
-                    headers.forEach(h => {
-                        const td = document.createElement('td');
-                        td.innerText = row[h] || '-';
-                        tr.appendChild(td);
-                    });
-                    tbody.appendChild(tr);
-                });
-
-                tbl.appendChild(thead);
-                tbl.appendChild(tbody);
-                tableResp.appendChild(tbl);
-                wrapper.appendChild(tableResp);
-                obTables.appendChild(wrapper);
+                }
             });
         }
     </script>
