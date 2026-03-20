@@ -546,13 +546,6 @@
                         <h3 style="margin-top:0; color:var(--text-muted); font-size:16px; font-weight:500;">임직원 수 추이
                         </h3>
                         <canvas id="dartChart"></canvas>
-                    </div>
-                    <div class="chart-box" id="orderBacklogChartBox" style="display:none;">
-                        <h3 style="margin-top:0; color:var(--text-muted); font-size:16px; font-weight:500;">📦 수주 잔고 추이
-                            (정기보고서 원문 기준)
-                        </h3>
-                        <canvas id="orderBacklogChart"></canvas>
-                    </div>
                 </div>
             </div>
 
@@ -614,7 +607,6 @@
         let empChart = null;
         let finChart = null;
         let balChart = null;
-        let obChart = null;
 
         // Autocomplete
         searchInput.addEventListener('input', async (e) => {
@@ -739,7 +731,6 @@
                     document.getElementById('divPerShareValue').innerText = lastDiv.dividend_per_share > 0 ? lastDiv.dividend_per_share.toLocaleString() + '원' : '-';
 
                     renderChart(data);
-                    renderOrderBacklogChart(data);
                 }
             } catch (err) {
                 console.error(err);
@@ -755,7 +746,6 @@
             if (empChart) empChart.destroy();
             if (finChart) finChart.destroy();
             if (balChart) balChart.destroy();
-            if (obChart) obChart.destroy();
 
             // Balance Chart
             balChart = new Chart(ctxBal, {
@@ -962,118 +952,6 @@
                     tr.appendChild(td);
                 });
                 body.appendChild(tr);
-            });
-        }
-
-        // ─── 수주 잔고 추이 차트 (Overview 탭 내) ─────────────────
-        function renderOrderBacklogChart(data) {
-            const chartBox = document.getElementById('orderBacklogChartBox');
-            
-            // 수주잔고 데이터가 있는지 확인
-            const hasData = data.some(d => 
-                (d.order_backlog && d.order_backlog > 0) || 
-                (d.order_total && d.order_total > 0) || 
-                (d.order_delivered && d.order_delivered > 0)
-            );
-            
-            if (!hasData) {
-                chartBox.style.display = 'none';
-                return;
-            }
-            
-            chartBox.style.display = 'block';
-            const ctx = document.getElementById('orderBacklogChart').getContext('2d');
-            if (obChart) obChart.destroy();
-            
-            const datasets = [];
-            
-            // 수주잔고 (Bar)
-            const orderBacklogs = data.map(d => d.order_backlog || 0);
-            if (orderBacklogs.some(v => v !== 0)) {
-                datasets.push({
-                    label: '수주잔고',
-                    data: orderBacklogs,
-                    backgroundColor: 'rgba(47, 129, 247, 0.6)',
-                    borderColor: '#2f81f7',
-                    borderWidth: 1,
-                    borderRadius: 4,
-                    yAxisID: 'y'
-                });
-            }
-            
-            // 수주총액 (Line)
-            const orderTotals = data.map(d => d.order_total || 0);
-            if (orderTotals.some(v => v !== 0)) {
-                datasets.push({
-                    label: '수주총액',
-                    data: orderTotals,
-                    type: 'line',
-                    borderColor: '#bc8cff',
-                    backgroundColor: 'rgba(188,140,255,0.1)',
-                    tension: 0.3,
-                    fill: false,
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
-                    yAxisID: 'y'
-                });
-            }
-            
-            // 기납품액 (Line)
-            const orderDelivereds = data.map(d => d.order_delivered || 0);
-            if (orderDelivereds.some(v => v !== 0)) {
-                datasets.push({
-                    label: '기납품액',
-                    data: orderDelivereds,
-                    type: 'line',
-                    borderColor: '#3fb950',
-                    backgroundColor: 'rgba(63,185,80,0.1)',
-                    tension: 0.3,
-                    borderDash: [5, 5],
-                    fill: false,
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    yAxisID: 'y'
-                });
-            }
-            
-            if (datasets.length === 0) {
-                chartBox.style.display = 'none';
-                return;
-            }
-            
-            obChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: data.map(d => d.label),
-                    datasets
-                },
-                options: {
-                    responsive: true,
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: {
-                        legend: { labels: { color: '#c9d1d9', font: { family: 'Outfit' } } },
-                        tooltip: {
-                            callbacks: {
-                                label: function(ctx) {
-                                    return ctx.dataset.label + ': ' + formatKoreanCurrency(ctx.raw);
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            type: 'linear', position: 'left',
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: {
-                                color: '#c9d1d9',
-                                callback: function(value) {
-                                    return formatKoreanCurrency(value);
-                                }
-                            }
-                        },
-                        x: { grid: { display: false }, ticks: { color: '#c9d1d9' } }
-                    }
-                }
             });
         }
     </script>

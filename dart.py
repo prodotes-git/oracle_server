@@ -241,185 +241,6 @@ async def fetch_finance_data(corp_code: str, year: str, reprt_code: str):
             
     return res_data
 
-async def find_rcept_no(client, corp_code: str, year: str, reprt_code: str):
-    """list.json API로 정기보고서의 rcept_no 조회"""
-    detail_map = {"11011": "A001", "11012": "A002", "11013": "A003", "11014": "A003"}
-    pblntf_detail_ty = detail_map.get(reprt_code, "A001")
-    bgn_de = f"{year}0101"
-    end_de = f"{int(year)+1}1231"
-    
-    url = (f"https://opendart.fss.or.kr/api/list.json?"
-           f"crtfc_key={DART_API_KEY}&corp_code={corp_code}"
-           f"&bgn_de={bgn_de}&end_de={end_de}"
-           f"&pblntf_ty=A&pblntf_detail_ty={pblntf_detail_ty}"
-           f"&page_count=30")
-    
-    try:
-        res = await client.get(url, timeout=15.0)
-        if res.status_code == 200:
-            data = res.json()
-            if data.get("status") == "000":
-                lst = data.get("list", [])
-                reprt_nm_map = {"11011": "사업보고서", "11012": "반기보고서", "11013": "분기보고서", "11014": "분기보고서"}
-                target_nm = reprt_nm_map.get(reprt_code, "사업보고서")
-                
-                for item in lst:
-                    report_nm = item.get("report_nm", "")
-                    if reprt_code == "11013" and "1분기" not in report_nm: continue
-                    if reprt_code == "11014" and "3분기" not in report_nm: continue
-                    if target_nm in report_nm or report_nm.startswith("["): return item.get("rcept_no")
-                
-                if lst: return lst[0].get("rcept_no")
-    except Exception as e:
-        print(f"find_rcept_no error: {e}")
-    return None
-
-async def download_and_parse_order_backlog(client, rcept_no: str):
-    """보고서 원문 ZIP 다운로드 후 수주상황 테이블 파싱"""
-    url = f"https://opendart.fss.or.kr/api/document.xml?crtfc_key={DART_API_KEY}&rcept_no={rcept_no}"
-    try:
-        res = await client.get(url, timeout=30.0)
-        if res.status_code != 200: return []
-        
-        with zipfile.ZipFile(io.BytesIO(res.content)) as z:
-            for fname in z.namelist():
-                if not fname.endswith(('.xml', '.html', '.htm')): continue
-                with z.open(fname) as f:
-                    content = f.read()
-                    try: text = content.decode('utf-8')
-                    except:
-                        try: text = content.decode('euc-kr')
-                        except: text = content.decode('cp949', errors='ignore')
-                    
-                    if '수주' not in text: continue
-                    tables = parse_order_tables(text)
-                    if tables: return tables
-    except Exception as e:
-        print(f"download_and_parse error: {e}")
-    return []
-
-def parse_order_tables(html_text: str):
-    """HTML에서 수주상황 관련 테이블 파싱"""
-    soup = BeautifulSoup(html_text, 'lxml')
-    results = []
-    order_keywords = ['수주상황', '수주현황', '수주 상황', '수주 현황', '매출 및 수주', '매출및수주']
-    target_tables = []
-    
-    for keyword in order_keywords:
-        for tag in soup.find_all(string=re.compile(keyword)):
-            parent = tag.parent
-            for sibling in parent.find_all_next('table'):
-                if sibling not in target_tables: target_tables.append(sibling)
-                if len(target_tables) >= 5: break
-            if target_tables: break
-        if target_tables: break
-    
-    if not target_tables: return []
-    
-    for table in target_tables:
-        rows = table.find_all('tr')
-        if len(rows) < 2: continue
-        
-        header_row, header_idx = None, 0
-        for i, row in enumerate(rows):
-            cells = row.find_all(['th', 'td'])
-            cell_texts = [c.get_text(strip=True) for c in cells]
-            header_text = ' '.join(cell_texts)
-            if any(kw in header_text for kw in ['수주잔고', '잔고', '수주총액', '품목', '제품', '수주일자', '납기']):
-                header_row, header_idx = cell_texts, i
-                break
-        
-        if not header_row:
-            cells = rows[0].find_all(['th', 'td'])
-            header_row, header_idx = [c.get_text(strip=True) for c in cells], 0
-        
-        if len(header_row) < 2: continue
-        
-        for row in rows[header_idx + 1:]:
-            cells = row.find_all(['td', 'th'])
-            cell_texts = [c.get_text(strip=True) for c in cells]
-            if len(cell_texts) < 2: continue
-            if all(not t or t == '-' for t in cell_texts): continue
-            
-            row_data = {}
-            for j, header in enumerate(header_row):
-                if j < len(cell_texts): row_data[header] = cell_texts[j]
-            
-            if row_data: results.append(row_data)
-        
-        if results: break
-    
-    return results
-
-def parse_amount_str(val_str):
-    if not val_str: return 0
-    cleaned = re.sub(r'[^\d.-]', '', str(val_str))
-    try:
-        num = float(cleaned)
-        return num if not math.isnan(num) else 0
-    except: return 0
-
-import math
-
-async def fetch_order_backlog_data(corp_code: str, year: str, reprt_code: str):
-    """원문 파싱으로 정확한 수주총액, 수주잔고 합계를 추출"""
-    res_data = {"order_total": 0, "order_backlog": 0, "order_delivered": 0}
-    
-    async with httpx.AsyncClient() as client:
-        rcept_no = await find_rcept_no(client, corp_code, year, reprt_code)
-        if not rcept_no: return res_data
-        
-        tables = await download_and_parse_order_backlog(client, rcept_no)
-        if not tables: return res_data
-        
-        # 합계 구하기 로직 (요약 행 무시하고 전부 합산, 또는 합계행만 찾기)
-        # 여기서는 가장 단순하게 전체 row의 액수를 합산하거나 합계 행만 씁니다.
-        # 기업마다 "합계" 행이 있거나 없는 경우가 있어서 통계 오류를 막기 위해
-        # 항목들의 총 합이 "합계"와 같은지 체크하는 것은 복잡하므로,
-        # '합계' 또는 '총'이 들어간 row가 있으면 그 row만 사용,
-        # 없으면 전체 row 값을 모두 합쳐서 산출.
-        
-        has_total_row = any(any("합계" in str(val) or "총계" in str(val) for val in row.values()) for row in tables)
-        
-        backlog_sum, total_sum, delivered_sum = 0, 0, 0
-        
-        for row in tables:
-            is_total_row = any("합계" in str(val) or "총계" in str(val) for val in row.values())
-            
-            # 합계 행이 존재한다면, 합계 행 이외의 데이터는 버림
-            if has_total_row and not is_total_row:
-                continue
-                
-            for k, v in row.items():
-                kl = k.lower()
-                amount = parse_amount_str(v)
-                # 실제 화폐단위(백만, 천원 등) 스케일링은 헤더에 표기된 경우가 많으나,
-                # 기본적으로 수치가 재무제표 단위(원)와 비슷하게 맞추기 위해 1,000,000 단위 등을 곱해야 할 수 있습니다.
-                # 그러나 DART 공시 표마다 단위가 다르므로, 원시 숫자의 절대합만 반영 (프론트에서 축 스케일로 표시)
-                if '잔고' in kl or '잔액' in kl:
-                    backlog_sum += amount
-                if '수주총액' in kl or '총액' in kl:
-                    total_sum += amount
-                if '기납품액' in kl or '납품' in kl:
-                    delivered_sum += amount
-        
-        # 파싱된 숫자(보통 표의 단위가 '백만원' 혹은 '천원')를 재무제표 수준(보통 '원')으로 대략 보정 (숫자가 너무 작다면 백만 곱하기 등)
-        # 그러나 DART 수주표는 보통 백만원 단위가 많음을 고려하여,
-        # 파싱된 금액이 10억 미만(ex: 100,000 단위)이라면 1,000,000원을 곱해주는 식으로 보정할 수도 있으나,
-        # 일단은 그대로 합산하여 리턴합니다.
-        # 수주잔고는 계약자산/부채를 대체하는 것이므로 금액이 작다면 (단위: 백만원) 1,000,000 배 곱해줍니다.
-        if backlog_sum > 0 and backlog_sum < 10000000:
-            backlog_sum *= 1000000
-            total_sum *= 1000000
-            delivered_sum *= 1000000
-            
-        res_data["order_backlog"] = backlog_sum
-        res_data["order_total"] = total_sum
-        res_data["order_delivered"] = delivered_sum
-        
-    return res_data
-
-
 @router.get("/stats/{corp_code}")
 async def get_stats(corp_code: str):
     # 최근 8분기 데이터 조회
@@ -445,7 +266,7 @@ async def get_stats(corp_code: str):
     raw_results = []
     
     for year, code, label in reprts:
-        cache_key = f"dart_stats_v7:{corp_code}:{year}:{code}"
+        cache_key = f"dart_stats_v8:{corp_code}:{year}:{code}"
         cached = r.get(cache_key) if r else None
         
         if cached:
@@ -454,10 +275,9 @@ async def get_stats(corp_code: str):
             emp_task = fetch_dart_data(corp_code, year, code)
             fin_task = fetch_finance_data(corp_code, year, code)
             div_task = fetch_dividend_data(corp_code, year, code)
-            ob_task = fetch_order_backlog_data(corp_code, year, code)
             
-            emp_data, fin_data, div_data, ob_data = await asyncio.gather(emp_task, fin_task, div_task, ob_task)
-            combined = {**emp_data, **fin_data, **div_data, **ob_data}
+            emp_data, fin_data, div_data = await asyncio.gather(emp_task, fin_task, div_task)
+            combined = {**emp_data, **fin_data, **div_data}
             
             if r and (combined["employees"] > 0 or combined["revenue"] > 0 or combined["assets"] > 0):
                 r.setex(cache_key, 86400 * 30, json.dumps(combined)) # 한달 캐시
@@ -484,7 +304,13 @@ async def get_stats(corp_code: str):
         
         results.append(rv)
 
-    return results[::-1] # 시간순 정렬
+    # 아직 공시되지 않은 미래의 보고서 등 빈 데이터(모두 0인 경우) 필터링
+    valid_results = []
+    for rv in results:
+        if rv.get("revenue", 0) > 0 or rv.get("assets", 0) > 0 or rv.get("employees", 0) > 0:
+            valid_results.append(rv)
+
+    return valid_results[::-1] # 시간순 정렬
 
 @router.get("/api/data")
 async def get_raw_data(corp_code: str, year: str, reprt_code: str, api_name: str):
