@@ -3,9 +3,8 @@ import os
 import json
 import zipfile
 import io
-import re
+import asyncio
 import xml.etree.ElementTree as ET
-from bs4 import BeautifulSoup
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import HTMLResponse
 from typing import List, Optional
@@ -261,7 +260,6 @@ async def get_stats(corp_code: str):
         ])
     
     # 비동기 데이터 묶음 가져오기
-    import asyncio
     
     raw_results = []
     
